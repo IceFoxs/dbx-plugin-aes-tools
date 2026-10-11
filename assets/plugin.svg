@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- 冰晶渐变 -->
+    <linearGradient id="iceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f4ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a8d8ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5bb8f5;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 狐狸身体渐变 -->
+    <linearGradient id="foxBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c9e8ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6bb5e8;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 背景渐变 -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" style="stop-color:#0a1628;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#040a14;stop-opacity:1" />
+    </radialGradient>
+
+    <!-- 发光效果 -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="400" height="400" rx="24" fill="url(#bgGrad)"/>
+
+  <!-- 冰晶装饰 -->
+  <g opacity="0.3" filter="url(#glow)">
+    <!-- 左上冰晶 -->
+    <g transform="translate(60,60)">
+      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    </g>
+    <!-- 右上冰晶 -->
+    <g transform="translate(340,80) scale(0.8)">
+      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    </g>
+    <!-- 右下冰晶 -->
+    <g transform="translate(330,330) scale(0.6)">
+      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    </g>
+    <!-- 左下冰晶 -->
+    <g transform="translate(70,340) scale(0.7)">
+      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
+      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    </g>
+  </g>
+
+  <!-- 小雪花点缀 -->
+  <g fill="#a8d8ff" opacity="0.5">
+    <circle cx="120" cy="50" r="2"/>
+    <circle cx="290" cy="45" r="1.5"/>
+    <circle cx="355" cy="200" r="1.8"/>
+    <circle cx="45" cy="220" r="1.5"/>
+    <circle cx="100" cy="370" r="2"/>
+    <circle cx="300" cy="360" r="1.5"/>
+    <circle cx="200" cy="30" r="1.2"/>
+  </g>
+
+  <!-- 狐狸主体 -->
+  <g filter="url(#softGlow)">
+
+    <!-- 尾巴 -->
+    <path d="M 260 280 Q 330 240 340 180 Q 350 130 320 120 Q 290 110 300 160 Q 310 210 250 270 Z"
+          fill="url(#foxBody)" stroke="#a8d8ff" stroke-width="1.5"/>
+    <!-- 尾巴尖 -->
+    <path d="M 320 120 Q 340 130 340 160 Q 335 140 315 135 Z"
+          fill="#e8f4ff" opacity="0.8"/>
+
+    <!-- 身体 -->
+    <ellipse cx="200" cy="270" rx="80" ry="60" fill="url(#foxBody)"/>
+    <!-- 胸口白色 -->
+    <ellipse cx="195" cy="280" rx="45" ry="40" fill="#e8f4ff" opacity="0.7"/>
+
+    <!-- 头部 -->
+    <ellipse cx="190" cy="190" rx="70" ry="60" fill="url(#foxBody)"/>
+
+    <!-- 左耳 -->
+    <path d="M 135 160 L 110 80 L 165 140 Z" fill="#6bb5e8" stroke="#a8d8ff" stroke-width="1.5"/>
+    <path d="M 138 155 L 118 95 L 158 140 Z" fill="#c9e8ff" opacity="0.8"/>
+
+    <!-- 右耳 -->
+    <path d="M 245 160 L 270 80 L 215 140 Z" fill="#6bb5e8" stroke="#a8d8ff" stroke-width="1.5"/>
+    <path d="M 242 155 L 262 95 L 222 140 Z" fill="#c9e8ff" opacity="0.8"/>
+
+    <!-- 脸部白色区域 -->
+    <ellipse cx="190" cy="205" rx="45" ry="35" fill="#e8f4ff" opacity="0.8"/>
+
+    <!-- 左眼 -->
+    <ellipse cx="165" cy="185" rx="12" ry="14" fill="#0a1628"/>
+    <ellipse cx="165" cy="185" rx="10" ry="12" fill="#1a3a5c"/>
+    <ellipse cx="168" cy="182" rx="4" ry="5" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="162" cy="188" rx="2" ry="2" fill="#8ecfff" opacity="0.6"/>
+
+    <!-- 右眼 -->
+    <ellipse cx="215" cy="185" rx="12" ry="14" fill="#0a1628"/>
+    <ellipse cx="215" cy="185" rx="10" ry="12" fill="#1a3a5c"/>
+    <ellipse cx="218" cy="182" rx="4" ry="5" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="212" cy="188" rx="2" ry="2" fill="#8ecfff" opacity="0.6"/>
+
+    <!-- 鼻子 -->
+    <path d="M 185 200 L 190 208 L 195 200 Z" fill="#1a3a5c"/>
+    <ellipse cx="190" cy="199" rx="5" ry="3" fill="#2a4a6c"/>
+
+    <!-- 嘴巴 -->
+    <path d="M 190 208 Q 180 218 172 214" fill="none" stroke="#2a4a6c" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 190 208 Q 200 218 208 214" fill="none" stroke="#2a4a6c" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- 胡须 -->
+    <line x1="150" y1="205" x2="125" y2="200" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
+    <line x1="150" y1="210" x2="125" y2="212" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
+    <line x1="230" y1="205" x2="255" y2="200" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
+    <line x1="230" y1="210" x2="255" y2="212" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
+
+    <!-- 前爪 -->
+    <ellipse cx="155" cy="320" rx="22" ry="14" fill="#6bb5e8"/>
+    <ellipse cx="235" cy="320" rx="22" ry="14" fill="#6bb5e8"/>
+    <ellipse cx="155" cy="322" rx="16" ry="10" fill="#c9e8ff" opacity="0.6"/>
+    <ellipse cx="235" cy="322" rx="16" ry="10" fill="#c9e8ff" opacity="0.6"/>
+  </g>
+
+  <!-- 冰霜气息 -->
+  <g opacity="0.25" filter="url(#glow)">
+    <path d="M 100 230 Q 80 250 90 270" fill="none" stroke="#8ecfff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 280 230 Q 300 250 290 270" fill="none" stroke="#8ecfff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- 底部文字 -->
+  <text x="200" y="385" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold"
+        fill="#a8d8ff" text-anchor="middle" letter-spacing="4" opacity="0.8" filter="url(#glow)">
+    ICEFOX
+  </text>
+</svg>

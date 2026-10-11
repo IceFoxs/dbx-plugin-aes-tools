@@ -1,0 +1,259 @@
+{
+  "$schema": "https://raw.githubusercontent.com/t8y2/dbx/plugin-sdk-v1/plugins/manifest.schema.json",
+  "manifest_version": 1,
+  "id": "aes-tools",
+  "name": "aes-tools",
+  "version": "0.1.1",
+  "publisher": "icefox",
+  "description": "aes tools",
+  "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
+  "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
+  "icon": "assets/plugin.svg",
+  "engines": {
+    "dbx": ">=0.5.68",
+    "host_api": "1"
+  },
+  "entrypoints": {
+    "backend": {
+      "executable": "bin/dbx-plugin-aes-rust-plugin"
+    },
+    "ui": {
+      "root": "ui",
+      "entry": "ui/index.html"
+    }
+  },
+  "permissions": [
+    "host.workbench",
+    "host.events",
+    "host.filesystem",
+    "host.binary",
+    "host.plans:read",
+    "host.schema:read",
+    "host.storage",
+    "host.clipboard:read",
+    "host.data:read",
+    "host.network:https://baidu.com"
+  ],
+  "contributions": [
+    {
+      "type": "connection-provider",
+      "id": "aes-tools.connection",
+      "label": "aes-tools",
+      "icon": "assets/plugin.svg",
+      "database_type": "aes-rust-plugin",
+      "description": "Connection form contributed by aes-tools.",
+      "fields": [
+        {
+          "key": "display_name",
+          "label": "Connection name",
+          "type": "text",
+          "default": "aes-tools",
+          "binding": "name",
+          "required": true
+        },
+        {
+          "key": "host",
+          "label": "Host",
+          "type": "text",
+          "default": "localhost",
+          "binding": "host",
+          "required": true
+        },
+        {
+          "key": "port",
+          "label": "Port",
+          "type": "number",
+          "default": 8080,
+          "binding": "port",
+          "required": true
+        },
+        {
+          "key": "aes_key",
+          "label": "aes key",
+          "type": "text",
+          "default": "1234567890123456",
+          "binding": "config",
+          "required": true
+        },
+        {
+          "key": "aes_key_label",
+          "label": "aes key label",
+          "type": "textarea",
+          "default": "[{\"label\":\"默认密钥\",\"value\":\"default_key\",\"aes_key\":\"1234567890123456\"}]",
+          "binding": "config",
+          "required": true
+        }
+      ],
+      "workbench": "aes-tools.workbench",
+      "capabilities": [
+        "test",
+        "connect",
+        "disconnect"
+      ]
+    },
+    {
+      "type": "workbench",
+      "id": "aes-tools.workbench",
+      "label": "aes-tools Workbench",
+      "description": "Sandboxed UI contributed by aes-tools.",
+      "icon": "assets/plugin.svg"
+    }
+  ],
+  "localizations": {
+    "zh-CN": {
+      "name": "aes-tools",
+      "description": "aes tools",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools 连接",
+          "description": "由插件声明的连接表单。",
+          "fields": {
+            "display_name": {
+              "label": "连接名称"
+            },
+            "host": {
+              "label": "主机"
+            },
+            "port": {
+              "label": "端口"
+            },
+            "aes_key": {
+              "label": "aes密钥"
+            },
+            "aes_key_label": {
+              "label": "aes密钥标签"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools 工作台",
+          "description": "由插件提供的沙箱工作台界面。"
+        }
+      }
+    },
+    "zh-TW": {
+      "name": "aes-tools",
+      "description": "aes 工具",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools 連線",
+          "description": "由外掛宣告的連線表單。",
+          "fields": {
+            "display_name": {
+              "label": "連線名稱"
+            },
+            "host": {
+              "label": "主機"
+            },
+            "port": {
+              "label": "連接埠"
+            },
+            "aes_key": {
+              "label": "aes 金鑰"
+            },
+            "aes_key_label": {
+              "label": "aes 金鑰標籤"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools 工作台",
+          "description": "由外掛提供的沙箱工作台介面。"
+        }
+      }
+    },
+    "en": {
+      "name": "aes-tools",
+      "description": "aes tools",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools Connection",
+          "description": "Connection form contributed by aes-tools.",
+          "fields": {
+            "display_name": {
+              "label": "Connection name"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Port"
+            },
+            "aes_key": {
+              "label": "aes key"
+            },
+            "aes_key_label": {
+              "label": "aes key label"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools Workbench",
+          "description": "Sandboxed UI contributed by aes-tools."
+        }
+      }
+    },
+    "ja": {
+      "name": "aes-tools",
+      "description": "aes ツール",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools 接続",
+          "description": "プラグインによって提供される接続フォーム。",
+          "fields": {
+            "display_name": {
+              "label": "接続名"
+            },
+            "host": {
+              "label": "ホスト"
+            },
+            "port": {
+              "label": "ポート"
+            },
+            "aes_key": {
+              "label": "aes キー"
+            },
+            "aes_key_label": {
+              "label": "aes キーラベル"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools ワークベンチ",
+          "description": "プラグインによって提供されるサンドボックス UI。"
+        }
+      }
+    },
+    "ko": {
+      "name": "aes-tools",
+      "description": "aes 도구",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools 연결",
+          "description": "플러그인에서 제공하는 연결 양식입니다.",
+          "fields": {
+            "display_name": {
+              "label": "연결 이름"
+            },
+            "host": {
+              "label": "호스트"
+            },
+            "port": {
+              "label": "포트"
+            },
+            "aes_key": {
+              "label": "aes 키"
+            },
+            "aes_key_label": {
+              "label": "aes 키 레이블"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools 워크벤치",
+          "description": "플러그인에서 제공하는 샌드박스 UI입니다."
+        }
+      }
+    }
+  }
+}

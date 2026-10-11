@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES 加解密 · shadcn 风格</title>
+    <style>
+        /* ============================================================
+           shadcn/ui 设计系统灵感
+           - 优先使用 DBX 宿主注入的 CSS 变量
+           - 用 prefers-color-scheme 作为 fallback，保证暗色模式正确
+        ============================================================ */
+
+        /* ---------- 亮色模式 fallback ---------- */
+        :root {
+            --color-background: #fafafa;
+            --color-foreground: #09090b;
+            --color-card: #ffffff;
+            --color-card-foreground: #09090b;
+            --color-muted: #f4f4f5;
+            --color-muted-foreground: #71717a;
+            --color-border: #e4e4e7;
+            --color-input: #e4e4e7;
+            --color-ring: #18181b;
+            --color-primary: #18181b;
+            --color-primary-foreground: #fafafa;
+            --color-secondary: #f4f4f5;
+            --color-secondary-foreground: #18181b;
+            --color-placeholder: #a1a1aa;
+        }
+
+        /* ---------- 暗色模式 fallback（当宿主未注入变量时生效） ---------- */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: #09090b;
+                --color-foreground: #fafafa;
+                --color-card: #18181b;
+                --color-card-foreground: #fafafa;
+                --color-muted: #27272a;
+                --color-muted-foreground: #a1a1aa;
+                --color-border: #27272a;
+                --color-input: #27272a;
+                --color-ring: #fafafa;
+                --color-primary: #fafafa;
+                --color-primary-foreground: #18181b;
+                --color-secondary: #27272a;
+                --color-secondary-foreground: #fafafa;
+                --color-placeholder: #52525b;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--color-background);
+            color: var(--color-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ========== 卡片容器 ========== */
+        .card {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        /* 卡片头部 */
+        .card-header {
+            padding: 1.5rem 1.75rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .card-header-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--color-card-foreground);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card-title svg {
+            width: 1.3rem;
+            height: 1.3rem;
+            color: var(--color-card-foreground);
+            flex-shrink: 0;
+        }
+
+        .card-description {
+            font-size: 0.825rem;
+            color: var(--color-muted-foreground);
+            margin-top: 0.25rem;
+            line-height: 1.5;
+        }
+
+        /* 头部右侧：批量开关 + 语言切换 */
+        .card-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* 批量模式开关 */
+        .batch-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--color-muted);
+            padding: 4px 10px 4px 6px;
+            border-radius: 40px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .batch-toggle:hover {
+            filter: brightness(0.97);
+        }
+
+        .batch-toggle input {
+            display: none;
+        }
+
+        .batch-toggle-track {
+            position: relative;
+            width: 32px;
+            height: 18px;
+            background: var(--color-border);
+            border-radius: 40px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .batch-toggle-track::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            background: var(--color-card-foreground);
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .batch-toggle input:checked + .batch-toggle-track {
+            background: var(--color-primary);
+        }
+
+        .batch-toggle input:checked + .batch-toggle-track::after {
+            transform: translateX(14px);
+            background: var(--color-primary-foreground);
+        }
+
+        .batch-toggle-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--color-muted-foreground);
+            white-space: nowrap;
+        }
+
+        /* 语言切换器 */
+        .lang-switch {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: var(--color-muted);
+            padding: 4px;
+            border-radius: 40px;
+        }
+
+        .lang-btn {
+            border: none;
+            background: transparent;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--color-muted-foreground);
+            border: 1px solid transparent;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .lang-btn:hover {
+            background: var(--color-border);
+        }
+
+        .lang-btn.active {
+            background: var(--color-card);
+            color: var(--color-card-foreground);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-color: var(--color-border);
+            font-weight: 600;
+        }
+
+        /* 卡片内容 */
+        .card-content {
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ========== 横向布局核心 ========== */
+        .horizontal-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .horizontal-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        /* ========== 表单元素 ========== */
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .field-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--color-foreground);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .field-label svg {
+            width: 0.9rem;
+            height: 0.9rem;
+            color: var(--color-muted-foreground);
+            flex-shrink: 0;
+        }
+
+        /* 输入框 & 文本域 */
+        .input,
+        .textarea {
+            width: 100%;
+            padding: 0.55rem 0.8rem;
+            font-size: 0.825rem;
+            line-height: 1.5;
+            color: var(--color-foreground);
+            background-color: var(--color-card);
+            border: 1px solid var(--color-input);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+        }
+
+        .input::placeholder,
+        .textarea::placeholder {
+            color: var(--color-placeholder);
+            font-weight: 400;
+        }
+
+        .input:focus,
+        .textarea:focus {
+            border-color: var(--color-ring);
+            box-shadow: 0 0 0 1px var(--color-ring);
+        }
+
+        .textarea {
+            min-height: 160px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .key-input {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+        }
+
+        /* 密钥输入行（输入框 + 重置按钮） */
+        .key-input-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+
+        .key-input-row .input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 重置按钮 */
+        .btn-reset-key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            padding: 0 0.7rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+            color: var(--color-muted-foreground);
+            background-color: var(--color-muted);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            flex-shrink: 0;
+        }
+
+        .btn-reset-key:hover {
+            background-color: var(--color-border);
+            color: var(--color-foreground);
+        }
+
+        .btn-reset-key:active {
+            transform: scale(0.97);
+        }
+
+        .btn-reset-key:focus-visible {
+            outline: 2px solid var(--color-ring);
+            outline-offset: 2px;
+        }
+
+        .btn-reset-key svg {
+            width: 0.8rem;
+            height: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        /* ========== 自定义 Select（shadcn 风格，支持搜索过滤） ========== */
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-hidden {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .select-trigger {
+            width: 100%;
+            padding: 0.55rem 0.8rem;
+            font-size: 0.825rem;
+            line-height: 1.5;
+            color: var(--color-foreground);
+            background-color: var(--color-card);
+            border: 1px solid var(--color-input);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .select-trigger:hover {
+            border-color: var(--color-ring);
+            opacity: 0.85;
+        }
+
+        .select-trigger:focus-visible,
+        .select-wrapper.open .select-trigger {
+            border-color: var(--color-ring);
+            box-shadow: 0 0 0 1px var(--color-ring);
+        }
+
+        .select-trigger span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .select-arrow {
+            width: 0.9rem;
+            height: 0.9rem;
+            color: var(--color-muted-foreground);
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+        }
+
+        .select-wrapper.open .select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .select-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .select-wrapper.open .select-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .select-search-wrapper {
+            position: relative;
+            padding: 8px;
+            border-bottom: 1px solid var(--color-border);
+            flex-shrink: 0;
+        }
+
+        .select-search-icon {
+            position: absolute;
+            left: 1.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0.85rem;
+            height: 0.85rem;
+            color: var(--color-placeholder);
+            pointer-events: none;
+        }
+
+        .select-search {
+            width: 100%;
+            padding: 0.4rem 0.6rem 0.4rem 1.9rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--color-foreground);
+            background-color: var(--color-muted);
+            border: 1px solid var(--color-input);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s;
+            font-family: inherit;
+        }
+
+        .select-search::placeholder {
+            color: var(--color-placeholder);
+            font-weight: 400;
+        }
+
+        .select-search:focus {
+            border-color: var(--color-ring);
+            box-shadow: 0 0 0 1px var(--color-ring);
+            background-color: var(--color-card);
+        }
+
+        .select-list {
+            list-style: none;
+            margin: 0;
+            padding: 4px;
+            max-height: 192px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .select-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .select-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .select-list::-webkit-scrollbar-thumb {
+            background-color: var(--color-border);
+            border-radius: 8px;
+            border: 2px solid var(--color-card);
+        }
+        .select-list::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-muted-foreground);
+        }
+
+        .select-option {
+            padding: 0.45rem 0.6rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--color-foreground);
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.1s ease;
+        }
+
+        .select-option:hover {
+            background-color: var(--color-muted);
+        }
+
+        .select-option.selected {
+            background-color: var(--color-muted);
+            font-weight: 500;
+        }
+
+        .select-empty {
+            padding: 1rem 0.6rem;
+            font-size: 0.8rem;
+            color: var(--color-placeholder);
+            text-align: center;
+            cursor: default;
+        }
+
+        .field-hint {
+            font-size: 0.7rem;
+            color: var(--color-muted-foreground);
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .field-hint svg {
+            width: 0.75rem;
+            height: 0.75rem;
+            flex-shrink: 0;
+            color: var(--color-placeholder);
+        }
+
+        /* ========== 按钮组 ========== */
+        .button-row {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.825rem;
+            font-weight: 500;
+            line-height: 1.25;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            user-select: none;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+        }
+
+        .btn svg {
+            width: 0.95rem;
+            height: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-ring);
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background-color: var(--color-primary);
+            color: var(--color-primary-foreground);
+            border-color: var(--color-primary);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background-color: var(--color-secondary);
+            color: var(--color-secondary-foreground);
+            border-color: var(--color-secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--color-border);
+            border-color: var(--color-border);
+        }
+
+        .btn-ghost {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background-color: transparent;
+            color: var(--color-muted-foreground);
+            border-color: transparent;
+            border-radius: 6px;
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--color-muted);
+            color: var(--color-foreground);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.7rem;
+            border-radius: 6px;
+            gap: 0.3rem;
+        }
+
+        .btn-sm svg {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        /* ========== 结果区域 ========== */
+        .result-container {
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background-color: var(--color-muted);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 220px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 0.85rem;
+            border-bottom: 1px solid var(--color-border);
+            background-color: var(--color-card);
+            flex-shrink: 0;
+        }
+
+        .result-header-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--color-muted-foreground);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .result-header-label svg {
+            width: 0.8rem;
+            height: 0.8rem;
+        }
+
+        .result-body {
+            padding: 0.85rem 0.95rem;
+            flex: 1;
+            min-height: 160px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: var(--color-foreground);
+            word-break: break-all;
+            white-space: pre-wrap;
+            transition: background-color 0.2s;
+        }
+
+        .result-body.placeholder {
+            color: var(--color-placeholder);
+            font-family: 'Inter', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .result-body::-webkit-scrollbar-thumb {
+            background-color: var(--color-border);
+            border-radius: 8px;
+            border: 2px solid var(--color-muted);
+        }
+
+        .result-body::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-muted-foreground);
+        }
+
+        /* 批量结果项 */
+        .batch-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--color-border);
+            position: relative;
+        }
+
+        .batch-item:last-child {
+            border-bottom: none;
+        }
+
+        .batch-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .batch-item-label {
+            font-size: 0.65rem;
+            color: var(--color-muted-foreground);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .batch-item-copy {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.45rem;
+            font-size: 0.65rem;
+            font-weight: 500;
+            line-height: 1;
+            color: var(--color-muted-foreground);
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            flex-shrink: 0;
+            opacity: 0.75;
+        }
+
+        .batch-item-copy:hover {
+            background-color: var(--color-muted);
+            color: var(--color-foreground);
+            opacity: 1;
+        }
+
+        .batch-item-copy:active {
+            transform: scale(0.96);
+        }
+
+        .batch-item-copy svg {
+            width: 0.65rem;
+            height: 0.65rem;
+            flex-shrink: 0;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--color-border);
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 700px) {
+            .horizontal-layout {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .card-header-right {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .lang-switch {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .card {
+                max-width: 100%;
+            }
+
+            .card-content {
+                padding: 1.25rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(2px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <!-- 头部 -->
+    <div class="card-header">
+        <div class="card-header-left">
+            <div class="card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span data-i18n="title">AES 加解密</span>
+            </div>
+            <p class="card-description" data-i18n="description">使用 AES 对称加密算法，本地完成加解密操作。</p>
+        </div>
+        <div class="card-header-right">
+            <label class="batch-toggle" for="batchMode">
+                <input type="checkbox" id="batchMode"/>
+                <span class="batch-toggle-track"></span>
+                <span class="batch-toggle-label" data-i18n="batchMode">批量</span>
+            </label>
+            <div class="lang-switch" id="langSwitch">
+                <button class="lang-btn" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="zh-TW">繁體</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 内容 -->
+    <div class="card-content">
+        <div class="horizontal-layout">
+            <div class="horizontal-column">
+                <div class="field">
+                    <label class="field-label" for="keySelectorBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 7h16M4 12h10M4 17h14"/>
+                        </svg>
+                        <span data-i18n="keySelectorLabel">选择密钥</span>
+                    </label>
+                    <div class="select-wrapper" id="selectWrapper">
+                        <button type="button" id="keySelectorBtn" class="select-trigger">
+                            <span id="keySelectorLabel">— 不选择（手动输入） —</span>
+                            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="select-dropdown" id="keySelectorDropdown">
+                            <div class="select-search-wrapper">
+                                <svg class="select-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                <input type="text" id="keySelectorSearch" class="select-search" placeholder="搜索..." autocomplete="off" data-i18n-placeholder="searchPlaceholder"/>
+                            </div>
+                            <ul class="select-list" id="keySelectorList"></ul>
+                        </div>
+                        <select id="keySelector" class="select-hidden">
+                            <option value="" data-i18n="keySelectorDefault">— 不选择（手动输入） —</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="aesKey">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                        </svg>
+                        <span data-i18n="keyLabel">加密密钥</span>
+                    </label>
+                    <div class="key-input-row">
+                        <input id="aesKey" class="input key-input" type="text" placeholder="输入密钥..."
+                               autocomplete="off" value="1234567890123456" data-i18n-placeholder="keyPlaceholder"/>
+                        <button type="button" id="resetKeyBtn" class="btn-reset-key" title="重置默认密钥">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                            </svg>
+                            <span data-i18n="resetKeyBtn">重置</span>
+                        </button>
+                    </div>
+                    <div class="field-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                        <span data-i18n="keyHint">密钥仅用于本地运算，不会上传到服务器</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="field" style="flex:1;">
+                    <label class="field-label" for="inputText">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        <span data-i18n="inputLabel">输入内容</span>
+                        <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.7rem;" data-i18n="batchInputHint">（每行一条）</span>
+                    </label>
+                    <textarea id="inputText" class="textarea"
+                              placeholder="输入要加密的文本，或粘贴要解密的密文..."
+                              data-i18n-placeholder="inputPlaceholder">Hello AES 世界</textarea>
+                </div>
+
+                <div class="button-row">
+                    <button id="encryptBtn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span data-i18n="encryptBtn">加密</span>
+                    </button>
+                    <button id="decryptBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                        </svg>
+                        <span data-i18n="decryptBtn">解密</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="horizontal-column">
+                <div class="field" style="flex:1;">
+                    <label class="field-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span data-i18n="resultLabel">输出结果</span>
+                    </label>
+                    <div class="result-container">
+                        <div class="result-header">
+                            <span class="result-header-label">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                                <span id="resultCount"></span>
+                            </span>
+                            <button id="copyBtn" class="btn btn-ghost btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                <span data-i18n="copyBtn">复制</span>
+                            </button>
+                        </div>
+                        <div id="resultBody" class="result-body placeholder" data-i18n="resultPlaceholder">
+                            等待操作...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        // ---------- 国际化配置 ----------
+        const translations = {
+            zh: {
+                title: 'AES 加解密',
+                description: '使用 AES 对称加密算法，本地完成加解密操作。',
+                keySelectorLabel: '选择密钥',
+                keySelectorDefault: '— 不选择（手动输入） —',
+                keyLabel: '加密密钥',
+                keyPlaceholder: '输入密钥...',
+                keyHint: '密钥仅用于本地运算，不会上传到服务器',
+                resetKeyBtn: '重置',
+                inputLabel: '输入内容',
+                inputPlaceholder: '输入要加密的文本，或粘贴要解密的密文...',
+                encryptBtn: '加密',
+                decryptBtn: '解密',
+                resultLabel: '输出结果',
+                copyBtn: '复制',
+                resultPlaceholder: '等待操作...',
+                noContent: '无内容',
+                copied: '已复制',
+                copyFailed: '复制失败',
+                inputEncryptContent: '请输入要加密的内容',
+                inputDecryptContent: '请输入要解密的密文',
+                encryptError: '加密出错：',
+                decryptError: '解密失败：',
+                unknownError: '未知错误',
+                invalidCipher: '无效密文或密钥错误',
+                batchMode: '批量',
+                batchInputHint: '（每行一条）',
+                batchResultCount: '共 {count} 条',
+                batchItem: '第 {index} 条',
+                copyItem: '复制',
+                copiedItem: '已复制',
+                searchPlaceholder: '搜索...',
+                noResults: '无匹配结果'
+            },
+            'zh-TW': {
+                title: 'AES 加解密',
+                description: '使用 AES 對稱加密演算法，在本機完成加解密操作。',
+                keySelectorLabel: '選擇金鑰',
+                keySelectorDefault: '— 不選擇（手動輸入） —',
+                keyLabel: '加密金鑰',
+                keyPlaceholder: '輸入金鑰...',
+                keyHint: '金鑰僅用於本機運算，不會上傳到伺服器',
+                resetKeyBtn: '重置',
+                inputLabel: '輸入內容',
+                inputPlaceholder: '輸入要加密的文字，或貼上要解密的密文...',
+                encryptBtn: '加密',
+                decryptBtn: '解密',
+                resultLabel: '輸出結果',
+                copyBtn: '複製',
+                resultPlaceholder: '等待操作...',
+                noContent: '無內容',
+                copied: '已複製',
+                copyFailed: '複製失敗',
+                inputEncryptContent: '請輸入要加密的內容',
+                inputDecryptContent: '請輸入要解密的密文',
+                encryptError: '加密出錯：',
+                decryptError: '解密失敗：',
+                unknownError: '未知錯誤',
+                invalidCipher: '無效密文或金鑰錯誤',
+                batchMode: '批次',
+                batchInputHint: '（每行一條）',
+                batchResultCount: '共 {count} 條',
+                batchItem: '第 {index} 條',
+                copyItem: '複製',
+                copiedItem: '已複製',
+                searchPlaceholder: '搜尋...',
+                noResults: '無匹配結果'
+            },
+            en: {
+                title: 'AES Encryption',
+                description: 'Use AES symmetric encryption, all operations done locally.',
+                keySelectorLabel: 'Select Key',
+                keySelectorDefault: '— None (manual input) —',
+                keyLabel: 'Encryption Key',
+                keyPlaceholder: 'Enter key...',
+                keyHint: 'Key is only used locally, never uploaded to server',
+                resetKeyBtn: 'Reset',
+                inputLabel: 'Input',
+                inputPlaceholder: 'Enter text to encrypt, or paste ciphertext to decrypt...',
+                encryptBtn: 'Encrypt',
+                decryptBtn: 'Decrypt',
+                resultLabel: 'Output',
+                copyBtn: 'Copy',
+                resultPlaceholder: 'Waiting...',
+                noContent: 'Empty',
+                copied: 'Copied',
+                copyFailed: 'Copy failed',
+                inputEncryptContent: 'Please enter content to encrypt',
+                inputDecryptContent: 'Please enter ciphertext to decrypt',
+                encryptError: 'Encryption error: ',
+                decryptError: 'Decryption failed: ',
+                unknownError: 'unknown error',
+                invalidCipher: 'Invalid ciphertext or key',
+                batchMode: 'Batch',
+                batchInputHint: '(one per line)',
+                batchResultCount: '{count} items',
+                batchItem: 'Item {index}',
+                copyItem: 'Copy',
+                copiedItem: 'Copied',
+                searchPlaceholder: 'Search...',
+                noResults: 'No results'
+            },
+            ja: {
+                title: 'AES 暗号化',
+                description: 'AES対称暗号化アルゴリズムを使用し、ローカルで暗号化/復号化を行います。',
+                keySelectorLabel: 'キーを選択',
+                keySelectorDefault: '— 選択しない（手動入力） —',
+                keyLabel: '暗号化キー',
+                keyPlaceholder: 'キーを入力...',
+                keyHint: 'キーはローカルでのみ使用され、サーバーには送信されません',
+                resetKeyBtn: 'リセット',
+                inputLabel: '入力内容',
+                inputPlaceholder: '暗号化するテキスト、または復号化する暗号文を入力...',
+                encryptBtn: '暗号化',
+                decryptBtn: '復号化',
+                resultLabel: '出力結果',
+                copyBtn: 'コピー',
+                resultPlaceholder: '待機中...',
+                noContent: '内容なし',
+                copied: 'コピーしました',
+                copyFailed: 'コピー失敗',
+                inputEncryptContent: '暗号化する内容を入力してください',
+                inputDecryptContent: '復号化する暗号文を入力してください',
+                encryptError: '暗号化エラー：',
+                decryptError: '復号化失敗：',
+                unknownError: '不明なエラー',
+                invalidCipher: '無効な暗号文またはキー',
+                batchMode: '一括',
+                batchInputHint: '（1行に1つ）',
+                batchResultCount: '{count} 件',
+                batchItem: '{index} 番目',
+                copyItem: 'コピー',
+                copiedItem: 'コピーしました',
+                searchPlaceholder: '検索...',
+                noResults: '一致なし'
+            },
+            ko: {
+                title: 'AES 암호화/복호화',
+                description: 'AES 대칭 암호화 알고리즘을 사용하여 로컬에서 암호화/복호화합니다.',
+                keySelectorLabel: '키 선택',
+                keySelectorDefault: '— 선택 안 함 (수동 입력) —',
+                keyLabel: '암호화 키',
+                keyPlaceholder: '키를 입력하세요...',
+                keyHint: '키는 로컬 연산에만 사용되며 서버에 업로드되지 않습니다',
+                resetKeyBtn: '재설정',
+                inputLabel: '입력 내용',
+                inputPlaceholder: '암호화할 텍스트를 입력하거나 복호화할 암호문을 붙여넣으세요...',
+                encryptBtn: '암호화',
+                decryptBtn: '복호화',
+                resultLabel: '출력 결과',
+                copyBtn: '복사',
+                resultPlaceholder: '대기 중...',
+                noContent: '내용 없음',
+                copied: '복사됨',
+                copyFailed: '복사 실패',
+                inputEncryptContent: '암호화할 내용을 입력하세요',
+                inputDecryptContent: '복호화할 암호문을 입력하세요',
+                encryptError: '암호화 오류: ',
+                decryptError: '복호화 실패: ',
+                unknownError: '알 수 없는 오류',
+                invalidCipher: '잘못된 암호문 또는 키',
+                batchMode: '일괄',
+                batchInputHint: '(줄당 하나)',
+                batchResultCount: '{count}개',
+                batchItem: '{index}번째',
+                copyItem: '복사',
+                copiedItem: '복사됨',
+                searchPlaceholder: '검색...',
+                noResults: '결과 없음'
+            }
+        };
+
+        const DEFAULT_LANG = 'zh';
+
+        const languageNames = {
+            zh: '中文',
+            'zh-TW': '繁體中文',
+            en: 'English',
+            ja: '日本語',
+            ko: '한국어'
+        };
+
+        let currentLang = DEFAULT_LANG;
+
+        let keyOptions = [];
+        let currentSearchKeyword = '';
+
+        function t(key, params) {
+            let text = translations[currentLang]?.[key] ?? translations[DEFAULT_LANG]?.[key] ?? key;
+            if (params) {
+                Object.keys(params).forEach(k => {
+                    text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), params[k]);
+                });
+            }
+            return text;
+        }
+
+        function renderKeySelector() {
+            const selector = document.getElementById('keySelector');
+            const currentValue = selector.value;
+            selector.innerHTML = '';
+
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = t('keySelectorDefault');
+            selector.appendChild(defaultOpt);
+
+            keyOptions.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                selector.appendChild(option);
+            });
+
+            if (currentValue && keyOptions.some(o => o.value === currentValue)) {
+                selector.value = currentValue;
+            } else {
+                selector.value = '';
+            }
+
+            renderCustomDropdown();
+        }
+
+        function renderCustomDropdown() {
+            const list = document.getElementById('keySelectorList');
+            const label = document.getElementById('keySelectorLabel');
+            const selector = document.getElementById('keySelector');
+            const currentValue = selector.value;
+
+            list.innerHTML = '';
+
+            const keyword = currentSearchKeyword.trim().toLowerCase();
+
+            const defaultText = t('keySelectorDefault');
+            const defaultMatches = !keyword || defaultText.toLowerCase().includes(keyword);
+            if (defaultMatches) {
+                const defaultItem = document.createElement('li');
+                defaultItem.className = 'select-option' + (currentValue === '' ? ' selected' : '');
+                defaultItem.dataset.value = '';
+                defaultItem.textContent = defaultText;
+                list.appendChild(defaultItem);
+            }
+
+            let matchCount = 0;
+            keyOptions.forEach(opt => {
+                const optLabel = String(opt.label || '');
+                if (keyword && !optLabel.toLowerCase().includes(keyword)) {
+                    return;
+                }
+                matchCount++;
+
+                const item = document.createElement('li');
+                item.className = 'select-option' + (currentValue === opt.value ? ' selected' : '');
+                item.dataset.value = opt.value;
+                item.textContent = optLabel;
+                list.appendChild(item);
+            });
+
+            if (!defaultMatches && matchCount === 0) {
+                const emptyItem = document.createElement('li');
+                emptyItem.className = 'select-empty';
+                emptyItem.textContent = t('noResults');
+                list.appendChild(emptyItem);
+            }
+
+            if (currentValue === '') {
+                label.textContent = t('keySelectorDefault');
+            } else {
+                const found = keyOptions.find(o => o.value === currentValue);
+                label.textContent = found ? found.label : t('keySelectorDefault');
+            }
+        }
+
+        function syncKeyFromSelector() {
+            const selector = document.getElementById('keySelector');
+            const selectedValue = selector.value;
+
+            if (!selectedValue) {
+                return;
+            }
+
+            const found = keyOptions.find(o => o.value === selectedValue);
+            if (found && found.aes_key !== undefined) {
+                keyInput.value = found.aes_key;
+            }
+        }
+
+        function updateLanguage(lang) {
+            if (!translations[lang]) {
+                console.warn(`Language "${lang}" not found, falling back to "${DEFAULT_LANG}".`);
+                lang = DEFAULT_LANG;
+            }
+            currentLang = lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const translation = t(key);
+                const svg = el.querySelector('svg');
+                if (svg) {
+                    const textNodes = Array.from(el.childNodes).filter(
+                        node => node.nodeType === Node.TEXT_NODE
+                    );
+                    if (textNodes.length > 0) {
+                        textNodes[0].textContent = translation;
+                    } else {
+                        el.appendChild(document.createTextNode(translation));
+                    }
+                } else {
+                    el.textContent = translation;
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = t(key);
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.documentElement.lang = lang;
+
+            try {
+                localStorage.setItem('preferredLanguage', lang);
+            } catch (e) {}
+
+            const selector = document.getElementById('keySelector');
+            const prevValue = selector.value;
+            renderKeySelector();
+            selector.value = prevValue;
+
+            updateBatchHint();
+
+            if (resultBody.classList.contains('placeholder')) {
+                setResult(t('resultPlaceholder'), true);
+            } else {
+                renderBatchResults();
+            }
+        }
+
+        function getInitialLanguage() {
+            try {
+                const stored = localStorage.getItem('preferredLanguage');
+                if (stored && translations[stored]) {
+                    return stored;
+                }
+            } catch (e) {}
+
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang) {
+                if (translations[browserLang]) {
+                    return browserLang;
+                }
+                const primaryLang = browserLang.split('-')[0].toLowerCase();
+                if (translations[primaryLang]) {
+                    return primaryLang;
+                }
+            }
+
+            return DEFAULT_LANG;
+        }
+
+        const keyInput = document.getElementById('aesKey');
+        const inputText = document.getElementById('inputText');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const resultBody = document.getElementById('resultBody');
+        const copyBtn = document.getElementById('copyBtn');
+        const langSwitch = document.getElementById('langSwitch');
+        const batchMode = document.getElementById('batchMode');
+        const batchInputHint = document.getElementById('batchInputHint');
+        const resultCount = document.getElementById('resultCount');
+        const keySelector = document.getElementById('keySelector');
+        const resetKeyBtn = document.getElementById('resetKeyBtn');
+        const keySelectorSearch = document.getElementById('keySelectorSearch');
+
+        let batchResults = [];
+        let isBatchResult = false;
+
+        function setResult(text, isPlaceholder = false) {
+            resultBody.textContent = text;
+            resultCount.textContent = '';
+            if (isPlaceholder) {
+                resultBody.classList.add('placeholder');
+                resultBody.classList.remove('fade-in');
+            } else {
+                resultBody.classList.remove('placeholder');
+                resultBody.classList.add('fade-in');
+                setTimeout(() => resultBody.classList.remove('fade-in'), 200);
+            }
+        }
+
+        function getKey() {
+            const raw = keyInput.value.trim();
+            return raw === '' ? 'default-aes-key' : raw;
+        }
+
+        function updateBatchHint() {
+            if (batchMode.checked) {
+                batchInputHint.style.display = 'inline';
+            } else {
+                batchInputHint.style.display = 'none';
+            }
+        }
+
+        function renderBatchResults() {
+            if (!isBatchResult || batchResults.length === 0) return;
+
+            resultBody.classList.remove('placeholder');
+            resultCount.textContent = t('batchResultCount', { count: batchResults.length });
+            resultBody.innerHTML = '';
+
+            batchResults.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'batch-item';
+
+                // 头部行：标签 + 单条复制按钮
+                const header = document.createElement('div');
+                header.className = 'batch-item-header';
+
+                const label = document.createElement('div');
+                label.className = 'batch-item-label';
+                label.textContent = t('batchItem', { index: idx + 1 });
+                header.appendChild(label);
+
+                // 单条复制按钮（失败的行不显示）
+                if (!item.error) {
+                    const itemCopyBtn = document.createElement('button');
+                    itemCopyBtn.type = 'button';
+                    itemCopyBtn.className = 'batch-item-copy';
+                    itemCopyBtn.dataset.index = String(idx);
+                    itemCopyBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        <span>${t('copyItem')}</span>
+                    `;
+                    header.appendChild(itemCopyBtn);
+                }
+
+                div.appendChild(header);
+
+                const content = document.createElement('div');
+                if (item.error) {
+                    content.textContent = '❌ ' + item.error;
+                    content.style.color = '#b42318';
+                } else {
+                    content.textContent = item.output;
+                }
+                div.appendChild(content);
+                resultBody.appendChild(div);
+            });
+        }
+
+        // ---------- 单条复制 ----------
+        function copySingleItem(index, btnElement) {
+            const item = batchResults[index];
+            if (!item || item.error) return;
+
+            const text = item.output;
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+
+                // 按钮状态反馈
+                const span = btnElement.querySelector('span');
+                if (span) {
+                    const originalText = span.textContent;
+                    span.textContent = t('copiedItem');
+                    btnElement.style.color = '#027a48';
+                    setTimeout(() => {
+                        span.textContent = originalText;
+                        btnElement.style.color = '';
+                    }, 1200);
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+            }
+        }
+
+        // 使用事件委托绑定批量复制按钮
+        resultBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('.batch-item-copy');
+            if (!btn) return;
+            const idx = parseInt(btn.dataset.index, 10);
+            if (!isNaN(idx)) {
+                copySingleItem(idx, btn);
+            }
+        });
+
+        async function encrypt() {
+            try {
+                const key = getKey();
+                const plaintext = inputText.value;
+                if (!plaintext || plaintext.trim() === '') {
+                    setResult(t('inputEncryptContent'), true);
+                    return;
+                }
+
+                if (batchMode.checked) {
+                    const lines = plaintext.split('\n').filter(l => l.trim() !== '');
+                    if (lines.length === 0) {
+                        setResult(t('inputEncryptContent'), true);
+                        return;
+                    }
+                    batchResults = [];
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        try {
+                            const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesEncrypt", {
+                                connectionId: window.dbxPlugin.context?.connectionId,
+                                key: key,
+                                plaintext: line
+                            });
+                            if (res.code !== 0) {
+                                batchResults.push({ input: line, error: res.message });
+                            } else {
+                                batchResults.push({ input: line, output: res.data });
+                            }
+                        } catch (e) {
+                            batchResults.push({ input: line, error: e.message || t('unknownError') });
+                        }
+                    }
+                    isBatchResult = true;
+                    renderBatchResults();
+                    return;
+                }
+
+                const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesEncrypt", {
+                    connectionId: window.dbxPlugin.context?.connectionId,
+                    key: key,
+                    plaintext: plaintext
+                });
+                if (res.code !== 0) {
+                    setResult(res.message, true);
+                    return;
+                }
+                isBatchResult = false;
+                batchResults = [];
+                setResult(res.data);
+            } catch (e) {
+                console.error(e);
+                setResult(t('encryptError') + (e.message || t('unknownError')), true);
+            }
+        }
+
+        async function aesKey() {
+            try {
+                const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesKey", {
+                    connectionId: window.dbxPlugin.context?.connectionId
+                });
+                if (res.code !== 0) {
+                    setResult(res.message, true);
+                    return;
+                }
+                keyInput.value = res.data;
+            } catch (e) {
+                console.error(e);
+                setResult(t('encryptError') + (e.message || t('unknownError')), true);
+            }
+        }
+
+        async function aesKeyLables() {
+            try {
+                const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesKeyLables", {
+                    connectionId: window.dbxPlugin.context?.connectionId
+                });
+                if (res.code !== 0) {
+                    setResult(res.message, true);
+                    return;
+                }
+                keyOptions = JSON.parse(res.data);
+                renderKeySelector();
+            } catch (e) {
+                console.error(e);
+                setResult(t('encryptError') + (e.message || t('unknownError')), true);
+            }
+        }
+
+        async function decrypt() {
+            try {
+                const key = getKey();
+                const ciphertext = inputText.value.trim();
+                if (!ciphertext) {
+                    setResult(t('inputDecryptContent'), true);
+                    return;
+                }
+
+                if (batchMode.checked) {
+                    const lines = ciphertext.split('\n').filter(l => l.trim() !== '');
+                    if (lines.length === 0) {
+                        setResult(t('inputDecryptContent'), true);
+                        return;
+                    }
+                    batchResults = [];
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        try {
+                            const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesDecrypt", {
+                                connectionId: window.dbxPlugin.context?.connectionId,
+                                key: key,
+                                plaintext: line
+                            });
+                            if (res.code !== 0) {
+                                batchResults.push({ input: line, error: res.message });
+                            } else {
+                                batchResults.push({ input: line, output: res.data });
+                            }
+                        } catch (e) {
+                            batchResults.push({ input: line, error: e.message || t('invalidCipher') });
+                        }
+                    }
+                    isBatchResult = true;
+                    renderBatchResults();
+                    return;
+                }
+
+                const res = await window.dbxPlugin.invoke("aes-rust-plugin/aesDecrypt", {
+                    connectionId: window.dbxPlugin.context?.connectionId,
+                    key: key,
+                    plaintext: ciphertext
+                });
+                if (res.code !== 0) {
+                    setResult(res.message, true);
+                    return;
+                }
+                isBatchResult = false;
+                batchResults = [];
+                setResult(res.data);
+            } catch (e) {
+                console.error(e);
+                setResult(t('decryptError') + (e.message || t('invalidCipher')), true);
+            }
+        }
+
+        function copyResult() {
+            let text = '';
+            if (isBatchResult && batchResults.length > 0) {
+                text = batchResults.map((item, idx) => {
+                    if (item.error) {
+                        return `#${idx + 1} ERROR: ${item.error}`;
+                    }
+                    return item.output;
+                }).join('\n');
+            } else {
+                text = resultBody.textContent;
+            }
+
+            if (!text || resultBody.classList.contains('placeholder')) {
+                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('noContent');
+                setTimeout(() => {
+                    copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
+                }, 1200);
+                return;
+            }
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copied');
+            } catch (err) {
+                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyFailed');
+            }
+            setTimeout(() => {
+                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
+            }, 1500);
+        }
+
+        encryptBtn.addEventListener('click', encrypt);
+        decryptBtn.addEventListener('click', decrypt);
+        copyBtn.addEventListener('click', copyResult);
+
+        resetKeyBtn.addEventListener('click', () => {
+            aesKey();
+        });
+
+        keySelector.addEventListener('change', () => {
+            syncKeyFromSelector();
+        });
+
+        batchMode.addEventListener('change', () => {
+            updateBatchHint();
+            isBatchResult = false;
+            batchResults = [];
+            setResult(t('resultPlaceholder'), true);
+        });
+
+        langSwitch.addEventListener('click', (e) => {
+            const btn = e.target.closest('.lang-btn');
+            if (!btn) return;
+            const lang = btn.getAttribute('data-lang');
+            if (lang && translations[lang]) {
+                updateLanguage(lang);
+            }
+        });
+
+        inputText.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                encrypt();
+            } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+                e.preventDefault();
+                decrypt();
+            }
+        });
+
+        const selectWrapper = document.getElementById('selectWrapper');
+        const selectTrigger = document.getElementById('keySelectorBtn');
+        const selectList = document.getElementById('keySelectorList');
+
+        selectTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const willOpen = !selectWrapper.classList.contains('open');
+            selectWrapper.classList.toggle('open');
+
+            if (willOpen) {
+                setTimeout(() => {
+                    keySelectorSearch.focus();
+                }, 50);
+            } else {
+                keySelectorSearch.value = '';
+                currentSearchKeyword = '';
+                renderCustomDropdown();
+            }
+        });
+
+        keySelectorSearch.addEventListener('input', (e) => {
+            currentSearchKeyword = e.target.value;
+            renderCustomDropdown();
+        });
+
+        keySelectorSearch.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        selectList.addEventListener('click', (e) => {
+            const item = e.target.closest('.select-option');
+            if (!item) return;
+
+            const value = item.dataset.value;
+            keySelector.value = value;
+            keySelector.dispatchEvent(new Event('change'));
+
+            selectWrapper.classList.remove('open');
+            keySelectorSearch.value = '';
+            currentSearchKeyword = '';
+            renderCustomDropdown();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!selectWrapper.contains(e.target)) {
+                selectWrapper.classList.remove('open');
+                keySelectorSearch.value = '';
+                currentSearchKeyword = '';
+                renderCustomDropdown();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                selectWrapper.classList.remove('open');
+                keySelectorSearch.value = '';
+                currentSearchKeyword = '';
+                renderCustomDropdown();
+            }
+        });
+
+        setResult(t('resultPlaceholder'), true);
+
+        renderKeySelector();
+
+        const initialLang = getInitialLanguage();
+        updateLanguage(initialLang);
+        console.log('shadcn 风格 AES 加解密工具已就绪 ✨');
+        window.dbxPlugin.ready.then(() => {
+            const lang = window.dbxPlugin.locale;
+            if (lang && translations[lang]) {
+                updateLanguage(lang);
+            }
+            aesKey();
+            aesKeyLables();
+        });
+
+    })();
+</script>
+</body>
+</html>

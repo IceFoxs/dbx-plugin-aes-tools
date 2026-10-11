@@ -1,0 +1,9 @@
+/dist/
+/.dbx-dev/
+.dbx-repository-signing-key.env
+.DS_Store
+*.log
+.idea/vcs.xml
+.idea/aes-rust-plugin.iml
+/backend/target
+.idea/claudeCodeTabState.xml
