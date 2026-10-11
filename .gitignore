@@ -7,3 +7,5 @@
 .idea/aes-rust-plugin.iml
 /backend/target
 .idea/claudeCodeTabState.xml
+.idea
+
