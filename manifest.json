@@ -30,9 +30,7 @@
     "host.plans:read",
     "host.schema:read",
     "host.storage",
-    "host.clipboard:read",
-    "host.data:read",
-    "host.network:https://baidu.com"
+    "host.clipboard:read"
   ],
   "contributions": [
     {
