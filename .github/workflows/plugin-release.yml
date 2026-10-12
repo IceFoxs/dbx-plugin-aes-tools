@@ -1,7 +1,5 @@
 name: Release DBX plugin
 
-name: Release DBX plugin
-
 on:
   release:
     types: [published]
