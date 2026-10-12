@@ -17,7 +17,7 @@
   "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "license": "MIT",
-  "releaseNotes": "First Release.",
+  "releaseNotes": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.",
   "localizations": {
     "zh-CN": {
       "name": "aes工具",
