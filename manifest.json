@@ -68,6 +68,31 @@
           "required": true
         },
         {
+          "key": "protocol",
+          "label": "协议",
+          "type": "select",
+          "binding": "config",
+          "default": "http",
+          "options": [
+            {
+              "label": "HTTP（内部网络）",
+              "value": "http"
+            },
+            {
+              "label": "HTTPS",
+              "value": "https"
+            }
+          ]
+        },
+        {
+          "key": "interface_path",
+          "label": "接口地址",
+          "type": "text",
+          "binding": "config",
+          "default": "/aesKeys",
+          "required": true
+        },
+        {
           "key": "aes_key",
           "label": "aes key",
           "type": "text",
