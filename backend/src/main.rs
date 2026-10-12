@@ -158,7 +158,8 @@ impl PluginHandler for Plugin {
                     .unwrap()
                     .get(connection_id)
                     .cloned();
-                match http_util::HttpUtil::get(&aes_key_interface.unwrap().as_str()) {
+                match http_util::HttpUtil::get_with_timeout(&aes_key_interface.unwrap().as_str(), 3)
+                {
                     Ok(body) => {
                         if is_json_array(&body) {
                             Ok(json!({
@@ -172,12 +173,11 @@ impl PluginHandler for Plugin {
                             }))
                         }
                     }
-                    Err(e) => {
-                        Ok(json!({
-                            "code":0,
-                            "data": aes_key_label
-                        }))
-                    }
+                    #[warn(unused_variables)]
+                    Err(e) => Ok(json!({
+                        "code":0,
+                        "data": aes_key_label
+                    })),
                 }
             }
             "aes-rust-plugin/aesDecrypt" => {

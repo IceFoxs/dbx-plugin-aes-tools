@@ -23,7 +23,6 @@ impl HttpUtil {
         let body = agent().get(url).call()?.into_string()?;
         Ok(body)
     }
-    #[warn(unused)]
     /// GET 请求（自定义超时，单位秒），返回 String
     pub fn get_with_timeout(
         url: &str,
