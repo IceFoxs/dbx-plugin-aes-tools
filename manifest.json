@@ -23,14 +23,13 @@
     }
   },
   "permissions": [
-    "host.workbench",
+    "host.ai",
+    "host.binary",
+    "host.clipboard:read",
     "host.events",
     "host.filesystem",
-    "host.binary",
-    "host.plans:read",
-    "host.schema:read",
     "host.storage",
-    "host.clipboard:read"
+    "host.workbench"
   ],
   "contributions": [
     {
