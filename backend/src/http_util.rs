@@ -23,7 +23,7 @@ impl HttpUtil {
         let body = agent().get(url).call()?.into_string()?;
         Ok(body)
     }
-
+    #[warn(unused)]
     /// GET 请求（自定义超时，单位秒），返回 String
     pub fn get_with_timeout(
         url: &str,
@@ -36,7 +36,7 @@ impl HttpUtil {
         let body = agent.get(url).call()?.into_string()?;
         Ok(body)
     }
-
+    #[warn(unused)]
     /// GET 请求（带请求头 + 自定义超时）
     pub fn get_with_headers(
         url: &str,
@@ -52,7 +52,7 @@ impl HttpUtil {
         }
         Ok(req.call()?.into_string()?)
     }
-
+    #[warn(unused)]
     /// GET 请求（带查询参数 + 自定义超时）
     pub fn get_with_params(
         url: &str,
