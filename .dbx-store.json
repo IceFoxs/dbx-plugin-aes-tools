@@ -15,10 +15,10 @@
     "host.storage",
     "host.clipboard:read"
   ],
-  "source": "https://github.com/jinpy666/dbx-plugin-ssh",
-  "homepage": "https://github.com/jinpy666/dbx-plugin-ssh",
+  "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
+  "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "license": "MIT",
-  "releaseNotes": "",
+  "releaseNotes": "First Release.",
   "localizations": {
     "zh-CN": {
       "name": "aes工具",
