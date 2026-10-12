@@ -226,6 +226,6 @@ fn optional_string(object: Option<&serde_json::Map<String, Value>>, key: &str) -
 }
 fn main() -> std::io::Result<()> {
     let metadata =
-        PluginMetadata::new("aes-tools", env!("CARGO_PKG_VERSION")).with_capability("connections");
+        PluginMetadata::new("io.github.icefoxs.aes-tools", env!("CARGO_PKG_VERSION")).with_capability("connections");
     PluginServer::new(metadata, Plugin::default()).serve()
 }
