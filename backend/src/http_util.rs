@@ -1,9 +1,9 @@
 use std::sync::OnceLock;
 use std::time::Duration;
-
+#[warn(unused)]
 /// 默认超时时间（秒）
 const DEFAULT_TIMEOUT_SECS: u64 = 60;
-
+#[warn(unused)]
 /// 全局复用的 Agent（内部带连接池）
 static AGENT: OnceLock<ureq::Agent> = OnceLock::new();
 
@@ -19,6 +19,7 @@ pub struct HttpUtil;
 
 impl HttpUtil {
     /// GET 请求（默认超时），返回 String
+    #[warn(unused)]
     pub fn get(url: &str) -> Result<String, Box<dyn std::error::Error>> {
         let body = agent().get(url).call()?.into_string()?;
         Ok(body)
@@ -35,8 +36,9 @@ impl HttpUtil {
         let body = agent.get(url).call()?.into_string()?;
         Ok(body)
     }
-    #[warn(unused)]
+
     /// GET 请求（带请求头 + 自定义超时）
+    #[warn(unused)]
     pub fn get_with_headers(
         url: &str,
         headers: Vec<(&str, &str)>,
@@ -51,8 +53,9 @@ impl HttpUtil {
         }
         Ok(req.call()?.into_string()?)
     }
-    #[warn(unused)]
+
     /// GET 请求（带查询参数 + 自定义超时）
+    #[warn(unused)]
     pub fn get_with_params(
         url: &str,
         params: Vec<(&str, &str)>,

@@ -174,7 +174,7 @@ impl PluginHandler for Plugin {
                         }
                     }
                     #[warn(unused_variables)]
-                    Err(e) => Ok(json!({
+                    Err(_e) => Ok(json!({
                         "code":0,
                         "data": aes_key_label
                     })),
