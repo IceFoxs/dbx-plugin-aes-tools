@@ -1435,7 +1435,7 @@
 
         function getKey() {
             const raw = keyInput.value.trim();
-            return raw === '' ? 'default-aes-key' : raw;
+            return raw === '' ? '' : raw;
         }
 
         function updateBatchHint() {
