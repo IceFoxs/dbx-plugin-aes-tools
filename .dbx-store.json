@@ -1,0 +1,32 @@
+{
+  "name": "aes-tools",
+  "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.",
+  "icon": "assets/plugin.svg",
+  "tags": [
+    "aes"
+  ],
+  "permissions": [
+    "host.workbench",
+    "host.events",
+    "host.filesystem",
+    "host.binary",
+    "host.plans:read",
+    "host.schema:read",
+    "host.storage",
+    "host.clipboard:read"
+  ],
+  "source": "https://github.com/jinpy666/dbx-plugin-ssh",
+  "homepage": "https://github.com/jinpy666/dbx-plugin-ssh",
+  "license": "MIT",
+  "releaseNotes": "",
+  "localizations": {
+    "zh-CN": {
+      "name": "aes工具",
+      "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。"
+    },
+    "zh-TW": {
+      "name": "aes tools",
+      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration."
+    }
+  }
+}
