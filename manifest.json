@@ -142,6 +142,12 @@
             "port": {
               "label": "端口"
             },
+            "protocol": {
+              "label": "协议"
+            },
+            "interface_path": {
+              "label": "接口地址"
+            },
             "aes_key": {
               "label": "aes密钥"
             },
@@ -172,6 +178,12 @@
             },
             "port": {
               "label": "連接埠"
+            },
+            "protocol": {
+              "label": "協定"
+            },
+            "interface_path": {
+              "label": "介面位址"
             },
             "aes_key": {
               "label": "aes 金鑰"
@@ -204,6 +216,12 @@
             "port": {
               "label": "Port"
             },
+            "protocol": {
+              "label": "Protocol"
+            },
+            "interface_path": {
+              "label": "Interface path"
+            },
             "aes_key": {
               "label": "aes key"
             },
@@ -235,6 +253,12 @@
             "port": {
               "label": "ポート"
             },
+            "protocol": {
+              "label": "プロトコル"
+            },
+            "interface_path": {
+              "label": "インターフェースパス"
+            },
             "aes_key": {
               "label": "aes キー"
             },
@@ -265,6 +289,12 @@
             },
             "port": {
               "label": "포트"
+            },
+            "protocol": {
+              "label": "프로토콜"
+            },
+            "interface_path": {
+              "label": "인터페이스 경로"
             },
             "aes_key": {
               "label": "aes 키"
