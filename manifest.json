@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/t8y2/dbx/plugin-sdk-v1/plugins/manifest.schema.json",
   "manifest_version": 1,
-  "id": "io.github.icefox.aes-tools",
+  "id": "io.github.icefoxs.aes-tools",
   "name": "aes-tools",
   "version": "0.1.1",
-  "publisher": "icefox",
+  "publisher": "icefoxs",
   "description": "aes tools",
   "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
