@@ -19,7 +19,7 @@ pub struct HttpUtil;
 
 impl HttpUtil {
     /// GET 请求（默认超时），返回 String
-    #[warn(unused)]
+    #[allow(unused)]
     pub fn get(url: &str) -> Result<String, Box<dyn std::error::Error>> {
         let body = agent().get(url).call()?.into_string()?;
         Ok(body)
@@ -38,7 +38,7 @@ impl HttpUtil {
     }
 
     /// GET 请求（带请求头 + 自定义超时）
-    #[warn(unused)]
+    #[allow(unused)]
     pub fn get_with_headers(
         url: &str,
         headers: Vec<(&str, &str)>,
@@ -55,7 +55,7 @@ impl HttpUtil {
     }
 
     /// GET 请求（带查询参数 + 自定义超时）
-    #[warn(unused)]
+    #[allow(unused)]
     pub fn get_with_params(
         url: &str,
         params: Vec<(&str, &str)>,
