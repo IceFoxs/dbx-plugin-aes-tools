@@ -279,7 +279,7 @@
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            overflow: hidden;   /* 修复：不再由 card-content 滚动 */
         }
 
         /* 横向双栏布局 */
@@ -298,6 +298,7 @@
             gap: 0.85rem;
             min-width: 0;
             min-height: 0;
+            overflow-y: auto;   /* 修复：列内滚动，保证按钮不被裁掉 */
         }
 
         /* ========== 表单元素 ========== */
@@ -310,7 +311,8 @@
 
         .field.flex-grow {
             flex: 1 1 auto;
-            min-height: 0;
+            min-height: 120px;
+            /* 修复：去掉 overflow: hidden，避免裁掉内部内容 */
         }
 
         .field-label {
@@ -420,10 +422,10 @@
             box-shadow: 0 0 0 1px var(--color-ring);
         }
 
-        /* 文本域：占满剩余高度，但保证最小高度 */
+        /* 文本域：占满剩余高度，但保证最小可见高度 */
         .textarea {
             flex: 1 1 auto;
-            min-height: 80px;
+            min-height: 60px;   /* 修复：从 0 改为 60px，保证至少可见几行 */
             resize: none;
             line-height: 1.6;
             font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -782,7 +784,7 @@
             height: 0.75rem;
         }
 
-        /* 新增：工具按钮样式（清空、回填） */
+        /* 工具按钮样式（清空、回填） */
         .btn-tool {
             display: inline-flex;
             align-items: center;
@@ -826,7 +828,7 @@
         /* ========== 结果区域 ========== */
         .result-container {
             flex: 1 1 auto;
-            min-height: 80px;
+            min-height: 0;
             border: 1px solid var(--color-border);
             border-radius: 8px;
             background-color: var(--color-muted);
@@ -1807,7 +1809,7 @@
 
             if (resultBody.classList.contains('placeholder')) {
                 setResult(t('resultPlaceholder'), true);
-            } else {
+            } else if (isBatchResult) {
                 renderBatchResults();
             }
         }
@@ -1923,7 +1925,7 @@
                     `;
                     actions.appendChild(itemCopyBtn);
 
-                    // 新增：单个回填按钮
+                    // 单个回填按钮
                     const itemBackfillBtn = document.createElement('button');
                     itemBackfillBtn.type = 'button';
                     itemBackfillBtn.className = 'batch-item-backfill';
@@ -1982,7 +1984,7 @@
             }
         }
 
-        // 新增：单个回填功能
+        // 单个回填功能
         function backfillSingleItem(index, btnElement) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -2016,7 +2018,7 @@
                 return;
             }
 
-            // 新增：单个回填
+            // 单个回填
             const backfillBtn = e.target.closest('.batch-item-backfill');
             if (backfillBtn) {
                 const idx = parseInt(backfillBtn.dataset.index, 10);
