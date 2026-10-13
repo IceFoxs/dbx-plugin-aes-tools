@@ -1168,12 +1168,10 @@
                                 <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.65rem;" data-i18n="batchInputHint">（每行一条）</span>
                             </label>
                             <div class="field-actions">
-                                <!-- 新增：导入文本文件按钮 -->
+                                <!-- 导入文本文件按钮（文件夹图标，与拖放的上传图标区分） -->
                                 <button type="button" id="importFileBtn" class="btn-import" title="从本地文本文件导入内容">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="17 8 12 3 7 8"/>
-                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                                     </svg>
                                     <span data-i18n="importFileBtn">导入</span>
                                 </button>
@@ -1309,6 +1307,7 @@
                 importSuccess: '已导入',
                 importFailed: '导入失败',
                 importEmpty: '文件内容为空',
+                importTooLarge: '文件过大',
                 importNotText: '不支持该文件类型',
                 importNotTextDetail: '仅支持文本类文件',
                 dropHint: '松开鼠标即可导入文件',
@@ -1346,7 +1345,8 @@
                 backfilledItem: '已回填',
                 searchPlaceholder: '搜索...',
                 noResults: '无匹配结果',
-                cleared: '已清空'
+                cleared: '已清空',
+                batchTooMany: '行数过多（{count}），建议分片处理'
             },
             'zh-TW': {
                 title: 'AES 加解密',
@@ -1363,6 +1363,7 @@
                 importSuccess: '已匯入',
                 importFailed: '匯入失敗',
                 importEmpty: '檔案內容為空',
+                importTooLarge: '檔案過大',
                 importNotText: '不支援該檔案類型',
                 importNotTextDetail: '僅支援文字類檔案',
                 dropHint: '放開滑鼠即可匯入檔案',
@@ -1400,7 +1401,8 @@
                 backfilledItem: '已回填',
                 searchPlaceholder: '搜尋...',
                 noResults: '無匹配結果',
-                cleared: '已清空'
+                cleared: '已清空',
+                batchTooMany: '行數過多（{count}），建議分片處理'
             },
             en: {
                 title: 'AES Encryption',
@@ -1417,6 +1419,7 @@
                 importSuccess: 'Imported',
                 importFailed: 'Import failed',
                 importEmpty: 'File is empty',
+                importTooLarge: 'File too large',
                 importNotText: 'File type not supported',
                 importNotTextDetail: 'Only text files are supported',
                 dropHint: 'Drop to import the file',
@@ -1454,7 +1457,8 @@
                 backfilledItem: 'Backfilled',
                 searchPlaceholder: 'Search...',
                 noResults: 'No results',
-                cleared: 'Cleared'
+                cleared: 'Cleared',
+                batchTooMany: 'Too many lines ({count}), consider splitting'
             },
             ja: {
                 title: 'AES 暗号化',
@@ -1471,6 +1475,7 @@
                 importSuccess: '取込完了',
                 importFailed: '取込失敗',
                 importEmpty: 'ファイルが空です',
+                importTooLarge: 'ファイルが大きすぎます',
                 importNotText: 'このファイル形式には対応していません',
                 importNotTextDetail: 'テキストファイルのみ対応',
                 dropHint: 'ドロップしてファイルを取込',
@@ -1508,7 +1513,8 @@
                 backfilledItem: '再入力しました',
                 searchPlaceholder: '検索...',
                 noResults: '一致なし',
-                cleared: 'クリアしました'
+                cleared: 'クリアしました',
+                batchTooMany: '行数が多すぎます（{count}）、分割してください'
             },
             ko: {
                 title: 'AES 암호화/복호화',
@@ -1525,6 +1531,7 @@
                 importSuccess: '가져왔습니다',
                 importFailed: '가져오기 실패',
                 importEmpty: '파일이 비어 있습니다',
+                importTooLarge: '파일이 너무 큽니다',
                 importNotText: '지원하지 않는 파일 형식입니다',
                 importNotTextDetail: '텍스트 파일만 지원합니다',
                 dropHint: '놓으면 파일을 가져옵니다',
@@ -1562,11 +1569,17 @@
                 backfilledItem: '되돌렸습니다',
                 searchPlaceholder: '검색...',
                 noResults: '결과 없음',
-                cleared: '지워짐'
+                cleared: '지워짐',
+                batchTooMany: '줄이 너무 많습니다 ({count}), 분할하세요'
             }
         };
 
         const DEFAULT_LANG = 'zh';
+
+        // 导入文件大小上限（字节）
+        const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+        // 批量模式行数上限
+        const MAX_BATCH_LINES = 1000;
 
         const TEXT_FILE_EXTENSIONS = [
             '.txt', '.text', '.log',
@@ -1875,7 +1888,7 @@
         const dropOverlayText = document.getElementById('dropOverlayText');
         const appCard = document.getElementById('appCard');
 
-        // 新增：导入文件相关元素
+        // 导入文件相关元素
         const importFileBtn = document.getElementById('importFileBtn');
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
@@ -1887,6 +1900,8 @@
         let isBatchResult = false;
 
         let dropErrorTimer = null;
+        // flashImportButton 的定时器句柄，防止语言切换后旧定时器覆盖新文案
+        let importFlashTimer = null;
 
         function setResult(text, isPlaceholder = false) {
             resultBody.textContent = text;
@@ -2050,6 +2065,15 @@
             }
         });
 
+        // 批量模式行数守卫
+        function checkBatchLines(lines) {
+            if (lines.length > MAX_BATCH_LINES) {
+                setResult(t('batchTooMany', { count: lines.length }), true);
+                return false;
+            }
+            return true;
+        }
+
         async function encrypt() {
             try {
                 const key = getKey();
@@ -2065,6 +2089,8 @@
                         setResult(t('inputEncryptContent'), true);
                         return;
                     }
+                    if (!checkBatchLines(lines)) return;
+
                     batchResults = [];
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
@@ -2154,6 +2180,8 @@
                         setResult(t('inputDecryptContent'), true);
                         return;
                     }
+                    if (!checkBatchLines(lines)) return;
+
                     batchResults = [];
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
@@ -2269,7 +2297,7 @@
         }
 
         // ============================================================
-        // 新增：导入文本文件到输入框
+        // 导入文本文件到输入框
         // ============================================================
 
         function readFileAsText(file) {
@@ -2285,34 +2313,71 @@
             });
         }
 
+        // 读取浏览器 File 对象的头部字节（用于二进制内容校验）
+        function readFileHeadBytes(file, maxBytes) {
+            return new Promise((resolve) => {
+                try {
+                    const slice = file.slice(0, maxBytes);
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(new Uint8Array(reader.result));
+                    reader.onerror = () => resolve(null);
+                    reader.readAsArrayBuffer(slice);
+                } catch (e) {
+                    resolve(null);
+                }
+            });
+        }
+
+        // 在导入按钮上短暂显示状态文案，到期后用当前语言的 t() 恢复
         function flashImportButton(message, duration = 1500) {
             const span = importFileBtn.querySelector('span[data-i18n="importFileBtn"]');
             if (!span) return;
-            const originalText = span.textContent;
+            if (importFlashTimer) {
+                clearTimeout(importFlashTimer);
+                importFlashTimer = null;
+            }
             span.textContent = message;
-            setTimeout(() => { span.textContent = originalText; }, duration);
+            importFlashTimer = setTimeout(() => {
+                span.textContent = t('importFileBtn');
+                importFlashTimer = null;
+            }, duration);
         }
 
         async function handleImportFile(file) {
             if (!file) return;
 
             try {
-                // 先用扩展名/类型做一次快速判断
+                // 1) 文件大小限制
+                if (file.size > MAX_IMPORT_FILE_BYTES) {
+                    flashImportButton(t('importTooLarge'));
+                    return;
+                }
+
+                // 2) 扩展名 / MIME 类型快速判断
                 const fileMeta = {
                     name: file.name || '',
                     contentType: file.type || ''
                 };
 
-                if (!isImportableTextFile(fileMeta, null)) {
+                if (!isTextFileByName(fileMeta.name) && !isTextContentType(fileMeta.contentType)) {
                     console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
-                    showDropError(t('dropReject'));
+                    flashImportButton(t('importNotText'));
                     return;
                 }
 
+                // 3) 读取头部字节做二进制内容校验（与拖放逻辑对齐）
+                const headBytes = await readFileHeadBytes(file, 4096);
+                if (headBytes && !isTextContentByBytes(headBytes)) {
+                    console.warn('[AES] 拒绝二进制内容:', fileMeta.name);
+                    flashImportButton(t('importNotText'));
+                    return;
+                }
+
+                // 4) 读取全文
                 const text = await readFileAsText(file);
 
                 if (!text || text.trim() === '') {
-                    showDropError(t('importEmpty'));
+                    flashImportButton(t('importEmpty'));
                     return;
                 }
 
@@ -2320,7 +2385,7 @@
                 flashImportButton(t('importSuccess'));
             } catch (err) {
                 console.error('[AES] Import file failed:', err);
-                showDropError(t('importFailed'));
+                flashImportButton(t('importFailed'));
             }
         }
 
@@ -2333,7 +2398,9 @@
         fileInput.addEventListener('change', (e) => {
             const files = e.target.files;
             if (!files || files.length === 0) return;
-            handleImportFile(files[0]);
+            handleImportFile(files[0]).catch((err) => {
+                console.error('[AES] handleImportFile rejected:', err);
+            });
         });
 
         // ============================================================
@@ -2408,7 +2475,7 @@
             const parts = [];
             let offset = 0;
             const chunkSize = 64 * 1024;
-            const MAX_BYTES = 50 * 1024 * 1024;
+            const MAX_BYTES = MAX_IMPORT_FILE_BYTES;
             let eof = false;
 
             while (!eof) {
@@ -2431,22 +2498,6 @@
             }
 
             return decodeChunks(parts);
-        }
-
-        function readBrowserFileHead(file, maxBytes) {
-            return new Promise((resolve) => {
-                try {
-                    const slice = file.slice(0, maxBytes);
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        resolve(new Uint8Array(reader.result));
-                    };
-                    reader.onerror = () => resolve(null);
-                    reader.readAsArrayBuffer(slice);
-                } catch (e) {
-                    resolve(null);
-                }
-            });
         }
 
         function readBrowserFileToString(file) {
@@ -2530,7 +2581,12 @@
             const file = fileList[0];
 
             try {
-                const headBytes = await readBrowserFileHead(file, 4096);
+                if (file.size > MAX_IMPORT_FILE_BYTES) {
+                    showDropError(t('importTooLarge'));
+                    return;
+                }
+
+                const headBytes = await readFileHeadBytes(file, 4096);
 
                 const fileMeta = {
                     name: file.name || '',
@@ -2843,7 +2899,6 @@
         saveBtn.addEventListener('click', saveResult);
         formatBtn.addEventListener('click', formatInputText);
 
-        // 按钮事件监听
         clearInputBtn.addEventListener('click', clearInput);
         backfillBtn.addEventListener('click', backfillResult);
 
@@ -2939,6 +2994,21 @@
                 keySelectorSearch.value = '';
                 currentSearchKeyword = '';
                 renderCustomDropdown();
+            }
+        });
+
+        // 页面卸载时清理动态创建的元素与定时器
+        window.addEventListener('beforeunload', () => {
+            if (fileInput && fileInput.parentNode) {
+                fileInput.parentNode.removeChild(fileInput);
+            }
+            if (importFlashTimer) {
+                clearTimeout(importFlashTimer);
+                importFlashTimer = null;
+            }
+            if (dropErrorTimer) {
+                clearTimeout(dropErrorTimer);
+                dropErrorTimer = null;
             }
         });
 
