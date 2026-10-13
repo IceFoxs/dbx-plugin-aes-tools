@@ -24,8 +24,6 @@
   },
   "permissions": [
     "host.clipboard:read",
-    "host.events",
-    "host.filesystem",
     "host.workbench"
   ],
   "contributions": [
