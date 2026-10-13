@@ -279,7 +279,7 @@
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
-            overflow: hidden;   /* 修复：不再由 card-content 滚动 */
+            overflow: hidden;
         }
 
         /* 横向双栏布局 */
@@ -298,7 +298,7 @@
             gap: 0.85rem;
             min-width: 0;
             min-height: 0;
-            overflow-y: auto;   /* 修复：列内滚动，保证按钮不被裁掉 */
+            overflow-y: auto;
         }
 
         /* ========== 表单元素 ========== */
@@ -312,7 +312,6 @@
         .field.flex-grow {
             flex: 1 1 auto;
             min-height: 120px;
-            /* 修复：去掉 overflow: hidden，避免裁掉内部内容 */
         }
 
         .field-label {
@@ -425,7 +424,7 @@
         /* 文本域：占满剩余高度，但保证最小可见高度 */
         .textarea {
             flex: 1 1 auto;
-            min-height: 60px;   /* 修复：从 0 改为 60px，保证至少可见几行 */
+            min-height: 60px;
             resize: none;
             line-height: 1.6;
             font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -1040,6 +1039,11 @@
                 transform: translateY(0);
             }
         }
+
+        /* 隐藏的文件选择器（仅用于「导入」按钮触发） */
+        .hidden-file-input {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1164,6 +1168,15 @@
                                 <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.65rem;" data-i18n="batchInputHint">（每行一条）</span>
                             </label>
                             <div class="field-actions">
+                                <!-- 新增：导入文本文件按钮 -->
+                                <button type="button" id="importFileBtn" class="btn-import" title="从本地文本文件导入内容">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <span data-i18n="importFileBtn">导入</span>
+                                </button>
                                 <!-- 清空输入按钮 -->
                                 <button type="button" id="clearInputBtn" class="btn-tool" title="清空输入内容">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1309,6 +1322,7 @@
                 saveBtn: '保存',
                 backfillBtn: '回填',
                 clearBtn: '清空',
+                importFileBtn: '导入',
                 resultPlaceholder: '等待操作...',
                 noContent: '无内容',
                 copied: '已复制',
@@ -1362,6 +1376,7 @@
                 saveBtn: '儲存',
                 backfillBtn: '回填',
                 clearBtn: '清空',
+                importFileBtn: '匯入',
                 resultPlaceholder: '等待操作...',
                 noContent: '無內容',
                 copied: '已複製',
@@ -1415,6 +1430,7 @@
                 saveBtn: 'Save',
                 backfillBtn: 'Backfill',
                 clearBtn: 'Clear',
+                importFileBtn: 'Import',
                 resultPlaceholder: 'Waiting...',
                 noContent: 'Empty',
                 copied: 'Copied',
@@ -1468,6 +1484,7 @@
                 saveBtn: '保存',
                 backfillBtn: '再入力',
                 clearBtn: 'クリア',
+                importFileBtn: '取込',
                 resultPlaceholder: '待機中...',
                 noContent: '内容なし',
                 copied: 'コピーしました',
@@ -1521,6 +1538,7 @@
                 saveBtn: '저장',
                 backfillBtn: '되돌리기',
                 clearBtn: '지우기',
+                importFileBtn: '가져오기',
                 resultPlaceholder: '대기 중...',
                 noContent: '내용 없음',
                 copied: '복사됨',
@@ -1857,6 +1875,14 @@
         const dropOverlayText = document.getElementById('dropOverlayText');
         const appCard = document.getElementById('appCard');
 
+        // 新增：导入文件相关元素
+        const importFileBtn = document.getElementById('importFileBtn');
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt,.text,.log,.json,.xml,.yaml,.yml,.csv,.tsv,.ini,.conf,.cfg,.properties,.toml,.env,.md,.markdown,.sql,.html,.htm,.css,.scss,.less,.js,.mjs,.cjs,.ts,.jsx,.tsx,.vue,.svelte,.java,.py,.go,.rs,.rb,.php,.c,.cpp,.h,.hpp,.cs,.swift,.kt,.scala,.sh,.bat,.ps1';
+        fileInput.className = 'hidden-file-input';
+        document.body.appendChild(fileInput);
+
         let batchResults = [];
         let isBatchResult = false;
 
@@ -1911,7 +1937,6 @@
                     const actions = document.createElement('div');
                     actions.className = 'batch-item-actions';
 
-                    // 单个复制按钮
                     const itemCopyBtn = document.createElement('button');
                     itemCopyBtn.type = 'button';
                     itemCopyBtn.className = 'batch-item-copy';
@@ -1925,7 +1950,6 @@
                     `;
                     actions.appendChild(itemCopyBtn);
 
-                    // 单个回填按钮
                     const itemBackfillBtn = document.createElement('button');
                     itemBackfillBtn.type = 'button';
                     itemBackfillBtn.className = 'batch-item-backfill';
@@ -1984,7 +2008,6 @@
             }
         }
 
-        // 单个回填功能
         function backfillSingleItem(index, btnElement) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -2008,7 +2031,6 @@
         }
 
         resultBody.addEventListener('click', (e) => {
-            // 单个复制
             const copyBtn = e.target.closest('.batch-item-copy');
             if (copyBtn) {
                 const idx = parseInt(copyBtn.dataset.index, 10);
@@ -2018,7 +2040,6 @@
                 return;
             }
 
-            // 单个回填
             const backfillBtn = e.target.closest('.batch-item-backfill');
             if (backfillBtn) {
                 const idx = parseInt(backfillBtn.dataset.index, 10);
@@ -2246,6 +2267,74 @@
             backfillBtn.style.opacity = '0.7';
             setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
         }
+
+        // ============================================================
+        // 新增：导入文本文件到输入框
+        // ============================================================
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result || ''));
+                    reader.onerror = () => reject(reader.error);
+                    reader.readAsText(file, 'UTF-8');
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        function flashImportButton(message, duration = 1500) {
+            const span = importFileBtn.querySelector('span[data-i18n="importFileBtn"]');
+            if (!span) return;
+            const originalText = span.textContent;
+            span.textContent = message;
+            setTimeout(() => { span.textContent = originalText; }, duration);
+        }
+
+        async function handleImportFile(file) {
+            if (!file) return;
+
+            try {
+                // 先用扩展名/类型做一次快速判断
+                const fileMeta = {
+                    name: file.name || '',
+                    contentType: file.type || ''
+                };
+
+                if (!isImportableTextFile(fileMeta, null)) {
+                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
+                    showDropError(t('dropReject'));
+                    return;
+                }
+
+                const text = await readFileAsText(file);
+
+                if (!text || text.trim() === '') {
+                    showDropError(t('importEmpty'));
+                    return;
+                }
+
+                applyImportedText(text);
+                flashImportButton(t('importSuccess'));
+            } catch (err) {
+                console.error('[AES] Import file failed:', err);
+                showDropError(t('importFailed'));
+            }
+        }
+
+        importFileBtn.addEventListener('click', () => {
+            // 每次点击前清空 value，确保同一个文件可以重复选择
+            fileInput.value = '';
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            handleImportFile(files[0]);
+        });
 
         // ============================================================
         // 拖放导入 —— 自动适配环境
