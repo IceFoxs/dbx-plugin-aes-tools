@@ -684,6 +684,7 @@
             border-bottom: 1px solid var(--color-border);
             background-color: var(--color-card);
             flex-shrink: 0;
+            gap: 0.5rem;
         }
 
         .result-header-label {
@@ -700,6 +701,12 @@
         .result-header-label svg {
             width: 0.8rem;
             height: 0.8rem;
+        }
+
+        .result-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
         .result-body {
@@ -1014,14 +1021,25 @@
                                 </svg>
                                 <span id="resultCount"></span>
                             </span>
-                            <button id="copyBtn" class="btn btn-ghost btn-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                                <span data-i18n="copyBtn">复制</span>
-                            </button>
+                            <div class="result-header-actions">
+                                <button id="saveBtn" class="btn btn-ghost btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                        <polyline points="17 21 17 13 7 13 7 21"/>
+                                        <polyline points="7 3 7 8 15 8"/>
+                                    </svg>
+                                    <span data-i18n="saveBtn">保存</span>
+                                </button>
+                                <button id="copyBtn" class="btn btn-ghost btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                    <span data-i18n="copyBtn">复制</span>
+                                </button>
+                            </div>
                         </div>
                         <div id="resultBody" class="result-body placeholder" data-i18n="resultPlaceholder">
                             等待操作...
@@ -1051,10 +1069,15 @@
                 decryptBtn: '解密',
                 resultLabel: '输出结果',
                 copyBtn: '复制',
+                saveBtn: '保存',
                 resultPlaceholder: '等待操作...',
                 noContent: '无内容',
                 copied: '已复制',
                 copyFailed: '复制失败',
+                saved: '已保存',
+                saveFailed: '保存失败',
+                saveCancelled: '已取消保存',
+                saveUnsupported: '当前环境不支持保存',
                 inputEncryptContent: '请输入要加密的内容',
                 inputDecryptContent: '请输入要解密的密文',
                 encryptError: '加密出错：',
@@ -1085,10 +1108,15 @@
                 decryptBtn: '解密',
                 resultLabel: '輸出結果',
                 copyBtn: '複製',
+                saveBtn: '儲存',
                 resultPlaceholder: '等待操作...',
                 noContent: '無內容',
                 copied: '已複製',
                 copyFailed: '複製失敗',
+                saved: '已儲存',
+                saveFailed: '儲存失敗',
+                saveCancelled: '已取消儲存',
+                saveUnsupported: '目前環境不支援儲存',
                 inputEncryptContent: '請輸入要加密的內容',
                 inputDecryptContent: '請輸入要解密的密文',
                 encryptError: '加密出錯：',
@@ -1119,10 +1147,15 @@
                 decryptBtn: 'Decrypt',
                 resultLabel: 'Output',
                 copyBtn: 'Copy',
+                saveBtn: 'Save',
                 resultPlaceholder: 'Waiting...',
                 noContent: 'Empty',
                 copied: 'Copied',
                 copyFailed: 'Copy failed',
+                saved: 'Saved',
+                saveFailed: 'Save failed',
+                saveCancelled: 'Save cancelled',
+                saveUnsupported: 'Save not supported in this environment',
                 inputEncryptContent: 'Please enter content to encrypt',
                 inputDecryptContent: 'Please enter ciphertext to decrypt',
                 encryptError: 'Encryption error: ',
@@ -1153,10 +1186,15 @@
                 decryptBtn: '復号化',
                 resultLabel: '出力結果',
                 copyBtn: 'コピー',
+                saveBtn: '保存',
                 resultPlaceholder: '待機中...',
                 noContent: '内容なし',
                 copied: 'コピーしました',
                 copyFailed: 'コピー失敗',
+                saved: '保存しました',
+                saveFailed: '保存失敗',
+                saveCancelled: '保存をキャンセルしました',
+                saveUnsupported: 'この環境では保存できません',
                 inputEncryptContent: '暗号化する内容を入力してください',
                 inputDecryptContent: '復号化する暗号文を入力してください',
                 encryptError: '暗号化エラー：',
@@ -1187,10 +1225,15 @@
                 decryptBtn: '복호화',
                 resultLabel: '출력 결과',
                 copyBtn: '복사',
+                saveBtn: '저장',
                 resultPlaceholder: '대기 중...',
                 noContent: '내용 없음',
                 copied: '복사됨',
                 copyFailed: '복사 실패',
+                saved: '저장됨',
+                saveFailed: '저장 실패',
+                saveCancelled: '저장 취소됨',
+                saveUnsupported: '이 환경에서는 저장할 수 없습니다',
                 inputEncryptContent: '암호화할 내용을 입력하세요',
                 inputDecryptContent: '복호화할 암호문을 입력하세요',
                 encryptError: '암호화 오류: ',
@@ -1209,14 +1252,6 @@
         };
 
         const DEFAULT_LANG = 'zh';
-
-        const languageNames = {
-            zh: '中文',
-            'zh-TW': '繁體中文',
-            en: 'English',
-            ja: '日本語',
-            ko: '한국어'
-        };
 
         let currentLang = DEFAULT_LANG;
 
@@ -1409,6 +1444,7 @@
         const decryptBtn = document.getElementById('decryptBtn');
         const resultBody = document.getElementById('resultBody');
         const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
         const langSwitch = document.getElementById('langSwitch');
         const batchMode = document.getElementById('batchMode');
         const batchInputHint = document.getElementById('batchInputHint');
@@ -1457,7 +1493,6 @@
                 const div = document.createElement('div');
                 div.className = 'batch-item';
 
-                // 头部行：标签 + 单条复制按钮
                 const header = document.createElement('div');
                 header.className = 'batch-item-header';
 
@@ -1466,7 +1501,6 @@
                 label.textContent = t('batchItem', { index: idx + 1 });
                 header.appendChild(label);
 
-                // 单条复制按钮（失败的行不显示）
                 if (!item.error) {
                     const itemCopyBtn = document.createElement('button');
                     itemCopyBtn.type = 'button';
@@ -1496,7 +1530,6 @@
             });
         }
 
-        // ---------- 单条复制 ----------
         function copySingleItem(index, btnElement) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -1510,7 +1543,6 @@
                 document.execCommand('copy');
                 document.body.removeChild(ta);
 
-                // 按钮状态反馈
                 const span = btnElement.querySelector('span');
                 if (span) {
                     const originalText = span.textContent;
@@ -1526,7 +1558,6 @@
             }
         }
 
-        // 使用事件委托绑定批量复制按钮
         resultBody.addEventListener('click', (e) => {
             const btn = e.target.closest('.batch-item-copy');
             if (!btn) return;
@@ -1717,9 +1748,139 @@
             }, 1500);
         }
 
+        // ============================================================
+        // 保存到文件 —— 多层降级方案
+        // 路径 A：桌面端 fileTransfer.beginSave（原生保存对话框）
+        // 路径 B：Web 端 Blob + <a download>（浏览器下载）
+        // 路径 C：全部失败时轻提示
+        // ============================================================
+        async function saveResult() {
+            const btnSpan = saveBtn.querySelector('span[data-i18n="saveBtn"]');
+            const originalText = btnSpan ? btnSpan.textContent : '';
+
+            // 1. 收集要保存的文本
+            let text = '';
+            if (isBatchResult && batchResults.length > 0) {
+                text = batchResults.map((item, idx) => {
+                    if (item.error) {
+                        return `#${idx + 1} ERROR: ${item.error}`;
+                    }
+                    return item.output;
+                }).join('\n');
+            } else {
+                text = resultBody.textContent;
+            }
+
+            // 2. 空内容 / placeholder 状态时轻提示
+            if (!text || resultBody.classList.contains('placeholder')) {
+                if (btnSpan) {
+                    btnSpan.textContent = t('noContent');
+                    setTimeout(() => { btnSpan.textContent = originalText; }, 1200);
+                }
+                return;
+            }
+
+            // 3. 生成默认文件名
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+            const defaultName = `aes-result-${ts}.txt`;
+
+            // ============================================================
+            // 路径 A：桌面端 —— fileTransfer.beginSave 原生保存对话框
+            // ============================================================
+            const ft = window.dbxPlugin?.fileTransfer;
+            const canUseNativeSave = ft && typeof ft.beginSave === 'function';
+
+            if (canUseNativeSave) {
+                let handleId = null;
+                try {
+                    const handle = await ft.beginSave({
+                        name: defaultName,
+                        contentType: 'text/plain'
+                    });
+
+                    // 用户取消
+                    if (!handle || !handle.handleId) {
+                        return;
+                    }
+                    handleId = handle.handleId;
+                    const chunkBytes = handle.chunkBytes || 1024 * 1024;
+
+                    const encoder = new TextEncoder();
+                    const bytes = encoder.encode(text);
+                    let offset = 0;
+
+                    while (offset < bytes.length) {
+                        const end = Math.min(offset + chunkBytes, bytes.length);
+                        const slice = bytes.subarray(offset, end);
+
+                        let binary = '';
+                        for (let i = 0; i < slice.length; i++) {
+                            binary += String.fromCharCode(slice[i]);
+                        }
+                        const dataBase64 = btoa(binary);
+
+                        await ft.write(handleId, offset, dataBase64);
+                        offset = end;
+                    }
+
+                    await ft.finish(handleId);
+                    handleId = null;
+
+                    if (btnSpan) {
+                        btnSpan.textContent = t('saved');
+                        setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
+                    }
+                    return;
+                } catch (err) {
+                    console.error('Native save failed, falling back to browser download:', err);
+                    if (handleId && ft && typeof ft.cancel === 'function') {
+                        try { await ft.cancel(handleId); } catch (_) {}
+                    }
+                    // 继续走路径 B
+                }
+            }
+
+            // ============================================================
+            // 路径 B：Web 端降级 —— Blob + <a download>
+            // ============================================================
+            try {
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = defaultName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                if (btnSpan) {
+                    btnSpan.textContent = t('saved');
+                    setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
+                }
+                return;
+            } catch (err) {
+                console.error('Browser download failed:', err);
+            }
+
+            // ============================================================
+            // 路径 C：最终兜底
+            // ============================================================
+            if (btnSpan) {
+                btnSpan.textContent = t('saveUnsupported');
+                setTimeout(() => { btnSpan.textContent = originalText; }, 2000);
+            }
+        }
+
         encryptBtn.addEventListener('click', encrypt);
         decryptBtn.addEventListener('click', decrypt);
         copyBtn.addEventListener('click', copyResult);
+        saveBtn.addEventListener('click', saveResult);
 
         resetKeyBtn.addEventListener('click', () => {
             aesKey();
