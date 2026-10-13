@@ -782,6 +782,47 @@
             height: 0.75rem;
         }
 
+        /* 新增：工具按钮样式（清空、回填） */
+        .btn-tool {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.65rem;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+            color: var(--color-muted-foreground);
+            background-color: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            flex-shrink: 0;
+        }
+
+        .btn-tool:hover {
+            background-color: var(--color-muted);
+            color: var(--color-foreground);
+        }
+
+        .btn-tool:active {
+            transform: scale(0.97);
+        }
+
+        .btn-tool:focus-visible {
+            outline: 2px solid var(--color-ring);
+            outline-offset: 1px;
+        }
+
+        .btn-tool svg {
+            width: 0.7rem;
+            height: 0.7rem;
+            flex-shrink: 0;
+        }
+
         /* ========== 结果区域 ========== */
         .result-container {
             flex: 1 1 auto;
@@ -825,6 +866,7 @@
             display: flex;
             align-items: center;
             gap: 0.25rem;
+            flex-wrap: wrap;
         }
 
         .result-body {
@@ -854,17 +896,14 @@
         .result-body::-webkit-scrollbar {
             width: 8px;
         }
-
         .result-body::-webkit-scrollbar-track {
             background: transparent;
         }
-
         .result-body::-webkit-scrollbar-thumb {
             background-color: var(--color-border);
             border-radius: 8px;
             border: 2px solid var(--color-muted);
         }
-
         .result-body::-webkit-scrollbar-thumb:hover {
             background-color: var(--color-muted-foreground);
         }
@@ -1112,6 +1151,16 @@
                                 <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.65rem;" data-i18n="batchInputHint">（每行一条）</span>
                             </label>
                             <div class="field-actions">
+                                <!-- 新增：清空输入按钮 -->
+                                <button type="button" id="clearInputBtn" class="btn-tool" title="清空输入内容">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        <line x1="10" y1="11" x2="10" y2="17"/>
+                                        <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                    <span data-i18n="clearBtn">清空</span>
+                                </button>
                                 <button type="button" id="formatBtn" class="btn-import" title="格式化 JSON / XML">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1178,6 +1227,14 @@
                                     <span id="resultCount"></span>
                                 </span>
                                 <div class="result-header-actions">
+                                    <!-- 新增：结果回填至输入按钮 -->
+                                    <button id="backfillBtn" class="btn btn-ghost btn-sm" title="将结果回填到输入框">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 14 4 9 9 4"/>
+                                            <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                                        </svg>
+                                        <span data-i18n="backfillBtn">回填</span>
+                                    </button>
                                     <button id="saveBtn" class="btn btn-ghost btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1237,6 +1294,8 @@
                 resultLabel: '输出结果',
                 copyBtn: '复制',
                 saveBtn: '保存',
+                backfillBtn: '回填',
+                clearBtn: '清空',
                 resultPlaceholder: '等待操作...',
                 noContent: '无内容',
                 copied: '已复制',
@@ -1257,7 +1316,8 @@
                 copyItem: '复制',
                 copiedItem: '已复制',
                 searchPlaceholder: '搜索...',
-                noResults: '无匹配结果'
+                noResults: '无匹配结果',
+                cleared: '已清空'
             },
             'zh-TW': {
                 title: 'AES 加解密',
@@ -1285,6 +1345,8 @@
                 resultLabel: '輸出結果',
                 copyBtn: '複製',
                 saveBtn: '儲存',
+                backfillBtn: '回填',
+                clearBtn: '清空',
                 resultPlaceholder: '等待操作...',
                 noContent: '無內容',
                 copied: '已複製',
@@ -1305,7 +1367,8 @@
                 copyItem: '複製',
                 copiedItem: '已複製',
                 searchPlaceholder: '搜尋...',
-                noResults: '無匹配結果'
+                noResults: '無匹配結果',
+                cleared: '已清空'
             },
             en: {
                 title: 'AES Encryption',
@@ -1333,6 +1396,8 @@
                 resultLabel: 'Output',
                 copyBtn: 'Copy',
                 saveBtn: 'Save',
+                backfillBtn: 'Backfill',
+                clearBtn: 'Clear',
                 resultPlaceholder: 'Waiting...',
                 noContent: 'Empty',
                 copied: 'Copied',
@@ -1353,7 +1418,8 @@
                 copyItem: 'Copy',
                 copiedItem: 'Copied',
                 searchPlaceholder: 'Search...',
-                noResults: 'No results'
+                noResults: 'No results',
+                cleared: 'Cleared'
             },
             ja: {
                 title: 'AES 暗号化',
@@ -1381,6 +1447,8 @@
                 resultLabel: '出力結果',
                 copyBtn: 'コピー',
                 saveBtn: '保存',
+                backfillBtn: '再入力',
+                clearBtn: 'クリア',
                 resultPlaceholder: '待機中...',
                 noContent: '内容なし',
                 copied: 'コピーしました',
@@ -1401,7 +1469,8 @@
                 copyItem: 'コピー',
                 copiedItem: 'コピーしました',
                 searchPlaceholder: '検索...',
-                noResults: '一致なし'
+                noResults: '一致なし',
+                cleared: 'クリアしました'
             },
             ko: {
                 title: 'AES 암호화/복호화',
@@ -1429,6 +1498,8 @@
                 resultLabel: '출력 결과',
                 copyBtn: '복사',
                 saveBtn: '저장',
+                backfillBtn: '되돌리기',
+                clearBtn: '지우기',
                 resultPlaceholder: '대기 중...',
                 noContent: '내용 없음',
                 copied: '복사됨',
@@ -1449,7 +1520,8 @@
                 copyItem: '복사',
                 copiedItem: '복사됨',
                 searchPlaceholder: '검색...',
-                noResults: '결과 없음'
+                noResults: '결과 없음',
+                cleared: '지워짐'
             }
         };
 
@@ -1748,6 +1820,8 @@
         const resultBody = document.getElementById('resultBody');
         const copyBtn = document.getElementById('copyBtn');
         const saveBtn = document.getElementById('saveBtn');
+        const backfillBtn = document.getElementById('backfillBtn');
+        const clearInputBtn = document.getElementById('clearInputBtn');
         const formatBtn = document.getElementById('formatBtn');
         const langSwitch = document.getElementById('langSwitch');
         const batchMode = document.getElementById('batchMode');
@@ -2055,6 +2129,46 @@
             setTimeout(() => {
                 copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
             }, 1500);
+        }
+
+        // ============================================================
+        // 新增功能：清空输入 / 回填结果
+        // ============================================================
+        function clearInput() {
+            inputText.value = '';
+            try {
+                inputText.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (e) {}
+            // 简单视觉反馈（可选）
+            clearInputBtn.style.opacity = '0.7';
+            setTimeout(() => { clearInputBtn.style.opacity = ''; }, 200);
+        }
+
+        function backfillResult() {
+            let text = '';
+            if (isBatchResult && batchResults.length > 0) {
+                text = batchResults.map((item, idx) => {
+                    if (item.error) {
+                        return `#${idx + 1} ERROR: ${item.error}`;
+                    }
+                    return item.output;
+                }).join('\n');
+            } else {
+                if (resultBody.classList.contains('placeholder')) {
+                    // 无结果时给予轻微提示
+                    backfillBtn.style.opacity = '0.5';
+                    setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
+                    return;
+                }
+                text = resultBody.textContent;
+            }
+            inputText.value = text;
+            try {
+                inputText.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (e) {}
+            // 视觉反馈
+            backfillBtn.style.opacity = '0.7';
+            setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
         }
 
         // ============================================================
@@ -2563,6 +2677,10 @@
         copyBtn.addEventListener('click', copyResult);
         saveBtn.addEventListener('click', saveResult);
         formatBtn.addEventListener('click', formatInputText);
+
+        // 新增按钮事件监听
+        clearInputBtn.addEventListener('click', clearInput);
+        backfillBtn.addEventListener('click', backfillResult);
 
         resetKeyBtn.addEventListener('click', () => {
             aesKey();
