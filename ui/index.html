@@ -11,7 +11,6 @@
            - 用 prefers-color-scheme 作为 fallback，保证暗色模式正确
         ============================================================ */
 
-        /* ---------- 亮色模式 fallback ---------- */
         :root {
             --color-background: #fafafa;
             --color-foreground: #09090b;
@@ -29,7 +28,6 @@
             --color-placeholder: #a1a1aa;
         }
 
-        /* ---------- 暗色模式 fallback（当宿主未注入变量时生效） ---------- */
         @media (prefers-color-scheme: dark) {
             :root {
                 --color-background: #09090b;
@@ -68,7 +66,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ========== 卡片容器 ========== */
         .card {
             width: 100%;
             max-width: 900px;
@@ -77,13 +74,47 @@
             border-radius: 12px;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
             transition: box-shadow 0.2s ease;
+            position: relative;
         }
 
         .card:hover {
             box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
         }
 
-        /* 卡片头部 */
+        /* 拖放遮罩 */
+        .drop-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(24, 24, 27, 0.8);
+            border: 2px dashed var(--color-primary);
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .drop-overlay.active {
+            display: flex;
+        }
+
+        .drop-overlay svg {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        /* 拖放错误遮罩（红色） */
+        .drop-overlay.error {
+            background: rgba(180, 35, 24, 0.85);
+            border-color: #fca5a5;
+        }
+
         .card-header {
             padding: 1.5rem 1.75rem 1.25rem;
             border-bottom: 1px solid var(--color-border);
@@ -123,7 +154,6 @@
             line-height: 1.5;
         }
 
-        /* 头部右侧：批量开关 + 语言切换 */
         .card-header-right {
             display: flex;
             align-items: center;
@@ -131,7 +161,6 @@
             flex-shrink: 0;
         }
 
-        /* 批量模式开关 */
         .batch-toggle {
             display: flex;
             align-items: center;
@@ -192,7 +221,6 @@
             white-space: nowrap;
         }
 
-        /* 语言切换器 */
         .lang-switch {
             display: flex;
             gap: 4px;
@@ -229,7 +257,6 @@
             font-weight: 600;
         }
 
-        /* 卡片内容 */
         .card-content {
             padding: 1.75rem;
             display: flex;
@@ -237,7 +264,6 @@
             gap: 1.25rem;
         }
 
-        /* ========== 横向布局核心 ========== */
         .horizontal-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -252,7 +278,6 @@
             min-width: 0;
         }
 
-        /* ========== 表单元素 ========== */
         .field {
             display: flex;
             flex-direction: column;
@@ -276,7 +301,6 @@
             flex-shrink: 0;
         }
 
-        /* 字段标签行（label 左 + 操作按钮右） */
         .field-label-row {
             display: flex;
             align-items: center;
@@ -289,7 +313,13 @@
             min-width: 0;
         }
 
-        /* 输入内容顶部的小按钮（导入 TXT） */
+        .field-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-shrink: 0;
+        }
+
         .btn-import {
             display: inline-flex;
             align-items: center;
@@ -330,7 +360,6 @@
             flex-shrink: 0;
         }
 
-        /* 输入框 & 文本域 */
         .input,
         .textarea {
             width: 100%;
@@ -371,7 +400,6 @@
             font-size: 0.8rem;
         }
 
-        /* 密钥输入行（输入框 + 重置按钮） */
         .key-input-row {
             display: flex;
             gap: 0.5rem;
@@ -383,7 +411,6 @@
             min-width: 0;
         }
 
-        /* 重置按钮 */
         .btn-reset-key {
             display: inline-flex;
             align-items: center;
@@ -424,7 +451,6 @@
             flex-shrink: 0;
         }
 
-        /* ========== 自定义 Select（shadcn 风格，支持搜索过滤） ========== */
         .select-wrapper {
             position: relative;
             width: 100%;
@@ -627,7 +653,6 @@
             color: var(--color-placeholder);
         }
 
-        /* ========== 按钮组 ========== */
         .button-row {
             display: flex;
             gap: 0.6rem;
@@ -718,7 +743,6 @@
             height: 0.75rem;
         }
 
-        /* ========== 结果区域 ========== */
         .result-container {
             border: 1px solid var(--color-border);
             border-radius: 8px;
@@ -806,7 +830,6 @@
             background-color: var(--color-muted-foreground);
         }
 
-        /* 批量结果项 */
         .batch-item {
             padding: 0.5rem 0;
             border-bottom: 1px solid var(--color-border);
@@ -921,8 +944,16 @@
     </style>
 </head>
 <body>
-<div class="card">
-    <!-- 头部 -->
+<div class="card" id="appCard">
+    <div class="drop-overlay" id="dropOverlay">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span id="dropOverlayText" data-i18n="dropHint">松开鼠标即可导入文件</span>
+    </div>
+
     <div class="card-header">
         <div class="card-header-left">
             <div class="card-title">
@@ -949,7 +980,6 @@
         </div>
     </div>
 
-    <!-- 内容 -->
     <div class="card-content">
         <div class="horizontal-layout">
             <div class="horizontal-column">
@@ -1031,19 +1061,29 @@
                             <span data-i18n="inputLabel">输入内容</span>
                             <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.7rem;" data-i18n="batchInputHint">（每行一条）</span>
                         </label>
-                        <button type="button" id="importBtn" class="btn-import" title="导入TXT文件">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                            <span data-i18n="importBtn">导入</span>
-                        </button>
+                        <div class="field-actions">
+                            <button type="button" id="formatBtn" class="btn-import" title="格式化 JSON / XML">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"/>
+                                    <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                                <span data-i18n="formatBtn">格式化</span>
+                            </button>
+                        </div>
                     </div>
                     <textarea id="inputText" class="textarea"
                               placeholder="输入要加密的文本，或粘贴要解密的密文..."
                               data-i18n-placeholder="inputPlaceholder">Hello AES 世界</textarea>
+                    <div class="field-hint">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span data-i18n="dragImportHint">仅支持文本类文件（TXT / XML / JSON / 日志 / 配置等）</span>
+                    </div>
                 </div>
 
                 <div class="button-row">
@@ -1130,11 +1170,16 @@
                 resetKeyBtn: '重置',
                 inputLabel: '输入内容',
                 inputPlaceholder: '输入要加密的文本，或粘贴要解密的密文...',
-                importBtn: '导入',
+                dragImportHint: '仅支持文本类文件（TXT / XML / JSON / 日志 / 配置等）',
                 importSuccess: '已导入',
                 importFailed: '导入失败',
-                importCancelled: '已取消导入',
                 importEmpty: '文件内容为空',
+                importNotText: '不支持该文件类型',
+                importNotTextDetail: '仅支持文本类文件',
+                dropHint: '松开鼠标即可导入文件',
+                dropReject: '不支持该文件类型',
+                formatBtn: '格式化',
+                formatEmpty: '内容为空',
                 encryptBtn: '加密',
                 decryptBtn: '解密',
                 resultLabel: '输出结果',
@@ -1146,7 +1191,6 @@
                 copyFailed: '复制失败',
                 saved: '已保存',
                 saveFailed: '保存失败',
-                saveCancelled: '已取消保存',
                 saveUnsupported: '当前环境不支持保存',
                 inputEncryptContent: '请输入要加密的内容',
                 inputDecryptContent: '请输入要解密的密文',
@@ -1174,11 +1218,16 @@
                 resetKeyBtn: '重置',
                 inputLabel: '輸入內容',
                 inputPlaceholder: '輸入要加密的文字，或貼上要解密的密文...',
-                importBtn: '匯入',
+                dragImportHint: '僅支援文字類檔案（TXT / XML / JSON / 日誌 / 設定等）',
                 importSuccess: '已匯入',
                 importFailed: '匯入失敗',
-                importCancelled: '已取消匯入',
                 importEmpty: '檔案內容為空',
+                importNotText: '不支援該檔案類型',
+                importNotTextDetail: '僅支援文字類檔案',
+                dropHint: '放開滑鼠即可匯入檔案',
+                dropReject: '不支援該檔案類型',
+                formatBtn: '格式化',
+                formatEmpty: '內容為空',
                 encryptBtn: '加密',
                 decryptBtn: '解密',
                 resultLabel: '輸出結果',
@@ -1190,7 +1239,6 @@
                 copyFailed: '複製失敗',
                 saved: '已儲存',
                 saveFailed: '儲存失敗',
-                saveCancelled: '已取消儲存',
                 saveUnsupported: '目前環境不支援儲存',
                 inputEncryptContent: '請輸入要加密的內容',
                 inputDecryptContent: '請輸入要解密的密文',
@@ -1218,11 +1266,16 @@
                 resetKeyBtn: 'Reset',
                 inputLabel: 'Input',
                 inputPlaceholder: 'Enter text to encrypt, or paste ciphertext to decrypt...',
-                importBtn: 'Import',
+                dragImportHint: 'Only text files supported (TXT / XML / JSON / log / config)',
                 importSuccess: 'Imported',
                 importFailed: 'Import failed',
-                importCancelled: 'Import cancelled',
                 importEmpty: 'File is empty',
+                importNotText: 'File type not supported',
+                importNotTextDetail: 'Only text files are supported',
+                dropHint: 'Drop to import the file',
+                dropReject: 'File type not supported',
+                formatBtn: 'Format',
+                formatEmpty: 'Content is empty',
                 encryptBtn: 'Encrypt',
                 decryptBtn: 'Decrypt',
                 resultLabel: 'Output',
@@ -1234,7 +1287,6 @@
                 copyFailed: 'Copy failed',
                 saved: 'Saved',
                 saveFailed: 'Save failed',
-                saveCancelled: 'Save cancelled',
                 saveUnsupported: 'Save not supported in this environment',
                 inputEncryptContent: 'Please enter content to encrypt',
                 inputDecryptContent: 'Please enter ciphertext to decrypt',
@@ -1262,11 +1314,16 @@
                 resetKeyBtn: 'リセット',
                 inputLabel: '入力内容',
                 inputPlaceholder: '暗号化するテキスト、または復号化する暗号文を入力...',
-                importBtn: '取込',
+                dragImportHint: 'テキストファイルのみ対応（TXT / XML / JSON / ログ / 設定など）',
                 importSuccess: '取込完了',
                 importFailed: '取込失敗',
-                importCancelled: '取込をキャンセルしました',
                 importEmpty: 'ファイルが空です',
+                importNotText: 'このファイル形式には対応していません',
+                importNotTextDetail: 'テキストファイルのみ対応',
+                dropHint: 'ドロップしてファイルを取込',
+                dropReject: 'このファイル形式には対応していません',
+                formatBtn: '整形',
+                formatEmpty: '内容が空です',
                 encryptBtn: '暗号化',
                 decryptBtn: '復号化',
                 resultLabel: '出力結果',
@@ -1278,7 +1335,6 @@
                 copyFailed: 'コピー失敗',
                 saved: '保存しました',
                 saveFailed: '保存失敗',
-                saveCancelled: '保存をキャンセルしました',
                 saveUnsupported: 'この環境では保存できません',
                 inputEncryptContent: '暗号化する内容を入力してください',
                 inputDecryptContent: '復号化する暗号文を入力してください',
@@ -1306,11 +1362,16 @@
                 resetKeyBtn: '재설정',
                 inputLabel: '입력 내용',
                 inputPlaceholder: '암호화할 텍스트를 입력하거나 복호화할 암호문을 붙여넣으세요...',
-                importBtn: '가져오기',
+                dragImportHint: '텍스트 파일만 지원 (TXT / XML / JSON / 로그 / 설정 등)',
                 importSuccess: '가져왔습니다',
                 importFailed: '가져오기 실패',
-                importCancelled: '가져오기 취소됨',
                 importEmpty: '파일이 비어 있습니다',
+                importNotText: '지원하지 않는 파일 형식입니다',
+                importNotTextDetail: '텍스트 파일만 지원합니다',
+                dropHint: '놓으면 파일을 가져옵니다',
+                dropReject: '지원하지 않는 파일 형식입니다',
+                formatBtn: '정렬',
+                formatEmpty: '내용이 비어 있습니다',
                 encryptBtn: '암호화',
                 decryptBtn: '복호화',
                 resultLabel: '출력 결과',
@@ -1322,7 +1383,6 @@
                 copyFailed: '복사 실패',
                 saved: '저장됨',
                 saveFailed: '저장 실패',
-                saveCancelled: '저장 취소됨',
                 saveUnsupported: '이 환경에서는 저장할 수 없습니다',
                 inputEncryptContent: '암호화할 내용을 입력하세요',
                 inputDecryptContent: '복호화할 암호문을 입력하세요',
@@ -1343,8 +1403,133 @@
 
         const DEFAULT_LANG = 'zh';
 
-        let currentLang = DEFAULT_LANG;
+        // ---------- 支持的文本文件扩展名白名单 ----------
+        const TEXT_FILE_EXTENSIONS = [
+            // 纯文本
+            '.txt', '.text', '.log',
+            // 数据格式
+            '.json', '.xml', '.yaml', '.yml', '.csv', '.tsv',
+            // 配置文件
+            '.ini', '.conf', '.cfg', '.properties', '.toml', '.env',
+            // 代码/脚本
+            '.md', '.markdown', '.sql', '.html', '.htm', '.css', '.scss', '.less',
+            '.js', '.mjs', '.cjs', '.ts', '.jsx', '.tsx', '.vue', '.svelte',
+            '.java', '.py', '.go', '.rs', '.rb', '.php', '.c', '.cpp', '.h', '.hpp',
+            '.cs', '.swift', '.kt', '.scala', '.sh', '.bat', '.ps1',
+            // 其他文本
+            '.gitignore', '.editorconfig', '.prettierrc', '.eslintrc'
+        ];
 
+        // ---------- 根据文件名判断是否文本文件 ----------
+        function isTextFileByName(fileName) {
+            if (!fileName) return false;
+            const lower = fileName.toLowerCase();
+
+            // 检查扩展名
+            for (const ext of TEXT_FILE_EXTENSIONS) {
+                if (lower.endsWith(ext)) return true;
+            }
+
+            // 无扩展名文件：视为文本（如 LICENSE、README 等）
+            const lastDot = lower.lastIndexOf('.');
+            const lastSlash = Math.max(lower.lastIndexOf('/'), lower.lastIndexOf('\\'));
+            if (lastDot <= lastSlash) return true;
+
+            return false;
+        }
+
+        // ---------- 根据 MIME 类型判断是否文本文件 ----------
+        function isTextContentType(contentType) {
+            if (!contentType) return false;
+            const lower = contentType.toLowerCase();
+
+            // text/* 全部接受
+            if (lower.startsWith('text/')) return true;
+
+            // application/* 中常见的文本子类型
+            const textAppTypes = [
+                'application/json',
+                'application/xml',
+                'application/javascript',
+                'application/x-javascript',
+                'application/typescript',
+                'application/x-yaml',
+                'application/yaml',
+                'application/x-sh',
+                'application/sql',
+                'application/x-httpd-php',
+                'application/xhtml+xml',
+                'application/ld+json'
+            ];
+            for (const t of textAppTypes) {
+                if (lower.startsWith(t)) return true;
+            }
+
+            return false;
+        }
+
+        // ---------- 根据内容检测是否为文本 ----------
+        // 检查前面若干字节中是否有明显的二进制特征（NUL 字节）
+        function isTextContentByBytes(bytes) {
+            if (!bytes || bytes.length === 0) return true;
+
+            // 只检查前 4096 字节
+            const checkLen = Math.min(bytes.length, 4096);
+            let nullCount = 0;
+
+            for (let i = 0; i < checkLen; i++) {
+                if (bytes[i] === 0) nullCount++;
+            }
+
+            // 出现 NUL 字节说明很可能是二进制文件
+            // 阈值：4096 字节中 NUL 超过 1% 判定为非文本
+            const nullRatio = nullCount / checkLen;
+            if (nullRatio > 0.01) return false;
+
+            return true;
+        }
+
+        // ---------- 综合判断文件是否为可导入的文本文件 ----------
+        function isImportableTextFile(fileMeta, sampleBytes) {
+            const fileName = fileMeta.name || '';
+            const contentType = fileMeta.contentType || '';
+
+            // 1. 按扩展名判断
+            if (fileName && isTextFileByName(fileName)) {
+                // 扩展名是文本类，但还需内容检查防止伪装
+                if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
+                    return false;
+                }
+                return true;
+            }
+
+            // 2. 按 MIME 类型判断
+            if (contentType && isTextContentType(contentType)) {
+                if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
+                    return false;
+                }
+                return true;
+            }
+
+            // 3. 无文件名、无 MIME 信息时，仅凭内容判断
+            if (!fileName && !contentType) {
+                return sampleBytes ? isTextContentByBytes(sampleBytes) : false;
+            }
+
+            // 4. 有文件名但不是文本扩展名 → 拒绝
+            if (fileName && !isTextFileByName(fileName)) {
+                return false;
+            }
+
+            // 5. 有 MIME 但不是文本 MIME → 拒绝
+            if (contentType && !isTextContentType(contentType)) {
+                return false;
+            }
+
+            return false;
+        }
+
+        let currentLang = DEFAULT_LANG;
         let keyOptions = [];
         let currentSearchKeyword = '';
 
@@ -1535,7 +1720,7 @@
         const resultBody = document.getElementById('resultBody');
         const copyBtn = document.getElementById('copyBtn');
         const saveBtn = document.getElementById('saveBtn');
-        const importBtn = document.getElementById('importBtn');
+        const formatBtn = document.getElementById('formatBtn');
         const langSwitch = document.getElementById('langSwitch');
         const batchMode = document.getElementById('batchMode');
         const batchInputHint = document.getElementById('batchInputHint');
@@ -1543,9 +1728,14 @@
         const keySelector = document.getElementById('keySelector');
         const resetKeyBtn = document.getElementById('resetKeyBtn');
         const keySelectorSearch = document.getElementById('keySelectorSearch');
+        const dropOverlay = document.getElementById('dropOverlay');
+        const dropOverlayText = document.getElementById('dropOverlayText');
 
         let batchResults = [];
         let isBatchResult = false;
+
+        // 拖放错误提示的清除定时器
+        let dropErrorTimer = null;
 
         function setResult(text, isPlaceholder = false) {
             resultBody.textContent = text;
@@ -1840,304 +2030,401 @@
         }
 
         // ============================================================
-        // 导入 TXT 文件 —— 多层降级方案
-        // 路径 A：桌面端 fileTransfer.pick + read（原生文件对话框）
-        // 路径 B：Web 端 <input type="file">（浏览器文件选择器）
-        // 路径 C：全部失败时轻提示
+        // 文件拖放导入 —— 增加文本格式校验
+        // 官方规定能力位：pick、beginSave、read、drop、folderExpansion
         // ============================================================
-        function importFile() {
-            const btnSpan = importBtn.querySelector('span[data-i18n="importBtn"]');
-            const originalText = btnSpan ? btnSpan.textContent : '';
 
-            // ============================================================
-            // 路径 A：桌面端 —— fileTransfer.pick + read
-            // ============================================================
-            const ft = window.dbxPlugin?.fileTransfer;
-            const canUseNativePick = ft && typeof ft.pick === 'function' && typeof ft.read === 'function';
+        function getFT() {
+            return (window.dbxPlugin && window.dbxPlugin.fileTransfer) || null;
+        }
 
-            if (canUseNativePick) {
-                (async () => {
-                    let handleId = null;
-                    try {
-                        const handles = await ft.pick({ multiple: false });
-                        const handle = Array.isArray(handles) ? handles[0] : handles;
-                        if (!handle || !handle.handleId) {
-                            // 用户取消，不提示
-                            return;
-                        }
-                        handleId = handle.handleId;
-                        const size = handle.size || 0;
+        function getFTCaps() {
+            const caps = (window.dbxPlugin && window.dbxPlugin.capabilities) || {};
+            return caps.fileTransfer || {};
+        }
 
-                        // 分块读取并拼接
-                        const parts = [];
-                        let offset = 0;
-                        const chunkSize = 64 * 1024; // 64KB
-                        let eof = false;
+        function canDrop() {
+            const ft = getFT();
+            if (!ft) return false;
+            if (typeof ft.onDrop !== 'function') return false;
+            const caps = getFTCaps();
+            if (caps.drop === false) return false;
+            return true;
+        }
 
-                        while (!eof) {
-                            const chunk = await ft.read(handleId, offset, chunkSize);
-                            if (!chunk) break;
+        function canSaveFT() {
+            const ft = getFT();
+            if (!ft) return false;
+            if (typeof ft.beginSave !== 'function') return false;
+            const caps = getFTCaps();
+            if (caps.beginSave === false) return false;
+            return true;
+        }
 
-                            const dataBase64 = chunk.dataBase64 || '';
-                            if (dataBase64) {
-                                const binary = atob(dataBase64);
-                                const bytes = new Uint8Array(binary.length);
-                                for (let i = 0; i < binary.length; i++) {
-                                    bytes[i] = binary.charCodeAt(i);
-                                }
-                                parts.push(bytes);
-                                offset += bytes.length;
-                            }
+        function decodeChunks(parts) {
+            if (!parts.length) return '';
+            const totalLength = parts.reduce((acc, p) => acc + p.length, 0);
+            const merged = new Uint8Array(totalLength);
+            let pos = 0;
+            for (const p of parts) {
+                merged.set(p, pos);
+                pos += p.length;
+            }
+            try {
+                return new TextDecoder('utf-8', { fatal: false }).decode(merged);
+            } catch (e) {
+                return new TextDecoder('utf-8').decode(merged);
+            }
+        }
 
-                            eof = chunk.eof === true;
-                            if (bytesLengthGuard(parts, size)) break;
-                        }
+        // 读取句柄的**前 N 字节**用于格式检测（避免读整个大文件）
+        async function readHeadBytes(handleId, maxBytes) {
+            const ft = getFT();
+            if (!ft || typeof ft.read !== 'function') return null;
 
-                        // 合并所有分块
-                        const totalLength = parts.reduce((acc, p) => acc + p.length, 0);
-                        const merged = new Uint8Array(totalLength);
-                        let pos = 0;
-                        for (const p of parts) {
-                            merged.set(p, pos);
-                            pos += p.length;
-                        }
+            try {
+                const chunk = await ft.read(handleId, 0, maxBytes);
+                if (!chunk || !chunk.dataBase64) return null;
 
-                        // 尝试 UTF-8 解码
-                        let text = '';
-                        try {
-                            text = new TextDecoder('utf-8', { fatal: false }).decode(merged);
-                        } catch (e) {
-                            text = new TextDecoder('utf-8').decode(merged);
-                        }
+                const binary = atob(chunk.dataBase64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes;
+            } catch (e) {
+                return null;
+            }
+        }
 
-                        if (!text || text.trim() === '') {
-                            if (btnSpan) {
-                                btnSpan.textContent = t('importEmpty');
-                                setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                            }
-                            return;
-                        }
+        // 读取完整内容
+        async function readHandleToString(handleId) {
+            const ft = getFT();
+            if (!ft || typeof ft.read !== 'function') return '';
 
-                        inputText.value = text;
-                        if (btnSpan) {
-                            btnSpan.textContent = t('importSuccess');
-                            setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                        }
-                        return;
-                    } catch (err) {
-                        console.error('Native import failed, falling back to browser file picker:', err);
-                        if (handleId && ft && typeof ft.cancel === 'function') {
-                            try { await ft.cancel(handleId); } catch (_) {}
-                        }
-                        // 继续走路径 B
-                        fallbackBrowserImport(btnSpan, originalText);
+            const parts = [];
+            let offset = 0;
+            const chunkSize = 64 * 1024;
+            const MAX_BYTES = 50 * 1024 * 1024;
+            let eof = false;
+
+            while (!eof) {
+                const chunk = await ft.read(handleId, offset, chunkSize);
+                if (!chunk) break;
+
+                const dataBase64 = chunk.dataBase64 || '';
+                if (dataBase64) {
+                    const binary = atob(dataBase64);
+                    const bytes = new Uint8Array(binary.length);
+                    for (let i = 0; i < binary.length; i++) {
+                        bytes[i] = binary.charCodeAt(i);
                     }
-                })();
+                    parts.push(bytes);
+                    offset += bytes.length;
+                }
+
+                eof = chunk.eof === true;
+                if (offset > MAX_BYTES) break;
+            }
+
+            return decodeChunks(parts);
+        }
+
+        function applyImportedText(text) {
+            inputText.value = text;
+            try {
+                inputText.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (e) {}
+        }
+
+        // 显示拖放错误遮罩
+        function showDropError(message) {
+            dropOverlay.classList.add('active');
+            dropOverlay.classList.add('error');
+            dropOverlayText.textContent = message;
+
+            if (dropErrorTimer) clearTimeout(dropErrorTimer);
+            dropErrorTimer = setTimeout(() => {
+                dropOverlay.classList.remove('active');
+                dropOverlay.classList.remove('error');
+                dropOverlayText.textContent = t('dropHint');
+                dropErrorTimer = null;
+            }, 2000);
+        }
+
+        // 处理拖放文件（含格式校验）
+        async function handleDroppedFiles(files) {
+            if (!files || !files.length) return;
+
+            const ft = getFT();
+            const file = files[0];
+
+            try {
+                // 1. 读取前 4KB 用于内容检测
+                const headBytes = await readHeadBytes(file.handleId, 4096);
+
+                // 2. 综合判断：扩展名 + MIME + 内容
+                const fileMeta = {
+                    name: file.name || '',
+                    contentType: file.contentType || ''
+                };
+
+                if (!isImportableTextFile(fileMeta, headBytes)) {
+                    // 拒绝：显示错误提示
+                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
+                    showDropError(t('dropReject'));
+
+                    // 释放句柄
+                    if (file.handleId && ft && typeof ft.cancel === 'function') {
+                        try { await ft.cancel(file.handleId); } catch (_) {}
+                    }
+                    return;
+                }
+
+                // 3. 通过校验：读取完整内容
+                const text = await readHandleToString(file.handleId);
+
+                if (!text || text.trim() === '') {
+                    showDropError(t('importEmpty'));
+                    return;
+                }
+
+                applyImportedText(text);
+            } catch (err) {
+                console.error('[AES] Drop import failed:', err);
+                if (file.handleId && ft && typeof ft.cancel === 'function') {
+                    try { await ft.cancel(file.handleId); } catch (_) {}
+                }
+                showDropError(t('importFailed'));
+            }
+        }
+
+        function setupDropListeners() {
+            if (!canDrop()) {
+                console.log('[AES] onDrop 不可用，跳过拖放监听注册');
                 return;
             }
 
-            // ============================================================
-            // 路径 B：Web 端 —— <input type="file">
-            // ============================================================
-            fallbackBrowserImport(btnSpan, originalText);
+            const ft = getFT();
+
+            ft.onDrop((files) => {
+                // 拖放结束，先清除普通遮罩
+                dropOverlay.classList.remove('active');
+                dropOverlay.classList.remove('error');
+                dropOverlayText.textContent = t('dropHint');
+
+                handleDroppedFiles(files);
+            });
+
+            if (typeof ft.onDragState === 'function') {
+                ft.onDragState((isDragging) => {
+                    // 拖拽中：显示普通提示遮罩（但不要覆盖错误遮罩）
+                    if (isDragging) {
+                        if (!dropOverlay.classList.contains('error')) {
+                            dropOverlay.classList.add('active');
+                        }
+                    } else {
+                        if (!dropOverlay.classList.contains('error')) {
+                            dropOverlay.classList.remove('active');
+                        }
+                    }
+                });
+            }
+
+            console.log('[AES] 拖放监听已注册（含文本格式校验）');
         }
 
-        // 分块大小累积检查（防止超大文件占满内存）
-        function bytesLengthGuard(parts, expectedSize) {
-            const total = parts.reduce((acc, p) => acc + p.length, 0);
-            // 最多 50 MB
-            if (total > 50 * 1024 * 1024) return true;
-            if (expectedSize > 0 && total >= expectedSize) return true;
-            return false;
-        }
+        function formatInputText() {
+            const btnSpan = formatBtn.querySelector('span[data-i18n="formatBtn"]');
+            const originalText = btnSpan ? btnSpan.textContent : '';
 
-        function fallbackBrowserImport(btnSpan, originalText) {
-            try {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.txt,text/plain';
-                input.style.display = 'none';
+            const raw = inputText.value;
+            if (!raw || raw.trim() === '') {
+                flashButton(btnSpan, originalText, t('formatEmpty'));
+                return;
+            }
 
-                input.addEventListener('change', (ev) => {
-                    const file = ev.target.files && ev.target.files[0];
-                    if (!file) {
+            const trimmed = raw.trim();
+
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                try {
+                    const obj = JSON.parse(trimmed);
+                    inputText.value = JSON.stringify(obj, null, 2);
+                    return;
+                } catch (e) {}
+            }
+
+            if (trimmed.startsWith('<')) {
+                try {
+                    const formatted = formatXmlString(trimmed);
+                    if (formatted) {
+                        inputText.value = formatted;
                         return;
                     }
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const text = String(reader.result || '');
-                        if (!text || text.trim() === '') {
-                            if (btnSpan) {
-                                btnSpan.textContent = t('importEmpty');
-                                setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                            }
-                            return;
-                        }
-                        inputText.value = text;
-                        if (btnSpan) {
-                            btnSpan.textContent = t('importSuccess');
-                            setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                        }
-                    };
-                    reader.onerror = () => {
-                        console.error('FileReader error:', reader.error);
-                        if (btnSpan) {
-                            btnSpan.textContent = t('importFailed');
-                            setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                        }
-                    };
-                    reader.readAsText(file, 'UTF-8');
-                });
-
-                // 某些浏览器需要 input 在 DOM 中才能触发
-                document.body.appendChild(input);
-                input.click();
-                setTimeout(() => {
-                    if (input.parentNode) input.parentNode.removeChild(input);
-                }, 1000);
-            } catch (err) {
-                console.error('Browser import failed:', err);
-                if (btnSpan) {
-                    btnSpan.textContent = t('importFailed');
-                    setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                }
+                } catch (e) {}
             }
         }
 
-        // ============================================================
-        // 保存到文件 —— 多层降级方案
-        // 路径 A：桌面端 fileTransfer.beginSave（原生保存对话框）
-        // 路径 B：Web 端 Blob + <a download>（浏览器下载）
-        // 路径 C：全部失败时轻提示
-        // ============================================================
-        async function saveResult() {
+        function formatXmlString(xmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlString, 'application/xml');
+
+            const parserError = doc.querySelector('parsererror');
+            if (parserError) return null;
+
+            const root = doc.documentElement;
+            if (!root) return null;
+
+            const lines = [];
+            serializeXmlNode(root, 0, lines);
+            return lines.join('\n');
+        }
+
+        function serializeXmlNode(node, depth, lines) {
+            const indent = '  '.repeat(depth);
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                if (text && text.trim() !== '') {
+                    lines.push(indent + text.trim());
+                }
+                return;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const tagName = node.nodeName;
+            const attrs = Array.from(node.attributes || [])
+                .map(a => ` ${a.name}="${escapeXmlAttr(a.value)}"`)
+                .join('');
+
+            const childNodes = Array.from(node.childNodes).filter(n => {
+                if (n.nodeType === Node.TEXT_NODE) return n.nodeValue.trim() !== '';
+                return n.nodeType === Node.ELEMENT_NODE;
+            });
+
+            if (childNodes.length === 0) {
+                lines.push(`${indent}<${tagName}${attrs}/>`);
+                return;
+            }
+
+            if (childNodes.length === 1 && childNodes[0].nodeType === Node.TEXT_NODE) {
+                const text = escapeXmlText(childNodes[0].nodeValue.trim());
+                lines.push(`${indent}<${tagName}${attrs}>${text}</${tagName}>`);
+                return;
+            }
+
+            lines.push(`${indent}<${tagName}${attrs}>`);
+            childNodes.forEach(child => {
+                serializeXmlNode(child, depth + 1, lines);
+            });
+            lines.push(`${indent}</${tagName}>`);
+        }
+
+        function escapeXmlText(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function escapeXmlAttr(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function flashButton(btnSpan, originalText, message, duration = 1500) {
+            if (!btnSpan) return;
+            btnSpan.textContent = message;
+            setTimeout(() => { btnSpan.textContent = originalText; }, duration);
+        }
+
+        function saveResult() {
             const btnSpan = saveBtn.querySelector('span[data-i18n="saveBtn"]');
             const originalText = btnSpan ? btnSpan.textContent : '';
 
-            // 1. 收集要保存的文本
             let text = '';
             if (isBatchResult && batchResults.length > 0) {
                 text = batchResults.map((item, idx) => {
-                    if (item.error) {
-                        return `#${idx + 1} ERROR: ${item.error}`;
-                    }
+                    if (item.error) return `#${idx + 1} ERROR: ${item.error}`;
                     return item.output;
                 }).join('\n');
             } else {
                 text = resultBody.textContent;
             }
 
-            // 2. 空内容 / placeholder 状态时轻提示
             if (!text || resultBody.classList.contains('placeholder')) {
-                if (btnSpan) {
-                    btnSpan.textContent = t('noContent');
-                    setTimeout(() => { btnSpan.textContent = originalText; }, 1200);
-                }
+                flashButton(btnSpan, originalText, t('noContent'), 1200);
                 return;
             }
 
-            // 3. 生成默认文件名
+            if (!canSaveFT()) {
+                flashButton(btnSpan, originalText, t('saveUnsupported'), 2000);
+                return;
+            }
+
             const now = new Date();
             const pad = (n) => String(n).padStart(2, '0');
             const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
             const defaultName = `aes-result-${ts}.txt`;
 
-            // ============================================================
-            // 路径 A：桌面端 —— fileTransfer.beginSave 原生保存对话框
-            // ============================================================
-            const ft = window.dbxPlugin?.fileTransfer;
-            const canUseNativeSave = ft && typeof ft.beginSave === 'function';
+            const ft = getFT();
 
-            if (canUseNativeSave) {
+            let savePromise;
+            try {
+                savePromise = ft.beginSave({ name: defaultName, contentType: 'text/plain' });
+            } catch (err) {
+                console.error('[AES] beginSave() threw synchronously:', err);
+                flashButton(btnSpan, originalText, t('saveFailed'));
+                return;
+            }
+
+            (async () => {
                 let handleId = null;
                 try {
-                    const handle = await ft.beginSave({
-                        name: defaultName,
-                        contentType: 'text/plain'
-                    });
-
-                    // 用户取消
+                    const handle = await savePromise;
                     if (!handle || !handle.handleId) {
                         return;
                     }
                     handleId = handle.handleId;
-                    const chunkBytes = handle.chunkBytes || 1024 * 1024;
 
-                    const encoder = new TextEncoder();
-                    const bytes = encoder.encode(text);
+                    const chunkBytes = handle.chunkBytes || 1024 * 1024;
+                    const bytes = new TextEncoder().encode(text);
                     let offset = 0;
 
                     while (offset < bytes.length) {
                         const end = Math.min(offset + chunkBytes, bytes.length);
                         const slice = bytes.subarray(offset, end);
-
                         let binary = '';
                         for (let i = 0; i < slice.length; i++) {
                             binary += String.fromCharCode(slice[i]);
                         }
-                        const dataBase64 = btoa(binary);
-
-                        await ft.write(handleId, offset, dataBase64);
+                        await ft.write(handleId, offset, btoa(binary));
                         offset = end;
                     }
 
                     await ft.finish(handleId);
                     handleId = null;
 
-                    if (btnSpan) {
-                        btnSpan.textContent = t('saved');
-                        setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                    }
-                    return;
+                    flashButton(btnSpan, originalText, t('saved'));
                 } catch (err) {
-                    console.error('Native save failed, falling back to browser download:', err);
+                    console.error('[AES] Save failed:', err);
                     if (handleId && ft && typeof ft.cancel === 'function') {
                         try { await ft.cancel(handleId); } catch (_) {}
                     }
-                    // 继续走路径 B
+                    flashButton(btnSpan, originalText, t('saveFailed'));
                 }
-            }
-
-            // ============================================================
-            // 路径 B：Web 端降级 —— Blob + <a download>
-            // ============================================================
-            try {
-                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = defaultName;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-                if (btnSpan) {
-                    btnSpan.textContent = t('saved');
-                    setTimeout(() => { btnSpan.textContent = originalText; }, 1500);
-                }
-                return;
-            } catch (err) {
-                console.error('Browser download failed:', err);
-            }
-
-            // ============================================================
-            // 路径 C：最终兜底
-            // ============================================================
-            if (btnSpan) {
-                btnSpan.textContent = t('saveUnsupported');
-                setTimeout(() => { btnSpan.textContent = originalText; }, 2000);
-            }
+            })();
         }
 
         encryptBtn.addEventListener('click', encrypt);
         decryptBtn.addEventListener('click', decrypt);
         copyBtn.addEventListener('click', copyResult);
         saveBtn.addEventListener('click', saveResult);
-        importBtn.addEventListener('click', importFile);
+        formatBtn.addEventListener('click', formatInputText);
 
         resetKeyBtn.addEventListener('click', () => {
             aesKey();
@@ -2240,12 +2527,20 @@
 
         const initialLang = getInitialLanguage();
         updateLanguage(initialLang);
-        console.log('shadcn 风格 AES 加解密工具已就绪 ✨');
+        console.log('shadcn 风格 AES 加解密工具已就绪 ✅');
+
         window.dbxPlugin.ready.then(() => {
             const lang = window.dbxPlugin.locale;
             if (lang && translations[lang]) {
                 updateLanguage(lang);
             }
+
+            const caps = getFTCaps();
+            console.log('[AES] fileTransfer capabilities:', caps);
+            console.log('[AES] drop 可用:', canDrop());
+            console.log('[AES] beginSave 可用:', canSaveFT());
+
+            setupDropListeners();
             aesKey();
             aesKeyLables();
         });
