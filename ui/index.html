@@ -1405,32 +1405,24 @@
 
         // ---------- 支持的文本文件扩展名白名单 ----------
         const TEXT_FILE_EXTENSIONS = [
-            // 纯文本
             '.txt', '.text', '.log',
-            // 数据格式
             '.json', '.xml', '.yaml', '.yml', '.csv', '.tsv',
-            // 配置文件
             '.ini', '.conf', '.cfg', '.properties', '.toml', '.env',
-            // 代码/脚本
             '.md', '.markdown', '.sql', '.html', '.htm', '.css', '.scss', '.less',
             '.js', '.mjs', '.cjs', '.ts', '.jsx', '.tsx', '.vue', '.svelte',
             '.java', '.py', '.go', '.rs', '.rb', '.php', '.c', '.cpp', '.h', '.hpp',
             '.cs', '.swift', '.kt', '.scala', '.sh', '.bat', '.ps1',
-            // 其他文本
             '.gitignore', '.editorconfig', '.prettierrc', '.eslintrc'
         ];
 
-        // ---------- 根据文件名判断是否文本文件 ----------
         function isTextFileByName(fileName) {
             if (!fileName) return false;
             const lower = fileName.toLowerCase();
 
-            // 检查扩展名
             for (const ext of TEXT_FILE_EXTENSIONS) {
                 if (lower.endsWith(ext)) return true;
             }
 
-            // 无扩展名文件：视为文本（如 LICENSE、README 等）
             const lastDot = lower.lastIndexOf('.');
             const lastSlash = Math.max(lower.lastIndexOf('/'), lower.lastIndexOf('\\'));
             if (lastDot <= lastSlash) return true;
@@ -1438,15 +1430,12 @@
             return false;
         }
 
-        // ---------- 根据 MIME 类型判断是否文本文件 ----------
         function isTextContentType(contentType) {
             if (!contentType) return false;
             const lower = contentType.toLowerCase();
 
-            // text/* 全部接受
             if (lower.startsWith('text/')) return true;
 
-            // application/* 中常见的文本子类型
             const textAppTypes = [
                 'application/json',
                 'application/xml',
@@ -1468,12 +1457,9 @@
             return false;
         }
 
-        // ---------- 根据内容检测是否为文本 ----------
-        // 检查前面若干字节中是否有明显的二进制特征（NUL 字节）
         function isTextContentByBytes(bytes) {
             if (!bytes || bytes.length === 0) return true;
 
-            // 只检查前 4096 字节
             const checkLen = Math.min(bytes.length, 4096);
             let nullCount = 0;
 
@@ -1481,29 +1467,23 @@
                 if (bytes[i] === 0) nullCount++;
             }
 
-            // 出现 NUL 字节说明很可能是二进制文件
-            // 阈值：4096 字节中 NUL 超过 1% 判定为非文本
             const nullRatio = nullCount / checkLen;
             if (nullRatio > 0.01) return false;
 
             return true;
         }
 
-        // ---------- 综合判断文件是否为可导入的文本文件 ----------
         function isImportableTextFile(fileMeta, sampleBytes) {
             const fileName = fileMeta.name || '';
             const contentType = fileMeta.contentType || '';
 
-            // 1. 按扩展名判断
             if (fileName && isTextFileByName(fileName)) {
-                // 扩展名是文本类，但还需内容检查防止伪装
                 if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
                     return false;
                 }
                 return true;
             }
 
-            // 2. 按 MIME 类型判断
             if (contentType && isTextContentType(contentType)) {
                 if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
                     return false;
@@ -1511,17 +1491,14 @@
                 return true;
             }
 
-            // 3. 无文件名、无 MIME 信息时，仅凭内容判断
             if (!fileName && !contentType) {
                 return sampleBytes ? isTextContentByBytes(sampleBytes) : false;
             }
 
-            // 4. 有文件名但不是文本扩展名 → 拒绝
             if (fileName && !isTextFileByName(fileName)) {
                 return false;
             }
 
-            // 5. 有 MIME 但不是文本 MIME → 拒绝
             if (contentType && !isTextContentType(contentType)) {
                 return false;
             }
@@ -1730,11 +1707,11 @@
         const keySelectorSearch = document.getElementById('keySelectorSearch');
         const dropOverlay = document.getElementById('dropOverlay');
         const dropOverlayText = document.getElementById('dropOverlayText');
+        const appCard = document.getElementById('appCard');
 
         let batchResults = [];
         let isBatchResult = false;
 
-        // 拖放错误提示的清除定时器
         let dropErrorTimer = null;
 
         function setResult(text, isPlaceholder = false) {
@@ -2030,8 +2007,9 @@
         }
 
         // ============================================================
-        // 文件拖放导入 —— 增加文本格式校验
-        // 官方规定能力位：pick、beginSave、read、drop、folderExpansion
+        // 拖放导入 —— 自动适配环境
+        // 桌面端：fileTransfer.onDrop（流式读取，无大小限制）
+        // Web 端：浏览器原生 drop 事件 + FileReader
         // ============================================================
 
         function getFT() {
@@ -2043,10 +2021,10 @@
             return caps.fileTransfer || {};
         }
 
-        function canDrop() {
+        // 宿主 onDrop 是否可用
+        function isHostDropAvailable() {
             const ft = getFT();
-            if (!ft) return false;
-            if (typeof ft.onDrop !== 'function') return false;
+            if (!ft || typeof ft.onDrop !== 'function') return false;
             const caps = getFTCaps();
             if (caps.drop === false) return false;
             return true;
@@ -2077,8 +2055,8 @@
             }
         }
 
-        // 读取句柄的**前 N 字节**用于格式检测（避免读整个大文件）
-        async function readHeadBytes(handleId, maxBytes) {
+        // ---------- 宿主句柄读取（桌面端）----------
+        async function readHandleHeadBytes(handleId, maxBytes) {
             const ft = getFT();
             if (!ft || typeof ft.read !== 'function') return null;
 
@@ -2097,7 +2075,6 @@
             }
         }
 
-        // 读取完整内容
         async function readHandleToString(handleId) {
             const ft = getFT();
             if (!ft || typeof ft.read !== 'function') return '';
@@ -2130,6 +2107,37 @@
             return decodeChunks(parts);
         }
 
+        // ---------- 浏览器 File 读取（Web 端）----------
+        function readBrowserFileHead(file, maxBytes) {
+            return new Promise((resolve) => {
+                try {
+                    const slice = file.slice(0, maxBytes);
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(new Uint8Array(reader.result));
+                    };
+                    reader.onerror = () => resolve(null);
+                    reader.readAsArrayBuffer(slice);
+                } catch (e) {
+                    resolve(null);
+                }
+            });
+        }
+
+        function readBrowserFileToString(file) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result || ''));
+                    reader.onerror = () => reject(reader.error);
+                    reader.readAsText(file, 'UTF-8');
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        // ---------- 应用导入文本 ----------
         function applyImportedText(text) {
             inputText.value = text;
             try {
@@ -2137,7 +2145,7 @@
             } catch (e) {}
         }
 
-        // 显示拖放错误遮罩
+        // ---------- 显示拖放错误遮罩 ----------
         function showDropError(message) {
             dropOverlay.classList.add('active');
             dropOverlay.classList.add('error');
@@ -2152,36 +2160,31 @@
             }, 2000);
         }
 
-        // 处理拖放文件（含格式校验）
-        async function handleDroppedFiles(files) {
+        // ---------- 桌面端：处理宿主 onDrop 句柄 ----------
+        async function handleHostDroppedFiles(files) {
             if (!files || !files.length) return;
 
             const ft = getFT();
             const file = files[0];
 
             try {
-                // 1. 读取前 4KB 用于内容检测
-                const headBytes = await readHeadBytes(file.handleId, 4096);
+                const headBytes = await readHandleHeadBytes(file.handleId, 4096);
 
-                // 2. 综合判断：扩展名 + MIME + 内容
                 const fileMeta = {
                     name: file.name || '',
                     contentType: file.contentType || ''
                 };
 
                 if (!isImportableTextFile(fileMeta, headBytes)) {
-                    // 拒绝：显示错误提示
                     console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
                     showDropError(t('dropReject'));
 
-                    // 释放句柄
                     if (file.handleId && ft && typeof ft.cancel === 'function') {
                         try { await ft.cancel(file.handleId); } catch (_) {}
                     }
                     return;
                 }
 
-                // 3. 通过校验：读取完整内容
                 const text = await readHandleToString(file.handleId);
 
                 if (!text || text.trim() === '') {
@@ -2199,26 +2202,53 @@
             }
         }
 
-        function setupDropListeners() {
-            if (!canDrop()) {
-                console.log('[AES] onDrop 不可用，跳过拖放监听注册');
-                return;
-            }
+        // ---------- Web 端：处理浏览器 drop ----------
+        async function handleBrowserDroppedFiles(fileList) {
+            if (!fileList || !fileList.length) return;
 
+            const file = fileList[0];
+
+            try {
+                const headBytes = await readBrowserFileHead(file, 4096);
+
+                const fileMeta = {
+                    name: file.name || '',
+                    contentType: file.type || ''
+                };
+
+                if (!isImportableTextFile(fileMeta, headBytes)) {
+                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
+                    showDropError(t('dropReject'));
+                    return;
+                }
+
+                const text = await readBrowserFileToString(file);
+
+                if (!text || text.trim() === '') {
+                    showDropError(t('importEmpty'));
+                    return;
+                }
+
+                applyImportedText(text);
+            } catch (err) {
+                console.error('[AES] Browser drop import failed:', err);
+                showDropError(t('importFailed'));
+            }
+        }
+
+        // ---------- 桌面端：注册宿主拖放监听 ----------
+        function setupHostDrop() {
             const ft = getFT();
 
             ft.onDrop((files) => {
-                // 拖放结束，先清除普通遮罩
                 dropOverlay.classList.remove('active');
                 dropOverlay.classList.remove('error');
                 dropOverlayText.textContent = t('dropHint');
-
-                handleDroppedFiles(files);
+                handleHostDroppedFiles(files);
             });
 
             if (typeof ft.onDragState === 'function') {
                 ft.onDragState((isDragging) => {
-                    // 拖拽中：显示普通提示遮罩（但不要覆盖错误遮罩）
                     if (isDragging) {
                         if (!dropOverlay.classList.contains('error')) {
                             dropOverlay.classList.add('active');
@@ -2231,7 +2261,81 @@
                 });
             }
 
-            console.log('[AES] 拖放监听已注册（含文本格式校验）');
+            console.log('[AES] 桌面端拖放监听已注册（fileTransfer.onDrop）');
+        }
+
+        // ---------- Web 端：注册浏览器原生拖放监听 ----------
+        function setupBrowserDrop() {
+            // 用 dragDepth 计数器正确处理子元素间的 dragenter/dragleave
+            let dragDepth = 0;
+
+            appCard.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dragDepth++;
+                if (dragDepth === 1) {
+                    // 首次进入：显示遮罩
+                    if (!dropOverlay.classList.contains('error')) {
+                        dropOverlay.classList.add('active');
+                    }
+                }
+            });
+
+            appCard.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.dataTransfer) {
+                    e.dataTransfer.dropEffect = 'copy';
+                }
+            });
+
+            appCard.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dragDepth--;
+                if (dragDepth <= 0) {
+                    dragDepth = 0;
+                    // 真正离开：隐藏遮罩（但不影响错误遮罩）
+                    if (!dropOverlay.classList.contains('error')) {
+                        dropOverlay.classList.remove('active');
+                    }
+                }
+            });
+
+            appCard.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dragDepth = 0;
+
+                // 清除普通遮罩
+                dropOverlay.classList.remove('active');
+                dropOverlay.classList.remove('error');
+                dropOverlayText.textContent = t('dropHint');
+
+                const files = e.dataTransfer && e.dataTransfer.files;
+                if (!files || files.length === 0) return;
+
+                handleBrowserDroppedFiles(files);
+            });
+
+            // 防止页面其他区域接受 drop 导致浏览器打开文件
+            window.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            window.addEventListener('drop', (e) => {
+                e.preventDefault();
+            });
+
+            console.log('[AES] Web 端拖放监听已注册（浏览器原生事件）');
+        }
+
+        // ---------- 统一入口：根据环境选择方案 ----------
+        function setupDropListeners() {
+            if (isHostDropAvailable()) {
+                setupHostDrop();
+            } else {
+                setupBrowserDrop();
+            }
         }
 
         function formatInputText() {
@@ -2537,7 +2641,7 @@
 
             const caps = getFTCaps();
             console.log('[AES] fileTransfer capabilities:', caps);
-            console.log('[AES] drop 可用:', canDrop());
+            console.log('[AES] 宿主 onDrop 可用:', isHostDropAvailable());
             console.log('[AES] beginSave 可用:', canSaveFT());
 
             setupDropListeners();
