@@ -107,15 +107,10 @@ impl PluginHandler for Plugin {
                 "connectionId": params.get("connectionId").cloned().unwrap_or(Value::Null)
             })),
             "aes-rust-plugin/aesEncrypt" => {
-                let connection_id = params
-                    .get("connectionId")
-                    .and_then(Value::as_str)
-                    .unwrap_or("");
-                let aes_key = self.aes_keys.lock().unwrap().get(connection_id).cloned();
-                let key = params
-                    .get("key")
-                    .and_then(Value::as_str)
-                    .unwrap_or("1234567890123456"); // 16 字节
+                let key = params.get("key").and_then(Value::as_str).unwrap_or(""); // 16 字节
+                if key.is_empty() {
+                    return Ok(json!({ "message": "请填写有效密钥", "code": 500 }));
+                }
                 let plaintext = params
                     .get("plaintext")
                     .and_then(Value::as_str)
@@ -127,7 +122,6 @@ impl PluginHandler for Plugin {
                 Ok(json!({
                     "code":0,
                     "data": aes_content,
-                    "aes_key":aes_key,
                 }))
             }
             "aes-rust-plugin/aesKey" => {
@@ -181,10 +175,10 @@ impl PluginHandler for Plugin {
                 }
             }
             "aes-rust-plugin/aesDecrypt" => {
-                let key = params
-                    .get("key")
-                    .and_then(Value::as_str)
-                    .unwrap_or("1234567890123456"); // 16 字节
+                let key = params.get("key").and_then(Value::as_str).unwrap_or(""); // 16 字节
+                if key.is_empty() {
+                    return Ok(json!({ "message": "请填写有效密钥", "code": 500 }));
+                }
                 let plaintext = params
                     .get("plaintext")
                     .and_then(Value::as_str)
@@ -225,7 +219,7 @@ fn optional_string(object: Option<&serde_json::Map<String, Value>>, key: &str) -
         .to_string()
 }
 fn main() -> std::io::Result<()> {
-    let metadata =
-        PluginMetadata::new("io.github.icefoxs.aes-tools", env!("CARGO_PKG_VERSION")).with_capability("connections");
+    let metadata = PluginMetadata::new("io.github.icefoxs.aes-tools", env!("CARGO_PKG_VERSION"))
+        .with_capability("connections");
     PluginServer::new(metadata, Plugin::default()).serve()
 }

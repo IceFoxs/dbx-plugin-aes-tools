@@ -5,7 +5,7 @@
   "name": "aes-tools",
   "version": "0.1.1",
   "publisher": "icefoxs",
-  "description": "aes tools",
+  "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。（AES-128-ECB 为确定性加密、非语义安全）",
   "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "icon": "assets/plugin.svg",
@@ -23,12 +23,9 @@
     }
   },
   "permissions": [
-    "host.ai",
-    "host.binary",
     "host.clipboard:read",
     "host.events",
     "host.filesystem",
-    "host.storage",
     "host.workbench"
   ],
   "contributions": [
@@ -69,15 +66,15 @@
           "label": "协议",
           "type": "select",
           "binding": "config",
-          "default": "http",
+          "default": "https",
           "options": [
-            {
-              "label": "HTTP（内部网络）",
-              "value": "http"
-            },
             {
               "label": "HTTPS",
               "value": "https"
+            },
+            {
+              "label": "HTTP（内部网络）",
+              "value": "http"
             }
           ]
         },
@@ -124,7 +121,7 @@
   "localizations": {
     "zh-CN": {
       "name": "aes-tools",
-      "description": "aes tools",
+      "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。（AES-128-ECB 为确定性加密、非语义安全）",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools 连接",
@@ -198,7 +195,7 @@
     },
     "en": {
       "name": "aes-tools",
-      "description": "aes tools",
+      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.(AES-128-ECB is deterministic encryption and not semantically secure)",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools Connection",

@@ -1,6 +1,6 @@
 {
   "name": "aes-tools",
-  "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.",
+  "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.(AES-128-ECB is deterministic encryption and not semantically secure)",
   "icon": "assets/plugin.svg",
   "tags": [
     "aes"
@@ -17,15 +17,15 @@
   "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "homepage": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
   "license": "MIT",
-  "releaseNotes": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.",
+  "releaseNotes": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.(AES-128-ECB is deterministic encryption and not semantically secure)",
   "localizations": {
     "zh-CN": {
       "name": "aes工具",
-      "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。"
+      "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。（AES-128-ECB 为确定性加密、非语义安全）"
     },
     "en": {
       "name": "aes tools",
-      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration."
+      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.(AES-128-ECB is deterministic encryption and not semantically secure)"
     }
   }
 }
