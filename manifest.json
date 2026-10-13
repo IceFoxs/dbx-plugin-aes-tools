@@ -158,7 +158,7 @@
     },
     "zh-TW": {
       "name": "aes-tools",
-      "description": "aes 工具",
+      "description": "基於 DBX 平台的 AES-128-ECB 加解密外掛，相容 Hutool 預設 AES 設定。（AES-128-ECB 為確定性加密、非語意安全）",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools 連線",
@@ -195,7 +195,7 @@
     },
     "en": {
       "name": "aes-tools",
-      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration.(AES-128-ECB is deterministic encryption and not semantically secure)",
+      "description": "AES-128-ECB encryption/decryption plugin based on the DBX platform, compatible with Hutool's default AES configuration. (AES-128-ECB is deterministic encryption and not semantically secure)",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools Connection",
@@ -232,7 +232,7 @@
     },
     "ja": {
       "name": "aes-tools",
-      "description": "aes ツール",
+      "description": "DBX プラットフォームベースの AES-128-ECB 暗号化/復号化プラグイン。Hutool のデフォルト AES 設定と互換性があります。（AES-128-ECB は決定論的暗号化であり、意味論的に安全ではありません）",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools 接続",
@@ -269,7 +269,7 @@
     },
     "ko": {
       "name": "aes-tools",
-      "description": "aes 도구",
+      "description": "DBX 플랫폼 기반 AES-128-ECB 암호화/복호화 플러그인으로, Hutool 기본 AES 설정과 호환됩니다. (AES-128-ECB는 결정적 암호화이며 의미론적으로 안전하지 않습니다)",
       "contributions": {
         "aes-tools.connection": {
           "label": "aes-tools 연결",
