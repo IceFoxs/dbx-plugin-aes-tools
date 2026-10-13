@@ -1687,6 +1687,9 @@
         let keyOptions = [];
         let currentSearchKeyword = '';
 
+        // 修复：语言切换时 select 重建会触发 change，用它屏蔽误改
+        let suppressKeyChange = false;
+
         function t(key, params) {
             let text = translations[currentLang]?.[key] ?? translations[DEFAULT_LANG]?.[key] ?? key;
             if (params) {
@@ -1831,10 +1834,26 @@
                 localStorage.setItem('preferredLanguage', lang);
             } catch (e) {}
 
+            // ============================================================
+            // 修复：渲染 select 前保存关键状态，渲染时屏蔽 change，渲染后恢复
+            // ============================================================
+            const savedKeyValue = keyInput.value;
+            const savedInputValue = inputText.value;
+
             const selector = document.getElementById('keySelector');
             const prevValue = selector.value;
-            renderKeySelector();
-            selector.value = prevValue;
+
+            suppressKeyChange = true;
+            try {
+                renderKeySelector();
+                selector.value = prevValue;
+            } finally {
+                suppressKeyChange = false;
+            }
+
+            // 恢复被重建过程可能影响的内容
+            keyInput.value = savedKeyValue;
+            inputText.value = savedInputValue;
 
             updateBatchHint();
 
@@ -2907,6 +2926,8 @@
         });
 
         keySelector.addEventListener('change', () => {
+            // 修复：语言切换过程中重建 select 会触发 change，此处跳过
+            if (suppressKeyChange) return;
             syncKeyFromSelector();
         });
 
