@@ -934,7 +934,15 @@
             font-weight: 500;
         }
 
-        .batch-item-copy {
+        .batch-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .batch-item-copy,
+        .batch-item-backfill {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -954,17 +962,20 @@
             opacity: 0.75;
         }
 
-        .batch-item-copy:hover {
+        .batch-item-copy:hover,
+        .batch-item-backfill:hover {
             background-color: var(--color-muted);
             color: var(--color-foreground);
             opacity: 1;
         }
 
-        .batch-item-copy:active {
+        .batch-item-copy:active,
+        .batch-item-backfill:active {
             transform: scale(0.96);
         }
 
-        .batch-item-copy svg {
+        .batch-item-copy svg,
+        .batch-item-backfill svg {
             width: 0.65rem;
             height: 0.65rem;
             flex-shrink: 0;
@@ -1151,7 +1162,7 @@
                                 <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.65rem;" data-i18n="batchInputHint">（每行一条）</span>
                             </label>
                             <div class="field-actions">
-                                <!-- 新增：清空输入按钮 -->
+                                <!-- 清空输入按钮 -->
                                 <button type="button" id="clearInputBtn" class="btn-tool" title="清空输入内容">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"/>
@@ -1227,7 +1238,7 @@
                                     <span id="resultCount"></span>
                                 </span>
                                 <div class="result-header-actions">
-                                    <!-- 新增：结果回填至输入按钮 -->
+                                    <!-- 结果回填至输入按钮（整体回填） -->
                                     <button id="backfillBtn" class="btn btn-ghost btn-sm" title="将结果回填到输入框">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="9 14 4 9 9 4"/>
@@ -1315,6 +1326,8 @@
                 batchItem: '第 {index} 条',
                 copyItem: '复制',
                 copiedItem: '已复制',
+                backfillItem: '回填',
+                backfilledItem: '已回填',
                 searchPlaceholder: '搜索...',
                 noResults: '无匹配结果',
                 cleared: '已清空'
@@ -1366,6 +1379,8 @@
                 batchItem: '第 {index} 條',
                 copyItem: '複製',
                 copiedItem: '已複製',
+                backfillItem: '回填',
+                backfilledItem: '已回填',
                 searchPlaceholder: '搜尋...',
                 noResults: '無匹配結果',
                 cleared: '已清空'
@@ -1417,6 +1432,8 @@
                 batchItem: 'Item {index}',
                 copyItem: 'Copy',
                 copiedItem: 'Copied',
+                backfillItem: 'Backfill',
+                backfilledItem: 'Backfilled',
                 searchPlaceholder: 'Search...',
                 noResults: 'No results',
                 cleared: 'Cleared'
@@ -1468,6 +1485,8 @@
                 batchItem: '{index} 番目',
                 copyItem: 'コピー',
                 copiedItem: 'コピーしました',
+                backfillItem: '再入力',
+                backfilledItem: '再入力しました',
                 searchPlaceholder: '検索...',
                 noResults: '一致なし',
                 cleared: 'クリアしました'
@@ -1519,6 +1538,8 @@
                 batchItem: '{index}번째',
                 copyItem: '복사',
                 copiedItem: '복사됨',
+                backfillItem: '되돌리기',
+                backfilledItem: '되돌렸습니다',
                 searchPlaceholder: '검색...',
                 noResults: '결과 없음',
                 cleared: '지워짐'
@@ -1885,6 +1906,10 @@
                 header.appendChild(label);
 
                 if (!item.error) {
+                    const actions = document.createElement('div');
+                    actions.className = 'batch-item-actions';
+
+                    // 单个复制按钮
                     const itemCopyBtn = document.createElement('button');
                     itemCopyBtn.type = 'button';
                     itemCopyBtn.className = 'batch-item-copy';
@@ -1896,7 +1921,23 @@
                         </svg>
                         <span>${t('copyItem')}</span>
                     `;
-                    header.appendChild(itemCopyBtn);
+                    actions.appendChild(itemCopyBtn);
+
+                    // 新增：单个回填按钮
+                    const itemBackfillBtn = document.createElement('button');
+                    itemBackfillBtn.type = 'button';
+                    itemBackfillBtn.className = 'batch-item-backfill';
+                    itemBackfillBtn.dataset.index = String(idx);
+                    itemBackfillBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 14 4 9 9 4"/>
+                            <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                        </svg>
+                        <span>${t('backfillItem')}</span>
+                    `;
+                    actions.appendChild(itemBackfillBtn);
+
+                    header.appendChild(actions);
                 }
 
                 div.appendChild(header);
@@ -1941,12 +1982,48 @@
             }
         }
 
+        // 新增：单个回填功能
+        function backfillSingleItem(index, btnElement) {
+            const item = batchResults[index];
+            if (!item || item.error) return;
+
+            const text = item.output;
+            inputText.value = text;
+            try {
+                inputText.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (e) {}
+
+            const span = btnElement.querySelector('span');
+            if (span) {
+                const originalText = span.textContent;
+                span.textContent = t('backfilledItem');
+                btnElement.style.color = '#027a48';
+                setTimeout(() => {
+                    span.textContent = originalText;
+                    btnElement.style.color = '';
+                }, 1200);
+            }
+        }
+
         resultBody.addEventListener('click', (e) => {
-            const btn = e.target.closest('.batch-item-copy');
-            if (!btn) return;
-            const idx = parseInt(btn.dataset.index, 10);
-            if (!isNaN(idx)) {
-                copySingleItem(idx, btn);
+            // 单个复制
+            const copyBtn = e.target.closest('.batch-item-copy');
+            if (copyBtn) {
+                const idx = parseInt(copyBtn.dataset.index, 10);
+                if (!isNaN(idx)) {
+                    copySingleItem(idx, copyBtn);
+                }
+                return;
+            }
+
+            // 新增：单个回填
+            const backfillBtn = e.target.closest('.batch-item-backfill');
+            if (backfillBtn) {
+                const idx = parseInt(backfillBtn.dataset.index, 10);
+                if (!isNaN(idx)) {
+                    backfillSingleItem(idx, backfillBtn);
+                }
+                return;
             }
         });
 
@@ -2132,14 +2209,13 @@
         }
 
         // ============================================================
-        // 新增功能：清空输入 / 回填结果
+        // 清空输入 / 整体回填结果
         // ============================================================
         function clearInput() {
             inputText.value = '';
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-            // 简单视觉反馈（可选）
             clearInputBtn.style.opacity = '0.7';
             setTimeout(() => { clearInputBtn.style.opacity = ''; }, 200);
         }
@@ -2155,7 +2231,6 @@
                 }).join('\n');
             } else {
                 if (resultBody.classList.contains('placeholder')) {
-                    // 无结果时给予轻微提示
                     backfillBtn.style.opacity = '0.5';
                     setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
                     return;
@@ -2166,7 +2241,6 @@
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-            // 视觉反馈
             backfillBtn.style.opacity = '0.7';
             setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
         }
@@ -2678,7 +2752,7 @@
         saveBtn.addEventListener('click', saveResult);
         formatBtn.addEventListener('click', formatInputText);
 
-        // 新增按钮事件监听
+        // 按钮事件监听
         clearInputBtn.addEventListener('click', clearInput);
         backfillBtn.addEventListener('click', backfillResult);
 
