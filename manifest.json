@@ -228,6 +228,154 @@
         }
       }
     },
+    "az": {
+      "name": "aes-tools",
+      "description": "DBX platforması əsasında AES-128-ECB şifrələmə/deşifrələmə plagini, Hutool-un standart AES konfiqurasiyası ilə uyğundur. (AES-128-ECB deterministik şifrələmədir və semantik cəhətdən təhlükəsiz deyil)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools Bağlantısı",
+          "description": "Plagin tərəfindən təqdim edilən bağlantı forması.",
+          "fields": {
+            "display_name": {
+              "label": "Bağlantı adı"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Port"
+            },
+            "protocol": {
+              "label": "Protokol"
+            },
+            "interface_path": {
+              "label": "İnterfeys yolu"
+            },
+            "aes_key": {
+              "label": "aes açarı"
+            },
+            "aes_key_label": {
+              "label": "aes açarı etiketi"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools İş dəzgahı",
+          "description": "Plagin tərəfindən təqdim edilən sandbox UI."
+        }
+      }
+    },
+    "es": {
+      "name": "aes-tools",
+      "description": "Complemento de cifrado/descifrado AES-128-ECB basado en la plataforma DBX, compatible con la configuración AES predeterminada de Hutool. (AES-128-ECB es cifrado determinista y no es semánticamente seguro)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "Conexión aes-tools",
+          "description": "Formulario de conexión proporcionado por el complemento.",
+          "fields": {
+            "display_name": {
+              "label": "Nombre de la conexión"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Puerto"
+            },
+            "protocol": {
+              "label": "Protocolo"
+            },
+            "interface_path": {
+              "label": "Ruta de la interfaz"
+            },
+            "aes_key": {
+              "label": "clave aes"
+            },
+            "aes_key_label": {
+              "label": "etiqueta de clave aes"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "Banco de trabajo aes-tools",
+          "description": "Interfaz sandbox proporcionada por el complemento."
+        }
+      }
+    },
+    "id": {
+      "name": "aes-tools",
+      "description": "Plugin enkripsi/dekripsi AES-128-ECB berbasis platform DBX, kompatibel dengan konfigurasi AES bawaan Hutool. (AES-128-ECB adalah enkripsi deterministik dan tidak aman secara semantik)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "Koneksi aes-tools",
+          "description": "Formulir koneksi yang disediakan oleh plugin.",
+          "fields": {
+            "display_name": {
+              "label": "Nama koneksi"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Port"
+            },
+            "protocol": {
+              "label": "Protokol"
+            },
+            "interface_path": {
+              "label": "Jalur antarmuka"
+            },
+            "aes_key": {
+              "label": "kunci aes"
+            },
+            "aes_key_label": {
+              "label": "label kunci aes"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "Workbench aes-tools",
+          "description": "Antarmuka sandbox yang disediakan oleh plugin."
+        }
+      }
+    },
+    "it": {
+      "name": "aes-tools",
+      "description": "Plugin di cifratura/decifratura AES-128-ECB basato sulla piattaforma DBX, compatibile con la configurazione AES predefinita di Hutool. (AES-128-ECB è una cifratura deterministica e non semanticamente sicura)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "Connessione aes-tools",
+          "description": "Modulo di connessione fornito dal plugin.",
+          "fields": {
+            "display_name": {
+              "label": "Nome connessione"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Porta"
+            },
+            "protocol": {
+              "label": "Protocollo"
+            },
+            "interface_path": {
+              "label": "Percorso interfaccia"
+            },
+            "aes_key": {
+              "label": "chiave aes"
+            },
+            "aes_key_label": {
+              "label": "etichetta chiave aes"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "Workbench aes-tools",
+          "description": "Interfaccia sandbox fornita dal plugin."
+        }
+      }
+    },
     "ja": {
       "name": "aes-tools",
       "description": "DBX プラットフォームベースの AES-128-ECB 暗号化/復号化プラグイン。Hutool のデフォルト AES 設定と互換性があります。（AES-128-ECB は決定論的暗号化であり、意味論的に安全ではありません）",
@@ -299,6 +447,117 @@
         "aes-tools.workbench": {
           "label": "aes-tools 워크벤치",
           "description": "플러그인에서 제공하는 샌드박스 UI입니다."
+        }
+      }
+    },
+    "pt": {
+      "name": "aes-tools",
+      "description": "Plugin de criptografia/descriptografia AES-128-ECB baseado na plataforma DBX, compatível com a configuração AES padrão do Hutool. (AES-128-ECB é criptografia determinística e não é semanticamente segura)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "Conexão aes-tools",
+          "description": "Formulário de conexão fornecido pelo plugin.",
+          "fields": {
+            "display_name": {
+              "label": "Nome da conexão"
+            },
+            "host": {
+              "label": "Host"
+            },
+            "port": {
+              "label": "Porta"
+            },
+            "protocol": {
+              "label": "Protocolo"
+            },
+            "interface_path": {
+              "label": "Caminho da interface"
+            },
+            "aes_key": {
+              "label": "chave aes"
+            },
+            "aes_key_label": {
+              "label": "rótulo da chave aes"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "Workbench aes-tools",
+          "description": "Interface sandbox fornecida pelo plugin."
+        }
+      }
+    },
+    "ru": {
+      "name": "aes-tools",
+      "description": "Плагин шифрования/дешифрования AES-128-ECB на базе платформы DBX, совместимый с конфигурацией AES по умолчанию Hutool. (AES-128-ECB — детерминированное шифрование, не является семантически безопасным)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "Подключение aes-tools",
+          "description": "Форма подключения, предоставляемая плагином.",
+          "fields": {
+            "display_name": {
+              "label": "Имя подключения"
+            },
+            "host": {
+              "label": "Хост"
+            },
+            "port": {
+              "label": "Порт"
+            },
+            "protocol": {
+              "label": "Протокол"
+            },
+            "interface_path": {
+              "label": "Путь интерфейса"
+            },
+            "aes_key": {
+              "label": "aes-ключ"
+            },
+            "aes_key_label": {
+              "label": "метка aes-ключа"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "Рабочая область aes-tools",
+          "description": "Песочница, предоставляемая плагином."
+        }
+      }
+    },
+    "tr": {
+      "name": "aes-tools",
+      "description": "DBX platformu tabanlı AES-128-ECB şifreleme/şifre çözme eklentisi, Hutool'un varsayılan AES yapılandırmasıyla uyumludur. (AES-128-ECB deterministik şifrelemedir ve anlamsal olarak güvenli değildir)",
+      "contributions": {
+        "aes-tools.connection": {
+          "label": "aes-tools Bağlantısı",
+          "description": "Eklenti tarafından sağlanan bağlantı formu.",
+          "fields": {
+            "display_name": {
+              "label": "Bağlantı adı"
+            },
+            "host": {
+              "label": "Sunucu"
+            },
+            "port": {
+              "label": "Bağlantı noktası"
+            },
+            "protocol": {
+              "label": "Protokol"
+            },
+            "interface_path": {
+              "label": "Arayüz yolu"
+            },
+            "aes_key": {
+              "label": "aes anahtarı"
+            },
+            "aes_key_label": {
+              "label": "aes anahtarı etiketi"
+            }
+          }
+        },
+        "aes-tools.workbench": {
+          "label": "aes-tools Çalışma Tezgahı",
+          "description": "Eklenti tarafından sağlanan sanal alan arayüzü."
         }
       }
     }
