@@ -386,10 +386,25 @@
             outline-offset: 1px;
         }
 
+        .btn-import:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .btn-import svg {
             width: 0.7rem;
             height: 0.7rem;
             flex-shrink: 0;
+        }
+
+        /* 旋转动画（刷新中） */
+        .btn-import.spinning svg {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* 输入框 & 文本域 */
@@ -1089,13 +1104,27 @@
                 <!-- 左侧列 -->
                 <div class="horizontal-column">
                     <div class="field">
-                        <label class="field-label" for="keySelectorBtn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 7h16M4 12h10M4 17h14"/>
-                            </svg>
-                            <span data-i18n="keySelectorLabel">选择密钥</span>
-                        </label>
+                        <div class="field-label-row">
+                            <label class="field-label" for="keySelectorBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 7h16M4 12h10M4 17h14"/>
+                                </svg>
+                                <span data-i18n="keySelectorLabel">选择密钥</span>
+                            </label>
+                            <div class="field-actions">
+                                <!-- 新增：刷新密钥列表按钮 -->
+                                <button type="button" id="refreshKeysBtn" class="btn-import" title="刷新密钥列表">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"/>
+                                        <path d="M1 20v-6h6"/>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/>
+                                        <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                                    </svg>
+                                    <span data-i18n="refreshKeysBtn">刷新</span>
+                                </button>
+                            </div>
+                        </div>
                         <div class="select-wrapper" id="selectWrapper">
                             <button type="button" id="keySelectorBtn" class="select-trigger">
                                 <span id="keySelectorLabel">— 不选择（手动输入） —</span>
@@ -1301,6 +1330,9 @@
                 keyPlaceholder: '输入密钥...',
                 keyHint: '密钥仅用于本地运算，不会上传到服务器',
                 resetKeyBtn: '重置',
+                refreshKeysBtn: '刷新',
+                refreshKeysBusy: '刷新中',
+                refreshKeysDone: '已刷新',
                 inputLabel: '输入内容',
                 inputPlaceholder: '输入要加密的文本，或粘贴要解密的密文...',
                 dragImportHint: '仅支持文本类文件（TXT / XML / JSON / 日志 / 配置等）',
@@ -1357,6 +1389,9 @@
                 keyPlaceholder: '輸入金鑰...',
                 keyHint: '金鑰僅用於本機運算，不會上傳到伺服器',
                 resetKeyBtn: '重置',
+                refreshKeysBtn: '重新整理',
+                refreshKeysBusy: '重新整理中',
+                refreshKeysDone: '已重新整理',
                 inputLabel: '輸入內容',
                 inputPlaceholder: '輸入要加密的文字，或貼上要解密的密文...',
                 dragImportHint: '僅支援文字類檔案（TXT / XML / JSON / 日誌 / 設定等）',
@@ -1413,6 +1448,9 @@
                 keyPlaceholder: 'Enter key...',
                 keyHint: 'Key is only used locally, never uploaded to server',
                 resetKeyBtn: 'Reset',
+                refreshKeysBtn: 'Refresh',
+                refreshKeysBusy: 'Refreshing',
+                refreshKeysDone: 'Refreshed',
                 inputLabel: 'Input',
                 inputPlaceholder: 'Enter text to encrypt, or paste ciphertext to decrypt...',
                 dragImportHint: 'Only text files supported (TXT / XML / JSON / log / config)',
@@ -1469,6 +1507,9 @@
                 keyPlaceholder: 'キーを入力...',
                 keyHint: 'キーはローカルでのみ使用され、サーバーには送信されません',
                 resetKeyBtn: 'リセット',
+                refreshKeysBtn: '更新',
+                refreshKeysBusy: '更新中',
+                refreshKeysDone: '更新済み',
                 inputLabel: '入力内容',
                 inputPlaceholder: '暗号化するテキスト、または復号化する暗号文を入力...',
                 dragImportHint: 'テキストファイルのみ対応（TXT / XML / JSON / ログ / 設定など）',
@@ -1525,6 +1566,9 @@
                 keyPlaceholder: '키를 입력하세요...',
                 keyHint: '키는 로컬 연산에만 사용되며 서버에 업로드되지 않습니다',
                 resetKeyBtn: '재설정',
+                refreshKeysBtn: '새로고침',
+                refreshKeysBusy: '새로고침 중',
+                refreshKeysDone: '완료',
                 inputLabel: '입력 내용',
                 inputPlaceholder: '암호화할 텍스트를 입력하거나 복호화할 암호문을 붙여넣으세요...',
                 dragImportHint: '텍스트 파일만 지원 (TXT / XML / JSON / 로그 / 설정 등)',
@@ -1907,6 +1951,9 @@
         const dropOverlayText = document.getElementById('dropOverlayText');
         const appCard = document.getElementById('appCard');
 
+        // 新增：刷新密钥列表按钮
+        const refreshKeysBtn = document.getElementById('refreshKeysBtn');
+
         // 导入文件相关元素
         const importFileBtn = document.getElementById('importFileBtn');
         const fileInput = document.createElement('input');
@@ -1921,6 +1968,9 @@
         let dropErrorTimer = null;
         // flashImportButton 的定时器句柄，防止语言切换后旧定时器覆盖新文案
         let importFlashTimer = null;
+        // 刷新密钥按钮状态
+        let isRefreshingKeys = false;
+        let refreshKeysFlashTimer = null;
 
         function setResult(text, isPlaceholder = false) {
             resultBody.textContent = text;
@@ -2332,7 +2382,6 @@
             });
         }
 
-        // 读取浏览器 File 对象的头部字节（用于二进制内容校验）
         function readFileHeadBytes(file, maxBytes) {
             return new Promise((resolve) => {
                 try {
@@ -2347,7 +2396,6 @@
             });
         }
 
-        // 在导入按钮上短暂显示状态文案，到期后用当前语言的 t() 恢复
         function flashImportButton(message, duration = 1500) {
             const span = importFileBtn.querySelector('span[data-i18n="importFileBtn"]');
             if (!span) return;
@@ -2366,13 +2414,11 @@
             if (!file) return;
 
             try {
-                // 1) 文件大小限制
                 if (file.size > MAX_IMPORT_FILE_BYTES) {
                     flashImportButton(t('importTooLarge'));
                     return;
                 }
 
-                // 2) 扩展名 / MIME 类型快速判断
                 const fileMeta = {
                     name: file.name || '',
                     contentType: file.type || ''
@@ -2384,7 +2430,6 @@
                     return;
                 }
 
-                // 3) 读取头部字节做二进制内容校验（与拖放逻辑对齐）
                 const headBytes = await readFileHeadBytes(file, 4096);
                 if (headBytes && !isTextContentByBytes(headBytes)) {
                     console.warn('[AES] 拒绝二进制内容:', fileMeta.name);
@@ -2392,7 +2437,6 @@
                     return;
                 }
 
-                // 4) 读取全文
                 const text = await readFileAsText(file);
 
                 if (!text || text.trim() === '') {
@@ -2409,7 +2453,6 @@
         }
 
         importFileBtn.addEventListener('click', () => {
-            // 每次点击前清空 value，确保同一个文件可以重复选择
             fileInput.value = '';
             fileInput.click();
         });
@@ -2419,6 +2462,69 @@
             if (!files || files.length === 0) return;
             handleImportFile(files[0]).catch((err) => {
                 console.error('[AES] handleImportFile rejected:', err);
+            });
+        });
+
+        // ============================================================
+        // 新增：刷新密钥列表
+        // ============================================================
+
+        function setRefreshKeysBtnState(state) {
+            // state: 'idle' | 'busy' | 'done'
+            const span = refreshKeysBtn.querySelector('span[data-i18n="refreshKeysBtn"]');
+            if (!span) return;
+
+            if (refreshKeysFlashTimer) {
+                clearTimeout(refreshKeysFlashTimer);
+                refreshKeysFlashTimer = null;
+            }
+
+            if (state === 'busy') {
+                refreshKeysBtn.disabled = true;
+                refreshKeysBtn.classList.add('spinning');
+                span.textContent = t('refreshKeysBusy');
+            } else if (state === 'done') {
+                refreshKeysBtn.disabled = false;
+                refreshKeysBtn.classList.remove('spinning');
+                span.textContent = t('refreshKeysDone');
+                refreshKeysFlashTimer = setTimeout(() => {
+                    span.textContent = t('refreshKeysBtn');
+                    refreshKeysFlashTimer = null;
+                }, 1500);
+            } else {
+                refreshKeysBtn.disabled = false;
+                refreshKeysBtn.classList.remove('spinning');
+                span.textContent = t('refreshKeysBtn');
+            }
+        }
+
+        async function refreshKeys() {
+            if (isRefreshingKeys) return;
+            isRefreshingKeys = true;
+            setRefreshKeysBtnState('busy');
+
+            try {
+                // 保存当前输入框值，防止 aesKeyLables 内部任何渲染意外清空
+                const savedKeyValue = keyInput.value;
+                const savedInputValue = inputText.value;
+
+                await aesKeyLables();
+
+                keyInput.value = savedKeyValue;
+                inputText.value = savedInputValue;
+
+                setRefreshKeysBtnState('done');
+            } catch (err) {
+                console.error('[AES] refreshKeys failed:', err);
+                setRefreshKeysBtnState('idle');
+            } finally {
+                isRefreshingKeys = false;
+            }
+        }
+
+        refreshKeysBtn.addEventListener('click', () => {
+            refreshKeys().catch((err) => {
+                console.error('[AES] refreshKeys rejected:', err);
             });
         });
 
@@ -2926,7 +3032,6 @@
         });
 
         keySelector.addEventListener('change', () => {
-            // 修复：语言切换过程中重建 select 会触发 change，此处跳过
             if (suppressKeyChange) return;
             syncKeyFromSelector();
         });
@@ -3018,7 +3123,6 @@
             }
         });
 
-        // 页面卸载时清理动态创建的元素与定时器
         window.addEventListener('beforeunload', () => {
             if (fileInput && fileInput.parentNode) {
                 fileInput.parentNode.removeChild(fileInput);
@@ -3026,6 +3130,10 @@
             if (importFlashTimer) {
                 clearTimeout(importFlashTimer);
                 importFlashTimer = null;
+            }
+            if (refreshKeysFlashTimer) {
+                clearTimeout(refreshKeysFlashTimer);
+                refreshKeysFlashTimer = null;
             }
             if (dropErrorTimer) {
                 clearTimeout(dropErrorTimer);
