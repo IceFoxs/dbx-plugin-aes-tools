@@ -2833,12 +2833,9 @@
         }
 
         function formatInputText() {
-            const btnSpan = formatBtn.querySelector('span[data-i18n="formatBtn"]');
-            const originalText = btnSpan ? btnSpan.textContent : '';
-
             const raw = inputText.value;
             if (!raw || raw.trim() === '') {
-                flashButton(btnSpan, originalText, t('formatEmpty'));
+                // 取消"内容为空"提示：直接静默返回
                 return;
             }
 
