@@ -469,7 +469,7 @@
 
         .ctx-menu {
             position: fixed; z-index: 1000;
-            min-width: 160px; max-width: 260px;
+            min-width: 160px; max-width: 280px;
             background: var(--color-card);
             border: 1px solid var(--color-border);
             border-radius: 8px;
@@ -725,6 +725,14 @@
                                         </svg>
                                         <span data-i18n="backfillBtn">回填</span>
                                     </button>
+                                    <button id="backfillNewlineBtn" class="btn btn-ghost btn-sm" title="换行追加到输入框">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 14 4 9 9 4"/>
+                                            <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                                            <line x1="16" y1="19" x2="16" y2="22"/>
+                                        </svg>
+                                        <span data-i18n="backfillNewlineBtn">换行回填</span>
+                                    </button>
                                     <button id="saveBtn" class="btn btn-ghost btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -791,6 +799,7 @@
                 copyBtn: '复制',
                 saveBtn: '保存',
                 backfillBtn: '回填',
+                backfillNewlineBtn: '换行回填',
                 clearBtn: '清空',
                 importFileBtn: '导入',
                 resultPlaceholder: '等待操作...',
@@ -825,6 +834,7 @@
                 ctxSelectAll: '全选',
                 ctxCopyAll: '复制全部',
                 ctxBackfill: '回填到输入框',
+                ctxBackfillNewline: '换行回填到输入框',
                 ctxCopyItem: '复制本条',
                 ctxBackfillItem: '回填本条',
                 ctxPasteFailed: '读取剪贴板失败，请用 Ctrl+V 粘贴'
@@ -860,6 +870,7 @@
                 copyBtn: '複製',
                 saveBtn: '儲存',
                 backfillBtn: '回填',
+                backfillNewlineBtn: '換行回填',
                 clearBtn: '清空',
                 importFileBtn: '匯入',
                 resultPlaceholder: '等待操作...',
@@ -894,6 +905,7 @@
                 ctxSelectAll: '全選',
                 ctxCopyAll: '複製全部',
                 ctxBackfill: '回填至輸入框',
+                ctxBackfillNewline: '換行回填至輸入框',
                 ctxCopyItem: '複製本條',
                 ctxBackfillItem: '回填本條',
                 ctxPasteFailed: '讀取剪貼簿失敗，請用 Ctrl+V 貼上'
@@ -929,6 +941,7 @@
                 copyBtn: 'Copy',
                 saveBtn: 'Save',
                 backfillBtn: 'Backfill',
+                backfillNewlineBtn: 'Backfill NL',
                 clearBtn: 'Clear',
                 importFileBtn: 'Import',
                 resultPlaceholder: 'Waiting...',
@@ -963,6 +976,7 @@
                 ctxSelectAll: 'Select All',
                 ctxCopyAll: 'Copy All',
                 ctxBackfill: 'Backfill to Input',
+                ctxBackfillNewline: 'Backfill with Newline',
                 ctxCopyItem: 'Copy Item',
                 ctxBackfillItem: 'Backfill Item',
                 ctxPasteFailed: 'Cannot read clipboard, please use Ctrl+V'
@@ -998,6 +1012,7 @@
                 copyBtn: 'コピー',
                 saveBtn: '保存',
                 backfillBtn: '再入力',
+                backfillNewlineBtn: '改行追記',
                 clearBtn: 'クリア',
                 importFileBtn: '取込',
                 resultPlaceholder: '待機中...',
@@ -1032,6 +1047,7 @@
                 ctxSelectAll: 'すべて選択',
                 ctxCopyAll: 'すべてコピー',
                 ctxBackfill: '入力欄に戻す',
+                ctxBackfillNewline: '改行で入力欄に追記',
                 ctxCopyItem: 'この項目をコピー',
                 ctxBackfillItem: 'この項目を戻す',
                 ctxPasteFailed: 'クリップボードを読み取れません。Ctrl+V で貼り付けてください'
@@ -1067,6 +1083,7 @@
                 copyBtn: '복사',
                 saveBtn: '저장',
                 backfillBtn: '되돌리기',
+                backfillNewlineBtn: '줄바꿈 추가',
                 clearBtn: '지우기',
                 importFileBtn: '가져오기',
                 resultPlaceholder: '대기 중...',
@@ -1101,6 +1118,7 @@
                 ctxSelectAll: '전체 선택',
                 ctxCopyAll: '전체 복사',
                 ctxBackfill: '입력창에 채우기',
+                ctxBackfillNewline: '줄바꿈으로 입력창에 추가',
                 ctxCopyItem: '이 항목 복사',
                 ctxBackfillItem: '이 항목 채우기',
                 ctxPasteFailed: '클립보드를 읽을 수 없습니다. Ctrl+V를 사용하세요'
@@ -1356,6 +1374,7 @@
         const copyBtn = document.getElementById('copyBtn');
         const saveBtn = document.getElementById('saveBtn');
         const backfillBtn = document.getElementById('backfillBtn');
+        const backfillNewlineBtn = document.getElementById('backfillNewlineBtn');
         const clearInputBtn = document.getElementById('clearInputBtn');
         const formatBtn = document.getElementById('formatBtn');
         const langSwitch = document.getElementById('langSwitch');
@@ -1797,7 +1816,6 @@
             insertTextInto(el, text);
         }
 
-        // 换行粘贴：读取剪贴板后，在前面加一个 \n 再插入
         async function ctxPasteWithNewlineInto(el) {
             if (!el) return;
             const text = await readClipboardText();
@@ -1805,7 +1823,6 @@
                 flashPasteHint(el);
                 return;
             }
-            // 若光标前已有内容且不以 \n 结尾，自动补一个换行；否则直接粘贴原内容
             const start = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
             const before = el.value.slice(0, start);
             const prefix = (before.length > 0 && !before.endsWith('\n')) ? '\n' : '';
@@ -1909,6 +1926,35 @@
             } catch (e) {}
             backfillBtn.style.opacity = '0.7';
             setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
+        }
+
+        // 换行回填：不覆盖，而是在当前内容后追加（自动补换行）
+        function backfillResultWithNewline() {
+            let text = '';
+            if (isBatchResult && batchResults.length > 0) {
+                text = batchResults.map((item, idx) => {
+                    if (item.error) return `#${idx + 1} ERROR: ${item.error}`;
+                    return item.output;
+                }).join('\n');
+            } else {
+                if (resultBody.classList.contains('placeholder')) {
+                    backfillNewlineBtn.style.opacity = '0.5';
+                    setTimeout(() => { backfillNewlineBtn.style.opacity = ''; }, 200);
+                    return;
+                }
+                text = resultBody.textContent;
+            }
+
+            const current = inputText.value;
+            const prefix = (current.length > 0 && !current.endsWith('\n')) ? '\n' : '';
+            inputText.value = current + prefix + text;
+
+            try {
+                inputText.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (e) {}
+
+            backfillNewlineBtn.style.opacity = '0.7';
+            setTimeout(() => { backfillNewlineBtn.style.opacity = ''; }, 200);
         }
 
         function readFileAsText(file) {
@@ -2450,7 +2496,8 @@
             paste: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
             pasteNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 11 12 14 15 11"/></svg>',
             selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
-            backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>'
+            backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>',
+            backfillNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><line x1="16" y1="19" x2="16" y2="22"/></svg>'
         };
 
         function closeCtxMenu() {
@@ -2532,7 +2579,6 @@
                     onClick: () => { return ctxPasteInto(el); } }
             ];
 
-            // 仅普通输入框（输入内容 textarea）支持"换行粘贴"；密钥框不加
             if (isNormalInput) {
                 items.push({
                     action: 'pasteNewline',
@@ -2567,6 +2613,8 @@
                     onClick: () => { return copyResult(); } },
                 { action: 'backfill', label: t('ctxBackfill'), icon: CTX_ICONS.backfill, disabled: !hasContent,
                     onClick: () => { backfillResult(); } },
+                { action: 'backfillNewline', label: t('ctxBackfillNewline'), icon: CTX_ICONS.backfillNewline, disabled: !hasContent,
+                    onClick: () => { backfillResultWithNewline(); } },
                 { type: 'sep' },
                 { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll,
                     onClick: () => {
@@ -2603,6 +2651,14 @@
                     onClick: () => {
                         if (!hasOutput) return;
                         inputText.value = item.output;
+                        try { inputText.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+                    } },
+                { action: 'backfillItemNewline', label: t('ctxBackfillNewline'), icon: CTX_ICONS.backfillNewline, disabled: !hasOutput,
+                    onClick: () => {
+                        if (!hasOutput) return;
+                        const current = inputText.value;
+                        const prefix = (current.length > 0 && !current.endsWith('\n')) ? '\n' : '';
+                        inputText.value = current + prefix + item.output;
                         try { inputText.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
                     } }
             ];
@@ -2712,6 +2768,7 @@
 
         clearInputBtn.addEventListener('click', clearInput);
         backfillBtn.addEventListener('click', backfillResult);
+        backfillNewlineBtn.addEventListener('click', backfillResultWithNewline);
 
         resetKeyBtn.addEventListener('click', () => { aesKey(); });
 
