@@ -821,6 +821,7 @@
                 ctxCut: '剪切',
                 ctxCopy: '复制',
                 ctxPaste: '粘贴',
+                ctxPasteNewline: '换行粘贴',
                 ctxSelectAll: '全选',
                 ctxCopyAll: '复制全部',
                 ctxBackfill: '回填到输入框',
@@ -889,6 +890,7 @@
                 ctxCut: '剪下',
                 ctxCopy: '複製',
                 ctxPaste: '貼上',
+                ctxPasteNewline: '換行貼上',
                 ctxSelectAll: '全選',
                 ctxCopyAll: '複製全部',
                 ctxBackfill: '回填至輸入框',
@@ -957,6 +959,7 @@
                 ctxCut: 'Cut',
                 ctxCopy: 'Copy',
                 ctxPaste: 'Paste',
+                ctxPasteNewline: 'Paste with Newline',
                 ctxSelectAll: 'Select All',
                 ctxCopyAll: 'Copy All',
                 ctxBackfill: 'Backfill to Input',
@@ -1025,6 +1028,7 @@
                 ctxCut: '切り取り',
                 ctxCopy: 'コピー',
                 ctxPaste: '貼り付け',
+                ctxPasteNewline: '改行貼り付け',
                 ctxSelectAll: 'すべて選択',
                 ctxCopyAll: 'すべてコピー',
                 ctxBackfill: '入力欄に戻す',
@@ -1093,6 +1097,7 @@
                 ctxCut: '잘라내기',
                 ctxCopy: '복사',
                 ctxPaste: '붙여넣기',
+                ctxPasteNewline: '줄바꿈 붙여넣기',
                 ctxSelectAll: '전체 선택',
                 ctxCopyAll: '전체 복사',
                 ctxBackfill: '입력창에 채우기',
@@ -1792,6 +1797,16 @@
             insertTextInto(el, text);
         }
 
+        async function ctxPasteWithNewlineInto(el) {
+            if (!el) return;
+            const text = await readClipboardText();
+            if (text === null) {
+                flashPasteHint(el);
+                return;
+            }
+            insertTextInto(el, '\n' + text);
+        }
+
         function flashPasteHint(el) {
             const old = document.getElementById('__paste_hint__');
             if (old && old.parentNode) old.parentNode.removeChild(old);
@@ -2428,6 +2443,7 @@
             cut: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>',
             copy: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
             paste: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+            pasteNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M12 9v4"/><polyline points="9 11 12 13 15 11"/></svg>',
             selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
             backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>'
         };
@@ -2508,6 +2524,8 @@
                     onClick: () => { el.focus(); document.execCommand('copy'); } },
                 { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
                     onClick: () => { return ctxPasteInto(el); } },
+                { action: 'pasteNewline', label: t('ctxPasteNewline'), icon: CTX_ICONS.pasteNewline,
+                    onClick: () => { return ctxPasteWithNewlineInto(el); } },
                 { type: 'sep' },
                 { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll, disabled: !hasText,
                     onClick: () => {
