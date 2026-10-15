@@ -2524,8 +2524,10 @@
                     onClick: () => { el.focus(); document.execCommand('copy'); } },
                 { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
                     onClick: () => { return ctxPasteInto(el); } },
-                { action: 'pasteNewline', label: t('ctxPasteNewline'), icon: CTX_ICONS.pasteNewline,
-                    onClick: () => { return ctxPasteWithNewlineInto(el); } },
+                ...(el !== keyInput
+                    ? [{ action: 'pasteNewline', label: t('ctxPasteNewline'), icon: CTX_ICONS.pasteNewline,
+                        onClick: () => { return ctxPasteWithNewlineInto(el); } }]
+                    : []),
                 { type: 'sep' },
                 { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll, disabled: !hasText,
                     onClick: () => {
