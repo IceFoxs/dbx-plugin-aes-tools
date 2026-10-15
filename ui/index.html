@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AES 加解密 · shadcn 风格</title>
     <style>
-        /* ============================================================
-           shadcn/ui 设计系统灵感
-           - 优先使用 DBX 宿主注入的 CSS 变量
-           - 用 prefers-color-scheme 作为 fallback，保证暗色模式正确
-        ============================================================ */
-
         :root {
             --color-background: #fafafa;
             --color-foreground: #09090b;
@@ -54,15 +48,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
         }
 
-        html {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
+        html { height: 100%; width: 100%; overflow: hidden; }
         body {
-            height: 100%;
-            width: 100%;
+            height: 100%; width: 100%;
             background-color: var(--color-background);
             color: var(--color-foreground);
             overflow: hidden;
@@ -70,995 +58,451 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* 全屏布局容器 */
         .app-shell {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            padding: 0.75rem;
+            display: flex; flex-direction: column;
+            width: 100%; height: 100%; padding: 0.75rem;
         }
 
         .card {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
+            flex: 1; min-height: 0; width: 100%;
             background-color: var(--color-card);
             border: 1px solid var(--color-border);
             border-radius: 12px;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
         }
 
-        /* 拖放遮罩 */
         .drop-overlay {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background: rgba(24, 24, 27, 0.8);
             border: 2px dashed var(--color-primary);
             border-radius: 12px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 0.5rem;
-            color: white;
-            font-size: 1rem;
-            font-weight: 500;
-            z-index: 100;
-            pointer-events: none;
+            display: none; align-items: center; justify-content: center;
+            flex-direction: column; gap: 0.5rem;
+            color: white; font-size: 1rem; font-weight: 500;
+            z-index: 100; pointer-events: none;
         }
 
-        .drop-overlay.active {
-            display: flex;
-        }
+        .drop-overlay.active { display: flex; }
+        .drop-overlay svg { width: 2.5rem; height: 2.5rem; }
+        .drop-overlay.error { background: rgba(180, 35, 24, 0.85); border-color: #fca5a5; }
 
-        .drop-overlay svg {
-            width: 2.5rem;
-            height: 2.5rem;
-        }
-
-        .drop-overlay.error {
-            background: rgba(180, 35, 24, 0.85);
-            border-color: #fca5a5;
-        }
-
-        /* ========== 卡片头部 ========== */
         .card-header {
             padding: 1rem 1.25rem 0.85rem;
             border-bottom: 1px solid var(--color-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-shrink: 0;
-            flex-wrap: wrap;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; flex-shrink: 0; flex-wrap: wrap;
         }
 
-        .card-header-left {
-            flex: 1;
-            min-width: 0;
-        }
+        .card-header-left { flex: 1; min-width: 0; }
 
         .card-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: var(--color-card-foreground);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 1.15rem; font-weight: 600;
+            letter-spacing: -0.02em; color: var(--color-card-foreground);
+            display: flex; align-items: center; gap: 0.5rem;
         }
 
-        .card-title svg {
-            width: 1.25rem;
-            height: 1.25rem;
-            color: var(--color-card-foreground);
-            flex-shrink: 0;
-        }
+        .card-title svg { width: 1.25rem; height: 1.25rem; color: var(--color-card-foreground); flex-shrink: 0; }
 
-        .card-description {
-            font-size: 0.8rem;
-            color: var(--color-muted-foreground);
-            margin-top: 0.2rem;
-            line-height: 1.5;
-        }
+        .card-description { font-size: 0.8rem; color: var(--color-muted-foreground); margin-top: 0.2rem; line-height: 1.5; }
 
-        .card-header-right {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            flex-shrink: 0;
-        }
+        .card-header-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
 
-        /* 批量开关 */
         .batch-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
+            display: flex; align-items: center; gap: 0.4rem;
             background: var(--color-muted);
-            padding: 3px 8px 3px 5px;
-            border-radius: 40px;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-            border: 1px solid transparent;
+            padding: 3px 8px 3px 5px; border-radius: 40px;
+            cursor: pointer; user-select: none;
+            transition: background 0.2s; border: 1px solid transparent;
         }
 
-        .batch-toggle:hover {
-            filter: brightness(0.97);
-        }
-
-        .batch-toggle input {
-            display: none;
-        }
+        .batch-toggle:hover { filter: brightness(0.97); }
+        .batch-toggle input { display: none; }
 
         .batch-toggle-track {
-            position: relative;
-            width: 28px;
-            height: 16px;
-            background: var(--color-border);
-            border-radius: 40px;
-            transition: background 0.2s;
-            flex-shrink: 0;
+            position: relative; width: 28px; height: 16px;
+            background: var(--color-border); border-radius: 40px;
+            transition: background 0.2s; flex-shrink: 0;
         }
 
         .batch-toggle-track::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 12px;
-            height: 12px;
-            background: var(--color-card-foreground);
-            border-radius: 50%;
-            transition: transform 0.2s;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            content: ''; position: absolute;
+            top: 2px; left: 2px; width: 12px; height: 12px;
+            background: var(--color-card-foreground); border-radius: 50%;
+            transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .batch-toggle input:checked + .batch-toggle-track {
-            background: var(--color-primary);
-        }
+        .batch-toggle input:checked + .batch-toggle-track { background: var(--color-primary); }
+        .batch-toggle input:checked + .batch-toggle-track::after { transform: translateX(12px); background: var(--color-primary-foreground); }
+        .batch-toggle-label { font-size: 0.65rem; font-weight: 500; color: var(--color-muted-foreground); white-space: nowrap; }
 
-        .batch-toggle input:checked + .batch-toggle-track::after {
-            transform: translateX(12px);
-            background: var(--color-primary-foreground);
-        }
-
-        .batch-toggle-label {
-            font-size: 0.65rem;
-            font-weight: 500;
-            color: var(--color-muted-foreground);
-            white-space: nowrap;
-        }
-
-        /* 语言切换器 */
-        .lang-switch {
-            display: flex;
-            gap: 3px;
-            flex-wrap: wrap;
-            background: var(--color-muted);
-            padding: 3px;
-            border-radius: 40px;
-        }
+        .lang-switch { display: flex; gap: 3px; flex-wrap: wrap; background: var(--color-muted); padding: 3px; border-radius: 40px; }
 
         .lang-btn {
-            border: none;
-            background: transparent;
-            padding: 3px 9px;
-            border-radius: 30px;
-            font-size: 0.65rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
+            border: none; background: transparent; padding: 3px 9px;
+            border-radius: 30px; font-size: 0.65rem; font-weight: 500;
+            cursor: pointer; transition: 0.2s;
             color: var(--color-muted-foreground);
-            border: 1px solid transparent;
-            line-height: 1.4;
-            white-space: nowrap;
+            border: 1px solid transparent; line-height: 1.4; white-space: nowrap;
         }
 
-        .lang-btn:hover {
-            background: var(--color-border);
-        }
-
+        .lang-btn:hover { background: var(--color-border); }
         .lang-btn.active {
-            background: var(--color-card);
-            color: var(--color-card-foreground);
+            background: var(--color-card); color: var(--color-card-foreground);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-            border-color: var(--color-border);
-            font-weight: 600;
+            border-color: var(--color-border); font-weight: 600;
         }
 
-        /* ========== 卡片内容 ========== */
         .card-content {
-            flex: 1;
-            min-height: 0;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            flex: 1; min-height: 0; padding: 1.25rem;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* 横向双栏布局 */
         .horizontal-layout {
-            flex: 1;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-            align-items: stretch;
+            flex: 1; min-height: 0;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1.25rem; align-items: stretch;
         }
 
         .horizontal-column {
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-            min-width: 0;
-            min-height: 0;
-            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 0.85rem;
+            min-width: 0; min-height: 0; overflow-y: auto;
         }
 
-        /* ========== 表单元素 ========== */
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            flex-shrink: 0;
-        }
-
-        .field.flex-grow {
-            flex: 1 1 auto;
-            min-height: 120px;
-        }
+        .field { display: flex; flex-direction: column; gap: 0.35rem; flex-shrink: 0; }
+        .field.flex-grow { flex: 1 1 auto; min-height: 120px; }
 
         .field-label {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--color-foreground);
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-            flex-shrink: 0;
+            font-size: 0.75rem; font-weight: 500; color: var(--color-foreground);
+            line-height: 1; display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;
         }
 
-        .field-label svg {
-            width: 0.85rem;
-            height: 0.85rem;
-            color: var(--color-muted-foreground);
-            flex-shrink: 0;
-        }
+        .field-label svg { width: 0.85rem; height: 0.85rem; color: var(--color-muted-foreground); flex-shrink: 0; }
 
-        .field-label-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            flex-shrink: 0;
-        }
-
-        .field-label-row .field-label {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .field-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            flex-shrink: 0;
-        }
+        .field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-shrink: 0; }
+        .field-label-row .field-label { flex: 1; min-width: 0; }
+        .field-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
         .btn-import {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            padding: 0.2rem 0.45rem;
-            font-size: 0.65rem;
-            font-weight: 500;
-            line-height: 1;
-            white-space: nowrap;
-            color: var(--color-muted-foreground);
-            background-color: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            font-family: inherit;
-            flex-shrink: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.25rem; padding: 0.2rem 0.45rem;
+            font-size: 0.65rem; font-weight: 500; line-height: 1;
+            white-space: nowrap; color: var(--color-muted-foreground);
+            background-color: transparent; border: 1px solid var(--color-border);
+            border-radius: 5px; cursor: pointer;
+            transition: all 0.15s ease; font-family: inherit; flex-shrink: 0;
         }
 
-        .btn-import:hover {
-            background-color: var(--color-muted);
-            color: var(--color-foreground);
-        }
+        .btn-import:hover { background-color: var(--color-muted); color: var(--color-foreground); }
+        .btn-import:active { transform: scale(0.97); }
+        .btn-import:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
+        .btn-import:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-import svg { width: 0.7rem; height: 0.7rem; flex-shrink: 0; }
+        .btn-import.spinning svg { animation: spin 0.8s linear infinite; }
 
-        .btn-import:active {
-            transform: scale(0.97);
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .btn-import:focus-visible {
-            outline: 2px solid var(--color-ring);
-            outline-offset: 1px;
-        }
-
-        .btn-import:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-import svg {
-            width: 0.7rem;
-            height: 0.7rem;
-            flex-shrink: 0;
-        }
-
-        /* 旋转动画（刷新中） */
-        .btn-import.spinning svg {
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* 输入框 & 文本域 */
-        .input,
-        .textarea {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.8rem;
-            line-height: 1.5;
-            color: var(--color-foreground);
-            background-color: var(--color-card);
-            border: 1px solid var(--color-input);
-            border-radius: 8px;
+        .input, .textarea {
+            width: 100%; padding: 0.5rem 0.75rem;
+            font-size: 0.8rem; line-height: 1.5;
+            color: var(--color-foreground); background-color: var(--color-card);
+            border: 1px solid var(--color-input); border-radius: 8px;
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
-            font-family: inherit;
-            letter-spacing: 0.01em;
+            font-family: inherit; letter-spacing: 0.01em;
         }
 
-        .input::placeholder,
-        .textarea::placeholder {
-            color: var(--color-placeholder);
-            font-weight: 400;
-        }
+        .input::placeholder, .textarea::placeholder { color: var(--color-placeholder); font-weight: 400; }
+        .input:focus, .textarea:focus { border-color: var(--color-ring); box-shadow: 0 0 0 1px var(--color-ring); }
 
-        .input:focus,
-        .textarea:focus {
-            border-color: var(--color-ring);
-            box-shadow: 0 0 0 1px var(--color-ring);
-        }
-
-        /* 文本域：占满剩余高度，但保证最小可见高度 */
         .textarea {
-            flex: 1 1 auto;
-            min-height: 60px;
-            resize: none;
+            flex: 1 1 auto; min-height: 60px; resize: none;
             line-height: 1.6;
             font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
             font-size: 0.8rem;
         }
 
-        .key-input {
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            letter-spacing: 0.5px;
-            font-size: 0.8rem;
-        }
-
-        .key-input-row {
-            display: flex;
-            gap: 0.5rem;
-            align-items: stretch;
-        }
-
-        .key-input-row .input {
-            flex: 1;
-            min-width: 0;
-        }
+        .key-input { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; letter-spacing: 0.5px; font-size: 0.8rem; }
+        .key-input-row { display: flex; gap: 0.5rem; align-items: stretch; }
+        .key-input-row .input { flex: 1; min-width: 0; }
 
         .btn-reset-key {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.3rem;
-            padding: 0 0.6rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            line-height: 1;
-            white-space: nowrap;
-            color: var(--color-muted-foreground);
-            background-color: var(--color-muted);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            font-family: inherit;
-            flex-shrink: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.3rem; padding: 0 0.6rem;
+            font-size: 0.7rem; font-weight: 500; line-height: 1;
+            white-space: nowrap; color: var(--color-muted-foreground);
+            background-color: var(--color-muted); border: 1px solid var(--color-border);
+            border-radius: 8px; cursor: pointer;
+            transition: all 0.15s ease; font-family: inherit; flex-shrink: 0;
         }
 
-        .btn-reset-key:hover {
-            background-color: var(--color-border);
-            color: var(--color-foreground);
-        }
+        .btn-reset-key:hover { background-color: var(--color-border); color: var(--color-foreground); }
+        .btn-reset-key:active { transform: scale(0.97); }
+        .btn-reset-key:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+        .btn-reset-key svg { width: 0.75rem; height: 0.75rem; flex-shrink: 0; }
 
-        .btn-reset-key:active {
-            transform: scale(0.97);
-        }
-
-        .btn-reset-key:focus-visible {
-            outline: 2px solid var(--color-ring);
-            outline-offset: 2px;
-        }
-
-        .btn-reset-key svg {
-            width: 0.75rem;
-            height: 0.75rem;
-            flex-shrink: 0;
-        }
-
-        /* ========== 自定义 Select ========== */
-        .select-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .select-hidden {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-            width: 0;
-            height: 0;
-            overflow: hidden;
-        }
+        .select-wrapper { position: relative; width: 100%; }
+        .select-hidden { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; overflow: hidden; }
 
         .select-trigger {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.8rem;
-            line-height: 1.5;
-            color: var(--color-foreground);
-            background-color: var(--color-card);
-            border: 1px solid var(--color-input);
-            border-radius: 8px;
+            width: 100%; padding: 0.5rem 0.75rem;
+            font-size: 0.8rem; line-height: 1.5;
+            color: var(--color-foreground); background-color: var(--color-card);
+            border: 1px solid var(--color-input); border-radius: 8px;
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
-            font-family: inherit;
-            letter-spacing: 0.01em;
-            cursor: pointer;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
+            font-family: inherit; letter-spacing: 0.01em;
+            cursor: pointer; text-align: left;
+            display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
         }
 
-        .select-trigger:hover {
-            border-color: var(--color-ring);
-            opacity: 0.85;
-        }
-
-        .select-trigger:focus-visible,
-        .select-wrapper.open .select-trigger {
-            border-color: var(--color-ring);
-            box-shadow: 0 0 0 1px var(--color-ring);
-        }
-
-        .select-trigger span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .select-trigger:hover { border-color: var(--color-ring); opacity: 0.85; }
+        .select-trigger:focus-visible, .select-wrapper.open .select-trigger { border-color: var(--color-ring); box-shadow: 0 0 0 1px var(--color-ring); }
+        .select-trigger span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .select-arrow {
-            width: 0.85rem;
-            height: 0.85rem;
-            color: var(--color-muted-foreground);
-            flex-shrink: 0;
+            width: 0.85rem; height: 0.85rem;
+            color: var(--color-muted-foreground); flex-shrink: 0;
             transition: transform 0.15s ease;
         }
 
-        .select-wrapper.open .select-arrow {
-            transform: rotate(180deg);
-        }
+        .select-wrapper.open .select-arrow { transform: rotate(180deg); }
 
         .select-dropdown {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background: var(--color-card);
-            border: 1px solid var(--color-border);
+            position: absolute; top: calc(100% + 4px);
+            left: 0; right: 0; z-index: 50;
+            background: var(--color-card); border: 1px solid var(--color-border);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-4px);
+            opacity: 0; visibility: hidden; transform: translateY(-4px);
             transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
-        .select-wrapper.open .select-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        .select-wrapper.open .select-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
 
-        .select-search-wrapper {
-            position: relative;
-            padding: 8px;
-            border-bottom: 1px solid var(--color-border);
-            flex-shrink: 0;
-        }
+        .select-search-wrapper { position: relative; padding: 8px; border-bottom: 1px solid var(--color-border); flex-shrink: 0; }
 
         .select-search-icon {
-            position: absolute;
-            left: 1.1rem;
-            top: 50%;
+            position: absolute; left: 1.1rem; top: 50%;
             transform: translateY(-50%);
-            width: 0.8rem;
-            height: 0.8rem;
-            color: var(--color-placeholder);
-            pointer-events: none;
+            width: 0.8rem; height: 0.8rem;
+            color: var(--color-placeholder); pointer-events: none;
         }
 
         .select-search {
-            width: 100%;
-            padding: 0.4rem 0.6rem 0.4rem 1.8rem;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: var(--color-foreground);
-            background-color: var(--color-muted);
-            border: 1px solid var(--color-input);
-            border-radius: 6px;
+            width: 100%; padding: 0.4rem 0.6rem 0.4rem 1.8rem;
+            font-size: 0.8rem; line-height: 1.4;
+            color: var(--color-foreground); background-color: var(--color-muted);
+            border: 1px solid var(--color-input); border-radius: 6px;
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s;
             font-family: inherit;
         }
 
-        .select-search::placeholder {
-            color: var(--color-placeholder);
-            font-weight: 400;
-        }
+        .select-search::placeholder { color: var(--color-placeholder); font-weight: 400; }
+        .select-search:focus { border-color: var(--color-ring); box-shadow: 0 0 0 1px var(--color-ring); background-color: var(--color-card); }
 
-        .select-search:focus {
-            border-color: var(--color-ring);
-            box-shadow: 0 0 0 1px var(--color-ring);
-            background-color: var(--color-card);
-        }
-
-        .select-list {
-            list-style: none;
-            margin: 0;
-            padding: 4px;
-            max-height: 240px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-        }
-
-        .select-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .select-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .select-list::-webkit-scrollbar-thumb {
-            background-color: var(--color-border);
-            border-radius: 8px;
-            border: 2px solid var(--color-card);
-        }
-        .select-list::-webkit-scrollbar-thumb:hover {
-            background-color: var(--color-muted-foreground);
-        }
+        .select-list { list-style: none; margin: 0; padding: 4px; max-height: 240px; overflow-y: auto; scrollbar-width: thin; }
+        .select-list::-webkit-scrollbar { width: 8px; }
+        .select-list::-webkit-scrollbar-track { background: transparent; }
+        .select-list::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 8px; border: 2px solid var(--color-card); }
+        .select-list::-webkit-scrollbar-thumb:hover { background-color: var(--color-muted-foreground); }
 
         .select-option {
-            padding: 0.4rem 0.6rem;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: var(--color-foreground);
-            border-radius: 6px;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 0.4rem 0.6rem; font-size: 0.8rem; line-height: 1.4;
+            color: var(--color-foreground); border-radius: 6px;
+            cursor: pointer; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
             transition: background-color 0.1s ease;
         }
 
-        .select-option:hover {
-            background-color: var(--color-muted);
-        }
+        .select-option:hover { background-color: var(--color-muted); }
+        .select-option.selected { background-color: var(--color-muted); font-weight: 500; }
 
-        .select-option.selected {
-            background-color: var(--color-muted);
-            font-weight: 500;
-        }
+        .select-empty { padding: 1rem 0.6rem; font-size: 0.8rem; color: var(--color-placeholder); text-align: center; cursor: default; }
 
-        .select-empty {
-            padding: 1rem 0.6rem;
-            font-size: 0.8rem;
-            color: var(--color-placeholder);
-            text-align: center;
-            cursor: default;
-        }
+        .field-hint { font-size: 0.7rem; color: var(--color-muted-foreground); line-height: 1.4; display: flex; align-items: center; gap: 0.3rem; flex-shrink: 0; }
+        .field-hint svg { width: 0.7rem; height: 0.7rem; flex-shrink: 0; color: var(--color-placeholder); }
 
-        .field-hint {
-            font-size: 0.7rem;
-            color: var(--color-muted-foreground);
-            line-height: 1.4;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            flex-shrink: 0;
-        }
-
-        .field-hint svg {
-            width: 0.7rem;
-            height: 0.7rem;
-            flex-shrink: 0;
-            color: var(--color-placeholder);
-        }
-
-        /* ========== 按钮 ========== */
-        .button-row {
-            display: flex;
-            gap: 0.5rem;
-            flex-shrink: 0;
-        }
+        .button-row { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.5rem 0.9rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-            line-height: 1.25;
-            border-radius: 8px;
-            border: 1px solid transparent;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.4rem; padding: 0.5rem 0.9rem;
+            font-size: 0.8rem; font-weight: 500; line-height: 1.25;
+            border-radius: 8px; border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.15s ease;
-            white-space: nowrap;
-            user-select: none;
-            font-family: inherit;
-            letter-spacing: 0.01em;
+            white-space: nowrap; user-select: none;
+            font-family: inherit; letter-spacing: 0.01em;
         }
 
-        .btn svg {
-            width: 0.9rem;
-            height: 0.9rem;
-            flex-shrink: 0;
-        }
+        .btn svg { width: 0.9rem; height: 0.9rem; flex-shrink: 0; }
+        .btn:active { transform: scale(0.98); }
+        .btn:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
 
-        .btn:active {
-            transform: scale(0.98);
-        }
+        .btn-primary { flex: 1; background-color: var(--color-primary); color: var(--color-primary-foreground); border-color: var(--color-primary); }
+        .btn-primary:hover { opacity: 0.9; }
 
-        .btn:focus-visible {
-            outline: 2px solid var(--color-ring);
-            outline-offset: 2px;
-        }
-
-        .btn-primary {
-            flex: 1;
-            background-color: var(--color-primary);
-            color: var(--color-primary-foreground);
-            border-color: var(--color-primary);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            flex: 1;
-            background-color: var(--color-secondary);
-            color: var(--color-secondary-foreground);
-            border-color: var(--color-secondary);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--color-border);
-            border-color: var(--color-border);
-        }
+        .btn-secondary { flex: 1; background-color: var(--color-secondary); color: var(--color-secondary-foreground); border-color: var(--color-secondary); }
+        .btn-secondary:hover { background-color: var(--color-border); border-color: var(--color-border); }
 
         .btn-ghost {
-            padding: 0.25rem 0.6rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            background-color: transparent;
-            color: var(--color-muted-foreground);
-            border-color: transparent;
-            border-radius: 6px;
+            padding: 0.25rem 0.6rem; font-size: 0.7rem; font-weight: 500;
+            background-color: transparent; color: var(--color-muted-foreground);
+            border-color: transparent; border-radius: 6px;
         }
 
-        .btn-ghost:hover {
-            background-color: var(--color-muted);
-            color: var(--color-foreground);
-        }
+        .btn-ghost:hover { background-color: var(--color-muted); color: var(--color-foreground); }
 
-        .btn-sm {
-            padding: 0.25rem 0.55rem;
-            font-size: 0.7rem;
-            border-radius: 6px;
-            gap: 0.3rem;
-        }
+        .btn-sm { padding: 0.25rem 0.55rem; font-size: 0.7rem; border-radius: 6px; gap: 0.3rem; }
+        .btn-sm svg { width: 0.75rem; height: 0.75rem; }
 
-        .btn-sm svg {
-            width: 0.75rem;
-            height: 0.75rem;
-        }
-
-        /* 工具按钮样式（清空、回填） */
         .btn-tool {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.3rem;
-            padding: 0.2rem 0.6rem;
-            font-size: 0.65rem;
-            font-weight: 500;
-            line-height: 1;
-            white-space: nowrap;
-            color: var(--color-muted-foreground);
-            background-color: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            font-family: inherit;
-            flex-shrink: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.3rem; padding: 0.2rem 0.6rem;
+            font-size: 0.65rem; font-weight: 500; line-height: 1;
+            white-space: nowrap; color: var(--color-muted-foreground);
+            background-color: transparent; border: 1px solid var(--color-border);
+            border-radius: 5px; cursor: pointer;
+            transition: all 0.15s ease; font-family: inherit; flex-shrink: 0;
         }
 
-        .btn-tool:hover {
-            background-color: var(--color-muted);
-            color: var(--color-foreground);
-        }
+        .btn-tool:hover { background-color: var(--color-muted); color: var(--color-foreground); }
+        .btn-tool:active { transform: scale(0.97); }
+        .btn-tool:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
+        .btn-tool svg { width: 0.7rem; height: 0.7rem; flex-shrink: 0; }
 
-        .btn-tool:active {
-            transform: scale(0.97);
-        }
-
-        .btn-tool:focus-visible {
-            outline: 2px solid var(--color-ring);
-            outline-offset: 1px;
-        }
-
-        .btn-tool svg {
-            width: 0.7rem;
-            height: 0.7rem;
-            flex-shrink: 0;
-        }
-
-        /* ========== 结果区域 ========== */
         .result-container {
-            flex: 1 1 auto;
-            min-height: 0;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            background-color: var(--color-muted);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            flex: 1 1 auto; min-height: 0;
+            border: 1px solid var(--color-border); border-radius: 8px;
+            background-color: var(--color-muted); overflow: hidden;
+            display: flex; flex-direction: column;
         }
 
         .result-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
             padding: 0.5rem 0.75rem;
             border-bottom: 1px solid var(--color-border);
             background-color: var(--color-card);
-            flex-shrink: 0;
-            gap: 0.5rem;
+            flex-shrink: 0; gap: 0.5rem;
         }
 
         .result-header-label {
-            font-size: 0.7rem;
-            font-weight: 500;
+            font-size: 0.7rem; font-weight: 500;
             color: var(--color-muted-foreground);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            display: flex; align-items: center; gap: 0.35rem;
         }
 
-        .result-header-label svg {
-            width: 0.75rem;
-            height: 0.75rem;
-        }
+        .result-header-label svg { width: 0.75rem; height: 0.75rem; }
 
-        .result-header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            flex-wrap: wrap;
-        }
+        .result-header-actions { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
 
         .result-body {
-            flex: 1;
-            min-height: 0;
-            padding: 0.75rem 0.85rem;
+            flex: 1; min-height: 0; padding: 0.75rem 0.85rem;
             overflow-y: auto;
             font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.8rem;
-            line-height: 1.7;
+            font-size: 0.8rem; line-height: 1.7;
             color: var(--color-foreground);
-            word-break: break-all;
-            white-space: pre-wrap;
+            word-break: break-all; white-space: pre-wrap;
             transition: background-color 0.2s;
         }
 
         .result-body.placeholder {
             color: var(--color-placeholder);
-            font-family: 'Inter', sans-serif;
-            font-style: normal;
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', sans-serif; font-style: normal; font-weight: 400;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .result-body::-webkit-scrollbar {
-            width: 8px;
-        }
-        .result-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .result-body::-webkit-scrollbar-thumb {
-            background-color: var(--color-border);
-            border-radius: 8px;
-            border: 2px solid var(--color-muted);
-        }
-        .result-body::-webkit-scrollbar-thumb:hover {
-            background-color: var(--color-muted-foreground);
-        }
+        .result-body::-webkit-scrollbar { width: 8px; }
+        .result-body::-webkit-scrollbar-track { background: transparent; }
+        .result-body::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 8px; border: 2px solid var(--color-muted); }
+        .result-body::-webkit-scrollbar-thumb:hover { background-color: var(--color-muted-foreground); }
 
-        /* 批量结果项 */
-        .batch-item {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--color-border);
-            position: relative;
-        }
+        .batch-item { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); position: relative; }
+        .batch-item:last-child { border-bottom: none; }
 
-        .batch-item:last-child {
-            border-bottom: none;
-        }
+        .batch-item-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem; }
 
-        .batch-item-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            margin-bottom: 0.2rem;
-        }
+        .batch-item-label { font-size: 0.65rem; color: var(--color-muted-foreground); font-family: 'Inter', sans-serif; font-weight: 500; }
 
-        .batch-item-label {
-            font-size: 0.65rem;
+        .batch-item-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+
+        .batch-item-copy, .batch-item-backfill {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.25rem; padding: 0.15rem 0.45rem;
+            font-size: 0.65rem; font-weight: 500; line-height: 1;
             color: var(--color-muted-foreground);
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
+            background-color: transparent; border: 1px solid transparent;
+            border-radius: 5px; cursor: pointer;
+            transition: all 0.15s ease; font-family: inherit; flex-shrink: 0; opacity: 0.75;
         }
 
-        .batch-item-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            flex-shrink: 0;
-        }
+        .batch-item-copy:hover, .batch-item-backfill:hover { background-color: var(--color-muted); color: var(--color-foreground); opacity: 1; }
+        .batch-item-copy:active, .batch-item-backfill:active { transform: scale(0.96); }
+        .batch-item-copy svg, .batch-item-backfill svg { width: 0.65rem; height: 0.65rem; flex-shrink: 0; }
 
-        .batch-item-copy,
-        .batch-item-backfill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            padding: 0.15rem 0.45rem;
-            font-size: 0.65rem;
-            font-weight: 500;
-            line-height: 1;
-            color: var(--color-muted-foreground);
-            background-color: transparent;
-            border: 1px solid transparent;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            font-family: inherit;
-            flex-shrink: 0;
-            opacity: 0.75;
-        }
+        .divider { height: 1px; background-color: var(--color-border); margin: 0.15rem 0; flex-shrink: 0; }
 
-        .batch-item-copy:hover,
-        .batch-item-backfill:hover {
-            background-color: var(--color-muted);
-            color: var(--color-foreground);
-            opacity: 1;
-        }
-
-        .batch-item-copy:active,
-        .batch-item-backfill:active {
-            transform: scale(0.96);
-        }
-
-        .batch-item-copy svg,
-        .batch-item-backfill svg {
-            width: 0.65rem;
-            height: 0.65rem;
-            flex-shrink: 0;
-        }
-
-        .divider {
-            height: 1px;
-            background-color: var(--color-border);
-            margin: 0.15rem 0;
-            flex-shrink: 0;
-        }
-
-        /* 响应式：只有当窗口非常窄（< 480px）时才堆叠 */
         @media (max-width: 480px) {
-            .app-shell {
-                padding: 0.4rem;
-            }
-
-            .horizontal-layout {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .card-header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 0.85rem 1rem 0.75rem;
-            }
-
-            .card-header-right {
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-
-            .lang-switch {
-                flex: 1;
-                justify-content: center;
-            }
-
-            .card-content {
-                padding: 0.85rem 1rem;
-            }
-
-            .card-title {
-                font-size: 1.05rem;
-            }
+            .app-shell { padding: 0.4rem; }
+            .horizontal-layout { grid-template-columns: 1fr; gap: 1rem; }
+            .card-header { flex-direction: column; align-items: stretch; padding: 0.85rem 1rem 0.75rem; }
+            .card-header-right { justify-content: space-between; flex-wrap: wrap; }
+            .lang-switch { flex: 1; justify-content: center; }
+            .card-content { padding: 0.85rem 1rem; }
+            .card-title { font-size: 1.05rem; }
         }
 
-        .fade-in {
-            animation: fadeIn 0.2s ease-in;
-        }
+        .fade-in { animation: fadeIn 0.2s ease-in; }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(2px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 隐藏的文件选择器（仅用于「导入」按钮触发） */
-        .hidden-file-input {
-            display: none;
+        .hidden-file-input { display: none; }
+
+        .ctx-menu {
+            position: fixed; z-index: 1000;
+            min-width: 160px; max-width: 260px;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+            padding: 4px; display: none;
+            font-size: 0.75rem; user-select: none;
         }
+
+        .ctx-menu.open { display: block; animation: ctxFadeIn 0.1s ease-out; }
+
+        @keyframes ctxFadeIn {
+            from { opacity: 0; transform: translateY(-2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ctx-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            width: 100%; padding: 0.4rem 0.6rem;
+            background: transparent; border: none;
+            border-radius: 5px; cursor: pointer;
+            color: var(--color-foreground);
+            font-family: inherit; font-size: 0.75rem; font-weight: 500;
+            line-height: 1.2; text-align: left; white-space: nowrap;
+            transition: background-color 0.1s ease;
+        }
+
+        .ctx-item:hover:not(:disabled) { background: var(--color-muted); }
+        .ctx-item:active:not(:disabled) { transform: scale(0.99); }
+        .ctx-item:disabled { opacity: 0.4; cursor: not-allowed; }
+        .ctx-item svg { width: 0.8rem; height: 0.8rem; flex-shrink: 0; color: var(--color-muted-foreground); }
+        .ctx-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+        .ctx-sep { height: 1px; background: var(--color-border); margin: 4px 2px; }
     </style>
 </head>
 <body>
@@ -1101,7 +545,6 @@
 
         <div class="card-content">
             <div class="horizontal-layout">
-                <!-- 左侧列 -->
                 <div class="horizontal-column">
                     <div class="field">
                         <div class="field-label-row">
@@ -1113,7 +556,6 @@
                                 <span data-i18n="keySelectorLabel">选择密钥</span>
                             </label>
                             <div class="field-actions">
-                                <!-- 新增：刷新密钥列表按钮 -->
                                 <button type="button" id="refreshKeysBtn" class="btn-import" title="刷新密钥列表">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"/>
@@ -1181,7 +623,6 @@
 
                     <div class="divider"></div>
 
-                    <!-- 输入内容：可伸缩 -->
                     <div class="field flex-grow">
                         <div class="field-label-row">
                             <label class="field-label" for="inputText">
@@ -1197,14 +638,12 @@
                                 <span id="batchInputHint" style="display:none; font-weight:400; color:var(--color-muted-foreground); font-size:0.65rem;" data-i18n="batchInputHint">（每行一条）</span>
                             </label>
                             <div class="field-actions">
-                                <!-- 导入文本文件按钮（文件夹图标，与拖放的上传图标区分） -->
                                 <button type="button" id="importFileBtn" class="btn-import" title="从本地文本文件导入内容">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                                     </svg>
                                     <span data-i18n="importFileBtn">导入</span>
                                 </button>
-                                <!-- 清空输入按钮 -->
                                 <button type="button" id="clearInputBtn" class="btn-tool" title="清空输入内容">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"/>
@@ -1258,7 +697,6 @@
                     </div>
                 </div>
 
-                <!-- 右侧列 -->
                 <div class="horizontal-column">
                     <div class="field flex-grow">
                         <label class="field-label">
@@ -1280,7 +718,6 @@
                                     <span id="resultCount"></span>
                                 </span>
                                 <div class="result-header-actions">
-                                    <!-- 结果回填至输入按钮（整体回填） -->
                                     <button id="backfillBtn" class="btn btn-ghost btn-sm" title="将结果回填到输入框">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="9 14 4 9 9 4"/>
@@ -1317,9 +754,11 @@
         </div>
     </div>
 </div>
+
+<div id="ctxMenu" class="ctx-menu" role="menu" aria-hidden="true"></div>
+
 <script>
     (function () {
-        // ---------- 国际化配置 ----------
         const translations = {
             zh: {
                 title: 'AES 加解密',
@@ -1378,7 +817,16 @@
                 searchPlaceholder: '搜索...',
                 noResults: '无匹配结果',
                 cleared: '已清空',
-                batchTooMany: '行数过多（{count}），建议分片处理'
+                batchTooMany: '行数过多（{count}），建议分片处理',
+                ctxCut: '剪切',
+                ctxCopy: '复制',
+                ctxPaste: '粘贴',
+                ctxSelectAll: '全选',
+                ctxCopyAll: '复制全部',
+                ctxBackfill: '回填到输入框',
+                ctxCopyItem: '复制本条',
+                ctxBackfillItem: '回填本条',
+                ctxPasteFailed: '读取剪贴板失败，请用 Ctrl+V 粘贴'
             },
             'zh-TW': {
                 title: 'AES 加解密',
@@ -1437,7 +885,16 @@
                 searchPlaceholder: '搜尋...',
                 noResults: '無匹配結果',
                 cleared: '已清空',
-                batchTooMany: '行數過多（{count}），建議分片處理'
+                batchTooMany: '行數過多（{count}），建議分片處理',
+                ctxCut: '剪下',
+                ctxCopy: '複製',
+                ctxPaste: '貼上',
+                ctxSelectAll: '全選',
+                ctxCopyAll: '複製全部',
+                ctxBackfill: '回填至輸入框',
+                ctxCopyItem: '複製本條',
+                ctxBackfillItem: '回填本條',
+                ctxPasteFailed: '讀取剪貼簿失敗，請用 Ctrl+V 貼上'
             },
             en: {
                 title: 'AES Encryption',
@@ -1496,7 +953,16 @@
                 searchPlaceholder: 'Search...',
                 noResults: 'No results',
                 cleared: 'Cleared',
-                batchTooMany: 'Too many lines ({count}), consider splitting'
+                batchTooMany: 'Too many lines ({count}), consider splitting',
+                ctxCut: 'Cut',
+                ctxCopy: 'Copy',
+                ctxPaste: 'Paste',
+                ctxSelectAll: 'Select All',
+                ctxCopyAll: 'Copy All',
+                ctxBackfill: 'Backfill to Input',
+                ctxCopyItem: 'Copy Item',
+                ctxBackfillItem: 'Backfill Item',
+                ctxPasteFailed: 'Cannot read clipboard, please use Ctrl+V'
             },
             ja: {
                 title: 'AES 暗号化',
@@ -1555,7 +1021,16 @@
                 searchPlaceholder: '検索...',
                 noResults: '一致なし',
                 cleared: 'クリアしました',
-                batchTooMany: '行数が多すぎます（{count}）、分割してください'
+                batchTooMany: '行数が多すぎます（{count}）、分割してください',
+                ctxCut: '切り取り',
+                ctxCopy: 'コピー',
+                ctxPaste: '貼り付け',
+                ctxSelectAll: 'すべて選択',
+                ctxCopyAll: 'すべてコピー',
+                ctxBackfill: '入力欄に戻す',
+                ctxCopyItem: 'この項目をコピー',
+                ctxBackfillItem: 'この項目を戻す',
+                ctxPasteFailed: 'クリップボードを読み取れません。Ctrl+V で貼り付けてください'
             },
             ko: {
                 title: 'AES 암호화/복호화',
@@ -1614,15 +1089,21 @@
                 searchPlaceholder: '검색...',
                 noResults: '결과 없음',
                 cleared: '지워짐',
-                batchTooMany: '줄이 너무 많습니다 ({count}), 분할하세요'
+                batchTooMany: '줄이 너무 많습니다 ({count}), 분할하세요',
+                ctxCut: '잘라내기',
+                ctxCopy: '복사',
+                ctxPaste: '붙여넣기',
+                ctxSelectAll: '전체 선택',
+                ctxCopyAll: '전체 복사',
+                ctxBackfill: '입력창에 채우기',
+                ctxCopyItem: '이 항목 복사',
+                ctxBackfillItem: '이 항목 채우기',
+                ctxPasteFailed: '클립보드를 읽을 수 없습니다. Ctrl+V를 사용하세요'
             }
         };
 
         const DEFAULT_LANG = 'zh';
-
-        // 导入文件大小上限（字节）
-        const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024; // 5MB
-        // 批量模式行数上限
+        const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
         const MAX_BATCH_LINES = 1000;
 
         const TEXT_FILE_EXTENSIONS = [
@@ -1639,99 +1120,63 @@
         function isTextFileByName(fileName) {
             if (!fileName) return false;
             const lower = fileName.toLowerCase();
-
             for (const ext of TEXT_FILE_EXTENSIONS) {
                 if (lower.endsWith(ext)) return true;
             }
-
             const lastDot = lower.lastIndexOf('.');
             const lastSlash = Math.max(lower.lastIndexOf('/'), lower.lastIndexOf('\\'));
             if (lastDot <= lastSlash) return true;
-
             return false;
         }
 
         function isTextContentType(contentType) {
             if (!contentType) return false;
             const lower = contentType.toLowerCase();
-
             if (lower.startsWith('text/')) return true;
-
             const textAppTypes = [
-                'application/json',
-                'application/xml',
-                'application/javascript',
-                'application/x-javascript',
-                'application/typescript',
-                'application/x-yaml',
-                'application/yaml',
-                'application/x-sh',
-                'application/sql',
-                'application/x-httpd-php',
-                'application/xhtml+xml',
-                'application/ld+json'
+                'application/json', 'application/xml', 'application/javascript',
+                'application/x-javascript', 'application/typescript', 'application/x-yaml',
+                'application/yaml', 'application/x-sh', 'application/sql',
+                'application/x-httpd-php', 'application/xhtml+xml', 'application/ld+json'
             ];
             for (const t of textAppTypes) {
                 if (lower.startsWith(t)) return true;
             }
-
             return false;
         }
 
         function isTextContentByBytes(bytes) {
             if (!bytes || bytes.length === 0) return true;
-
             const checkLen = Math.min(bytes.length, 4096);
             let nullCount = 0;
-
             for (let i = 0; i < checkLen; i++) {
                 if (bytes[i] === 0) nullCount++;
             }
-
             const nullRatio = nullCount / checkLen;
             if (nullRatio > 0.01) return false;
-
             return true;
         }
 
         function isImportableTextFile(fileMeta, sampleBytes) {
             const fileName = fileMeta.name || '';
             const contentType = fileMeta.contentType || '';
-
             if (fileName && isTextFileByName(fileName)) {
-                if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
-                    return false;
-                }
+                if (sampleBytes && !isTextContentByBytes(sampleBytes)) return false;
                 return true;
             }
-
             if (contentType && isTextContentType(contentType)) {
-                if (sampleBytes && !isTextContentByBytes(sampleBytes)) {
-                    return false;
-                }
+                if (sampleBytes && !isTextContentByBytes(sampleBytes)) return false;
                 return true;
             }
-
             if (!fileName && !contentType) {
                 return sampleBytes ? isTextContentByBytes(sampleBytes) : false;
             }
-
-            if (fileName && !isTextFileByName(fileName)) {
-                return false;
-            }
-
-            if (contentType && !isTextContentType(contentType)) {
-                return false;
-            }
-
             return false;
         }
 
         let currentLang = DEFAULT_LANG;
         let keyOptions = [];
         let currentSearchKeyword = '';
-
-        // 修复：语言切换时 select 重建会触发 change，用它屏蔽误改
         let suppressKeyChange = false;
 
         function t(key, params) {
@@ -1777,9 +1222,7 @@
             const currentValue = selector.value;
 
             list.innerHTML = '';
-
             const keyword = currentSearchKeyword.trim().toLowerCase();
-
             const defaultText = t('keySelectorDefault');
             const defaultMatches = !keyword || defaultText.toLowerCase().includes(keyword);
             if (defaultMatches) {
@@ -1793,11 +1236,8 @@
             let matchCount = 0;
             keyOptions.forEach(opt => {
                 const optLabel = String(opt.label || '');
-                if (keyword && !optLabel.toLowerCase().includes(keyword)) {
-                    return;
-                }
+                if (keyword && !optLabel.toLowerCase().includes(keyword)) return;
                 matchCount++;
-
                 const item = document.createElement('li');
                 item.className = 'select-option' + (currentValue === opt.value ? ' selected' : '');
                 item.dataset.value = opt.value;
@@ -1823,11 +1263,7 @@
         function syncKeyFromSelector() {
             const selector = document.getElementById('keySelector');
             const selectedValue = selector.value;
-
-            if (!selectedValue) {
-                return;
-            }
-
+            if (!selectedValue) return;
             const found = keyOptions.find(o => o.value === selectedValue);
             if (found && found.aes_key !== undefined) {
                 keyInput.value = found.aes_key;
@@ -1835,10 +1271,7 @@
         }
 
         function updateLanguage(lang) {
-            if (!translations[lang]) {
-                console.warn(`Language "${lang}" not found, falling back to "${DEFAULT_LANG}".`);
-                lang = DEFAULT_LANG;
-            }
+            if (!translations[lang]) lang = DEFAULT_LANG;
             currentLang = lang;
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1846,9 +1279,7 @@
                 const translation = t(key);
                 const svg = el.querySelector('svg');
                 if (svg) {
-                    const textNodes = Array.from(el.childNodes).filter(
-                        node => node.nodeType === Node.TEXT_NODE
-                    );
+                    const textNodes = Array.from(el.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
                     if (textNodes.length > 0) {
                         textNodes[0].textContent = translation;
                     } else {
@@ -1865,25 +1296,15 @@
             });
 
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                if (btn.getAttribute('data-lang') === lang) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (btn.getAttribute('data-lang') === lang) btn.classList.add('active');
+                else btn.classList.remove('active');
             });
 
             document.documentElement.lang = lang;
+            try { localStorage.setItem('preferredLanguage', lang); } catch (e) {}
 
-            try {
-                localStorage.setItem('preferredLanguage', lang);
-            } catch (e) {}
-
-            // ============================================================
-            // 修复：渲染 select 前保存关键状态，渲染时屏蔽 change，渲染后恢复
-            // ============================================================
             const savedKeyValue = keyInput.value;
             const savedInputValue = inputText.value;
-
             const selector = document.getElementById('keySelector');
             const prevValue = selector.value;
 
@@ -1895,7 +1316,6 @@
                 suppressKeyChange = false;
             }
 
-            // 恢复被重建过程可能影响的内容
             keyInput.value = savedKeyValue;
             inputText.value = savedInputValue;
 
@@ -1911,22 +1331,15 @@
         function getInitialLanguage() {
             try {
                 const stored = localStorage.getItem('preferredLanguage');
-                if (stored && translations[stored]) {
-                    return stored;
-                }
+                if (stored && translations[stored]) return stored;
             } catch (e) {}
 
             const browserLang = navigator.language || navigator.userLanguage;
             if (browserLang) {
-                if (translations[browserLang]) {
-                    return browserLang;
-                }
+                if (translations[browserLang]) return browserLang;
                 const primaryLang = browserLang.split('-')[0].toLowerCase();
-                if (translations[primaryLang]) {
-                    return primaryLang;
-                }
+                if (translations[primaryLang]) return primaryLang;
             }
-
             return DEFAULT_LANG;
         }
 
@@ -1950,11 +1363,7 @@
         const dropOverlay = document.getElementById('dropOverlay');
         const dropOverlayText = document.getElementById('dropOverlayText');
         const appCard = document.getElementById('appCard');
-
-        // 新增：刷新密钥列表按钮
         const refreshKeysBtn = document.getElementById('refreshKeysBtn');
-
-        // 导入文件相关元素
         const importFileBtn = document.getElementById('importFileBtn');
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
@@ -1962,15 +1371,16 @@
         fileInput.className = 'hidden-file-input';
         document.body.appendChild(fileInput);
 
+        const ctxMenu = document.getElementById('ctxMenu');
+
         let batchResults = [];
         let isBatchResult = false;
-
         let dropErrorTimer = null;
-        // flashImportButton 的定时器句柄，防止语言切换后旧定时器覆盖新文案
         let importFlashTimer = null;
-        // 刷新密钥按钮状态
         let isRefreshingKeys = false;
         let refreshKeysFlashTimer = null;
+        let ctxMenuOpen = false;
+        let pasteHintTimer = null;
 
         function setResult(text, isPlaceholder = false) {
             resultBody.textContent = text;
@@ -1991,11 +1401,8 @@
         }
 
         function updateBatchHint() {
-            if (batchMode.checked) {
-                batchInputHint.style.display = 'inline';
-            } else {
-                batchInputHint.style.display = 'none';
-            }
+            if (batchMode.checked) batchInputHint.style.display = 'inline';
+            else batchInputHint.style.display = 'none';
         }
 
         function renderBatchResults() {
@@ -2118,23 +1525,18 @@
             const copyBtn = e.target.closest('.batch-item-copy');
             if (copyBtn) {
                 const idx = parseInt(copyBtn.dataset.index, 10);
-                if (!isNaN(idx)) {
-                    copySingleItem(idx, copyBtn);
-                }
+                if (!isNaN(idx)) copySingleItem(idx, copyBtn);
                 return;
             }
 
             const backfillBtn = e.target.closest('.batch-item-backfill');
             if (backfillBtn) {
                 const idx = parseInt(backfillBtn.dataset.index, 10);
-                if (!isNaN(idx)) {
-                    backfillSingleItem(idx, backfillBtn);
-                }
+                if (!isNaN(idx)) backfillSingleItem(idx, backfillBtn);
                 return;
             }
         });
 
-        // 批量模式行数守卫
         function checkBatchLines(lines) {
             if (lines.length > MAX_BATCH_LINES) {
                 setResult(t('batchTooMany', { count: lines.length }), true);
@@ -2292,13 +1694,150 @@
             }
         }
 
-        function copyResult() {
+        async function copyToClipboard(text) {
+            if (!text) return false;
+
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (e) {
+                    console.warn('[AES] navigator.clipboard.writeText failed, fallback to execCommand:', e);
+                }
+            }
+
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.top = '0';
+                ta.style.left = '-9999px';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+
+                const selection = document.getSelection();
+                const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+                ta.select();
+                if (typeof ta.setSelectionRange === 'function') {
+                    ta.setSelectionRange(0, text.length);
+                }
+
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+
+                if (savedRange && selection) {
+                    selection.removeAllRanges();
+                    selection.addRange(savedRange);
+                }
+
+                return !!ok;
+            } catch (err) {
+                console.warn('[AES] execCommand copy failed:', err);
+                return false;
+            }
+        }
+
+        async function readClipboardText() {
+            try {
+                const dbx = window.dbxPlugin;
+                if (dbx && dbx.clipboard && typeof dbx.clipboard.readText === 'function') {
+                    const txt = await dbx.clipboard.readText();
+                    if (typeof txt === 'string') return txt;
+                }
+            } catch (e) {
+                console.warn('[AES] host clipboard.readText failed:', e);
+            }
+
+            try {
+                if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                    const txt = await navigator.clipboard.readText();
+                    if (typeof txt === 'string') return txt;
+                }
+            } catch (e) {
+                console.warn('[AES] navigator.clipboard.readText failed:', e);
+            }
+
+            return null;
+        }
+
+        function insertTextInto(el, text) {
+            if (!el || typeof text !== 'string') return;
+            el.focus();
+
+            const start = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
+            const end = (typeof el.selectionEnd === 'number') ? el.selectionEnd : el.value.length;
+            const before = el.value.slice(0, start);
+            const after = el.value.slice(end);
+            el.value = before + text + after;
+
+            const pos = start + text.length;
+            if (typeof el.setSelectionRange === 'function') {
+                el.setSelectionRange(pos, pos);
+            }
+
+            try {
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch (_) {}
+        }
+
+        async function ctxPasteInto(el) {
+            if (!el) return;
+            const text = await readClipboardText();
+            if (text === null) {
+                flashPasteHint(el);
+                return;
+            }
+            insertTextInto(el, text);
+        }
+
+        function flashPasteHint(el) {
+            const old = document.getElementById('__paste_hint__');
+            if (old && old.parentNode) old.parentNode.removeChild(old);
+            if (pasteHintTimer) {
+                clearTimeout(pasteHintTimer);
+                pasteHintTimer = null;
+            }
+
+            const hint = document.createElement('div');
+            hint.id = '__paste_hint__';
+            hint.textContent = t('ctxPasteFailed');
+            hint.style.cssText = [
+                'position:fixed', 'z-index:1100', 'padding:6px 10px',
+                'background:var(--color-card)', 'border:1px solid var(--color-border)',
+                'border-radius:6px', 'font-size:0.7rem', 'color:var(--color-foreground)',
+                'box-shadow:0 4px 12px rgba(0,0,0,0.1)', 'pointer-events:none',
+                'opacity:0', 'transition:opacity 0.15s ease'
+            ].join(';');
+
+            document.body.appendChild(hint);
+
+            const r = el.getBoundingClientRect();
+            const hw = hint.offsetWidth || 180;
+            let left = r.left + 12;
+            let top = r.top - 30;
+            if (left + hw > window.innerWidth - 8) left = window.innerWidth - hw - 8;
+            if (top < 8) top = r.bottom + 8;
+            hint.style.left = left + 'px';
+            hint.style.top = top + 'px';
+
+            requestAnimationFrame(() => { hint.style.opacity = '1'; });
+
+            pasteHintTimer = setTimeout(() => {
+                hint.style.opacity = '0';
+                setTimeout(() => {
+                    if (hint.parentNode) hint.parentNode.removeChild(hint);
+                }, 200);
+                pasteHintTimer = null;
+            }, 1600);
+        }
+
+        async function copyResult() {
             let text = '';
             if (isBatchResult && batchResults.length > 0) {
                 text = batchResults.map((item, idx) => {
-                    if (item.error) {
-                        return `#${idx + 1} ERROR: ${item.error}`;
-                    }
+                    if (item.error) return `#${idx + 1} ERROR: ${item.error}`;
                     return item.output;
                 }).join('\n');
             } else {
@@ -2312,25 +1851,14 @@
                 }, 1200);
                 return;
             }
-            try {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copied');
-            } catch (err) {
-                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyFailed');
-            }
+
+            const ok = await copyToClipboard(text);
+            copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = ok ? t('copied') : t('copyFailed');
             setTimeout(() => {
                 copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
             }, 1500);
         }
 
-        // ============================================================
-        // 清空输入 / 整体回填结果
-        // ============================================================
         function clearInput() {
             inputText.value = '';
             try {
@@ -2344,9 +1872,7 @@
             let text = '';
             if (isBatchResult && batchResults.length > 0) {
                 text = batchResults.map((item, idx) => {
-                    if (item.error) {
-                        return `#${idx + 1} ERROR: ${item.error}`;
-                    }
+                    if (item.error) return `#${idx + 1} ERROR: ${item.error}`;
                     return item.output;
                 }).join('\n');
             } else {
@@ -2364,10 +1890,6 @@
             backfillBtn.style.opacity = '0.7';
             setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
         }
-
-        // ============================================================
-        // 导入文本文件到输入框
-        // ============================================================
 
         function readFileAsText(file) {
             return new Promise((resolve, reject) => {
@@ -2412,38 +1934,26 @@
 
         async function handleImportFile(file) {
             if (!file) return;
-
             try {
                 if (file.size > MAX_IMPORT_FILE_BYTES) {
                     flashImportButton(t('importTooLarge'));
                     return;
                 }
-
-                const fileMeta = {
-                    name: file.name || '',
-                    contentType: file.type || ''
-                };
-
+                const fileMeta = { name: file.name || '', contentType: file.type || '' };
                 if (!isTextFileByName(fileMeta.name) && !isTextContentType(fileMeta.contentType)) {
-                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
                     flashImportButton(t('importNotText'));
                     return;
                 }
-
                 const headBytes = await readFileHeadBytes(file, 4096);
                 if (headBytes && !isTextContentByBytes(headBytes)) {
-                    console.warn('[AES] 拒绝二进制内容:', fileMeta.name);
                     flashImportButton(t('importNotText'));
                     return;
                 }
-
                 const text = await readFileAsText(file);
-
                 if (!text || text.trim() === '') {
                     flashImportButton(t('importEmpty'));
                     return;
                 }
-
                 applyImportedText(text);
                 flashImportButton(t('importSuccess'));
             } catch (err) {
@@ -2465,20 +1975,13 @@
             });
         });
 
-        // ============================================================
-        // 新增：刷新密钥列表
-        // ============================================================
-
         function setRefreshKeysBtnState(state) {
-            // state: 'idle' | 'busy' | 'done'
             const span = refreshKeysBtn.querySelector('span[data-i18n="refreshKeysBtn"]');
             if (!span) return;
-
             if (refreshKeysFlashTimer) {
                 clearTimeout(refreshKeysFlashTimer);
                 refreshKeysFlashTimer = null;
             }
-
             if (state === 'busy') {
                 refreshKeysBtn.disabled = true;
                 refreshKeysBtn.classList.add('spinning');
@@ -2502,17 +2005,12 @@
             if (isRefreshingKeys) return;
             isRefreshingKeys = true;
             setRefreshKeysBtnState('busy');
-
             try {
-                // 保存当前输入框值，防止 aesKeyLables 内部任何渲染意外清空
                 const savedKeyValue = keyInput.value;
                 const savedInputValue = inputText.value;
-
                 await aesKeyLables();
-
                 keyInput.value = savedKeyValue;
                 inputText.value = savedInputValue;
-
                 setRefreshKeysBtnState('done');
             } catch (err) {
                 console.error('[AES] refreshKeys failed:', err);
@@ -2527,10 +2025,6 @@
                 console.error('[AES] refreshKeys rejected:', err);
             });
         });
-
-        // ============================================================
-        // 拖放导入 —— 自动适配环境
-        // ============================================================
 
         function getFT() {
             return (window.dbxPlugin && window.dbxPlugin.fileTransfer) || null;
@@ -2577,11 +2071,9 @@
         async function readHandleHeadBytes(handleId, maxBytes) {
             const ft = getFT();
             if (!ft || typeof ft.read !== 'function') return null;
-
             try {
                 const chunk = await ft.read(handleId, 0, maxBytes);
                 if (!chunk || !chunk.dataBase64) return null;
-
                 const binary = atob(chunk.dataBase64);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) {
@@ -2596,7 +2088,6 @@
         async function readHandleToString(handleId) {
             const ft = getFT();
             if (!ft || typeof ft.read !== 'function') return '';
-
             const parts = [];
             let offset = 0;
             const chunkSize = 64 * 1024;
@@ -2606,7 +2097,6 @@
             while (!eof) {
                 const chunk = await ft.read(handleId, offset, chunkSize);
                 if (!chunk) break;
-
                 const dataBase64 = chunk.dataBase64 || '';
                 if (dataBase64) {
                     const binary = atob(dataBase64);
@@ -2617,11 +2107,9 @@
                     parts.push(bytes);
                     offset += bytes.length;
                 }
-
                 eof = chunk.eof === true;
                 if (offset > MAX_BYTES) break;
             }
-
             return decodeChunks(parts);
         }
 
@@ -2649,7 +2137,6 @@
             dropOverlay.classList.add('active');
             dropOverlay.classList.add('error');
             dropOverlayText.textContent = message;
-
             if (dropErrorTimer) clearTimeout(dropErrorTimer);
             dropErrorTimer = setTimeout(() => {
                 dropOverlay.classList.remove('active');
@@ -2661,35 +2148,23 @@
 
         async function handleHostDroppedFiles(files) {
             if (!files || !files.length) return;
-
             const ft = getFT();
             const file = files[0];
-
             try {
                 const headBytes = await readHandleHeadBytes(file.handleId, 4096);
-
-                const fileMeta = {
-                    name: file.name || '',
-                    contentType: file.contentType || ''
-                };
-
+                const fileMeta = { name: file.name || '', contentType: file.contentType || '' };
                 if (!isImportableTextFile(fileMeta, headBytes)) {
-                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
                     showDropError(t('dropReject'));
-
                     if (file.handleId && ft && typeof ft.cancel === 'function') {
                         try { await ft.cancel(file.handleId); } catch (_) {}
                     }
                     return;
                 }
-
                 const text = await readHandleToString(file.handleId);
-
                 if (!text || text.trim() === '') {
                     showDropError(t('importEmpty'));
                     return;
                 }
-
                 applyImportedText(text);
             } catch (err) {
                 console.error('[AES] Drop import failed:', err);
@@ -2702,35 +2177,23 @@
 
         async function handleBrowserDroppedFiles(fileList) {
             if (!fileList || !fileList.length) return;
-
             const file = fileList[0];
-
             try {
                 if (file.size > MAX_IMPORT_FILE_BYTES) {
                     showDropError(t('importTooLarge'));
                     return;
                 }
-
                 const headBytes = await readFileHeadBytes(file, 4096);
-
-                const fileMeta = {
-                    name: file.name || '',
-                    contentType: file.type || ''
-                };
-
+                const fileMeta = { name: file.name || '', contentType: file.type || '' };
                 if (!isImportableTextFile(fileMeta, headBytes)) {
-                    console.warn('[AES] 拒绝非文本文件:', fileMeta.name, fileMeta.contentType);
                     showDropError(t('dropReject'));
                     return;
                 }
-
                 const text = await readBrowserFileToString(file);
-
                 if (!text || text.trim() === '') {
                     showDropError(t('importEmpty'));
                     return;
                 }
-
                 applyImportedText(text);
             } catch (err) {
                 console.error('[AES] Browser drop import failed:', err);
@@ -2740,29 +2203,21 @@
 
         function setupHostDrop() {
             const ft = getFT();
-
             ft.onDrop((files) => {
                 dropOverlay.classList.remove('active');
                 dropOverlay.classList.remove('error');
                 dropOverlayText.textContent = t('dropHint');
                 handleHostDroppedFiles(files);
             });
-
             if (typeof ft.onDragState === 'function') {
                 ft.onDragState((isDragging) => {
                     if (isDragging) {
-                        if (!dropOverlay.classList.contains('error')) {
-                            dropOverlay.classList.add('active');
-                        }
+                        if (!dropOverlay.classList.contains('error')) dropOverlay.classList.add('active');
                     } else {
-                        if (!dropOverlay.classList.contains('error')) {
-                            dropOverlay.classList.remove('active');
-                        }
+                        if (!dropOverlay.classList.contains('error')) dropOverlay.classList.remove('active');
                     }
                 });
             }
-
-            console.log('[AES] 桌面端拖放监听已注册（fileTransfer.onDrop）');
         }
 
         function setupBrowserDrop() {
@@ -2773,18 +2228,14 @@
                 e.stopPropagation();
                 dragDepth++;
                 if (dragDepth === 1) {
-                    if (!dropOverlay.classList.contains('error')) {
-                        dropOverlay.classList.add('active');
-                    }
+                    if (!dropOverlay.classList.contains('error')) dropOverlay.classList.add('active');
                 }
             });
 
             appCard.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (e.dataTransfer) {
-                    e.dataTransfer.dropEffect = 'copy';
-                }
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
             });
 
             appCard.addEventListener('dragleave', (e) => {
@@ -2793,9 +2244,7 @@
                 dragDepth--;
                 if (dragDepth <= 0) {
                     dragDepth = 0;
-                    if (!dropOverlay.classList.contains('error')) {
-                        dropOverlay.classList.remove('active');
-                    }
+                    if (!dropOverlay.classList.contains('error')) dropOverlay.classList.remove('active');
                 }
             });
 
@@ -2803,41 +2252,26 @@
                 e.preventDefault();
                 e.stopPropagation();
                 dragDepth = 0;
-
                 dropOverlay.classList.remove('active');
                 dropOverlay.classList.remove('error');
                 dropOverlayText.textContent = t('dropHint');
-
                 const files = e.dataTransfer && e.dataTransfer.files;
                 if (!files || files.length === 0) return;
-
                 handleBrowserDroppedFiles(files);
             });
 
-            window.addEventListener('dragover', (e) => {
-                e.preventDefault();
-            });
-            window.addEventListener('drop', (e) => {
-                e.preventDefault();
-            });
-
-            console.log('[AES] Web 端拖放监听已注册（浏览器原生事件）');
+            window.addEventListener('dragover', (e) => { e.preventDefault(); });
+            window.addEventListener('drop', (e) => { e.preventDefault(); });
         }
 
         function setupDropListeners() {
-            if (isHostDropAvailable()) {
-                setupHostDrop();
-            } else {
-                setupBrowserDrop();
-            }
+            if (isHostDropAvailable()) setupHostDrop();
+            else setupBrowserDrop();
         }
 
         function formatInputText() {
             const raw = inputText.value;
-            if (!raw || raw.trim() === '') {
-                // 取消"内容为空"提示：直接静默返回
-                return;
-            }
+            if (!raw || raw.trim() === '') return;
 
             const trimmed = raw.trim();
 
@@ -2863,13 +2297,10 @@
         function formatXmlString(xmlString) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(xmlString, 'application/xml');
-
             const parserError = doc.querySelector('parsererror');
             if (parserError) return null;
-
             const root = doc.documentElement;
             if (!root) return null;
-
             const lines = [];
             serializeXmlNode(root, 0, lines);
             return lines.join('\n');
@@ -2877,58 +2308,39 @@
 
         function serializeXmlNode(node, depth, lines) {
             const indent = '  '.repeat(depth);
-
             if (node.nodeType === Node.TEXT_NODE) {
                 const text = node.nodeValue;
-                if (text && text.trim() !== '') {
-                    lines.push(indent + text.trim());
-                }
+                if (text && text.trim() !== '') lines.push(indent + text.trim());
                 return;
             }
-
             if (node.nodeType !== Node.ELEMENT_NODE) return;
-
             const tagName = node.nodeName;
             const attrs = Array.from(node.attributes || [])
-                .map(a => ` ${a.name}="${escapeXmlAttr(a.value)}"`)
-                .join('');
-
+                .map(a => ` ${a.name}="${escapeXmlAttr(a.value)}"`).join('');
             const childNodes = Array.from(node.childNodes).filter(n => {
                 if (n.nodeType === Node.TEXT_NODE) return n.nodeValue.trim() !== '';
                 return n.nodeType === Node.ELEMENT_NODE;
             });
-
             if (childNodes.length === 0) {
                 lines.push(`${indent}<${tagName}${attrs}/>`);
                 return;
             }
-
             if (childNodes.length === 1 && childNodes[0].nodeType === Node.TEXT_NODE) {
                 const text = escapeXmlText(childNodes[0].nodeValue.trim());
                 lines.push(`${indent}<${tagName}${attrs}>${text}</${tagName}>`);
                 return;
             }
-
             lines.push(`${indent}<${tagName}${attrs}>`);
-            childNodes.forEach(child => {
-                serializeXmlNode(child, depth + 1, lines);
-            });
+            childNodes.forEach(child => { serializeXmlNode(child, depth + 1, lines); });
             lines.push(`${indent}</${tagName}>`);
         }
 
         function escapeXmlText(s) {
-            return String(s)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
         function escapeXmlAttr(s) {
-            return String(s)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
         function flashButton(btnSpan, originalText, message, duration = 1500) {
@@ -2981,9 +2393,7 @@
                 let handleId = null;
                 try {
                     const handle = await savePromise;
-                    if (!handle || !handle.handleId) {
-                        return;
-                    }
+                    if (!handle || !handle.handleId) return;
                     handleId = handle.handleId;
 
                     const chunkBytes = handle.chunkBytes || 1024 * 1024;
@@ -3003,7 +2413,6 @@
 
                     await ft.finish(handleId);
                     handleId = null;
-
                     flashButton(btnSpan, originalText, t('saved'));
                 } catch (err) {
                     console.error('[AES] Save failed:', err);
@@ -3015,6 +2424,244 @@
             })();
         }
 
+        const CTX_ICONS = {
+            cut: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>',
+            copy: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+            paste: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+            selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
+            backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>'
+        };
+
+        function closeCtxMenu() {
+            if (!ctxMenuOpen) return;
+            ctxMenu.classList.remove('open');
+            ctxMenu.setAttribute('aria-hidden', 'true');
+            ctxMenu.innerHTML = '';
+            ctxMenuOpen = false;
+        }
+
+        function showCtxMenu(x, y, items) {
+            ctxMenu.innerHTML = '';
+            ctxMenu.setAttribute('aria-hidden', 'false');
+
+            items.forEach(it => {
+                if (it.type === 'sep') {
+                    const sep = document.createElement('div');
+                    sep.className = 'ctx-sep';
+                    ctxMenu.appendChild(sep);
+                    return;
+                }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ctx-item';
+                btn.dataset.action = it.action || '';
+                btn.innerHTML = (it.icon || '') + '<span></span>';
+                btn.querySelector('span').textContent = it.label;
+                if (it.disabled) btn.disabled = true;
+                if (typeof it.onClick === 'function') {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        try {
+                            const ret = it.onClick();
+                            if (ret && typeof ret.catch === 'function') {
+                                ret.catch(err => console.error('[AES] ctx action failed:', err));
+                            }
+                        } catch (err) {
+                            console.error('[AES] ctx action failed:', err);
+                        }
+                        closeCtxMenu();
+                    });
+                }
+                ctxMenu.appendChild(btn);
+            });
+
+            ctxMenu.style.left = '0px';
+            ctxMenu.style.top = '0px';
+            ctxMenu.classList.add('open');
+
+            const rect = ctxMenu.getBoundingClientRect();
+            let left = x;
+            let top = y;
+            const margin = 6;
+            if (left + rect.width > window.innerWidth - margin) left = window.innerWidth - rect.width - margin;
+            if (top + rect.height > window.innerHeight - margin) top = window.innerHeight - rect.height - margin;
+            if (left < margin) left = margin;
+            if (top < margin) top = margin;
+
+            ctxMenu.style.left = left + 'px';
+            ctxMenu.style.top = top + 'px';
+            ctxMenuOpen = true;
+        }
+
+        async function ctxCopyText(text) {
+            return copyToClipboard(text);
+        }
+
+        function buildInputCtxMenu(x, y, el) {
+            const hasSel = (typeof el.selectionStart === 'number') && el.selectionStart !== el.selectionEnd;
+            const hasText = el.value.length > 0;
+
+            const items = [
+                { action: 'cut', label: t('ctxCut'), icon: CTX_ICONS.cut, disabled: !hasSel,
+                    onClick: () => { el.focus(); document.execCommand('cut'); } },
+                { action: 'copy', label: t('ctxCopy'), icon: CTX_ICONS.copy, disabled: !hasSel,
+                    onClick: () => { el.focus(); document.execCommand('copy'); } },
+                { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
+                    onClick: () => { return ctxPasteInto(el); } },
+                { type: 'sep' },
+                { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll, disabled: !hasText,
+                    onClick: () => {
+                        el.focus();
+                        if (typeof el.select === 'function') el.select();
+                        else el.setSelectionRange(0, el.value.length);
+                    } }
+            ];
+            showCtxMenu(x, y, items);
+        }
+
+        function buildResultCtxMenu(x, y) {
+            const hasContent = !resultBody.classList.contains('placeholder')
+                && resultBody.textContent.trim() !== '';
+
+            const items = [
+                { action: 'copyAll', label: t('ctxCopyAll'), icon: CTX_ICONS.copy, disabled: !hasContent,
+                    onClick: () => { return copyResult(); } },
+                { action: 'backfill', label: t('ctxBackfill'), icon: CTX_ICONS.backfill, disabled: !hasContent,
+                    onClick: () => { backfillResult(); } },
+                { type: 'sep' },
+                { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll,
+                    onClick: () => {
+                        try {
+                            const sel = window.getSelection();
+                            if (!sel) return;
+                            const range = document.createRange();
+                            range.selectNodeContents(resultBody);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        } catch (_) {}
+                    } }
+            ];
+            showCtxMenu(x, y, items);
+        }
+
+        function buildBatchItemCtxMenu(x, y, itemEl) {
+            let idx = -1;
+            const copyBtnEl = itemEl.querySelector('.batch-item-copy');
+            if (copyBtnEl && copyBtnEl.dataset.index !== undefined) {
+                idx = parseInt(copyBtnEl.dataset.index, 10);
+            } else {
+                const allItems = Array.from(resultBody.querySelectorAll('.batch-item'));
+                idx = allItems.indexOf(itemEl);
+            }
+
+            const item = (idx >= 0) ? batchResults[idx] : null;
+            const hasOutput = item && !item.error;
+
+            const items = [
+                { action: 'copyItem', label: t('ctxCopyItem'), icon: CTX_ICONS.copy, disabled: !hasOutput,
+                    onClick: () => { if (!hasOutput) return; return ctxCopyText(item.output); } },
+                { action: 'backfillItem', label: t('ctxBackfillItem'), icon: CTX_ICONS.backfill, disabled: !hasOutput,
+                    onClick: () => {
+                        if (!hasOutput) return;
+                        inputText.value = item.output;
+                        try { inputText.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+                    } }
+            ];
+            showCtxMenu(x, y, items);
+        }
+
+        function buildGeneralCtxMenu(x, y) {
+            const items = [
+                { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
+                    onClick: () => { return ctxPasteInto(inputText); } },
+                { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll,
+                    onClick: () => {
+                        try {
+                            const sel = window.getSelection();
+                            if (sel) sel.removeAllRanges();
+                        } catch (_) {}
+                    } }
+            ];
+            showCtxMenu(x, y, items);
+        }
+
+        // ============================================================
+        // 右键 mousedown：阻止浏览器移动光标/改选区/自动选中文本
+        // ============================================================
+        document.addEventListener('mousedown', (e) => {
+            if (e.button !== 2) return;
+            const target = e.target;
+            if (!target) return;
+
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                e.preventDefault();
+                return;
+            }
+
+            if (resultBody.contains(target)) {
+                e.preventDefault();
+                try {
+                    const sel = window.getSelection();
+                    if (sel && !sel.isCollapsed) sel.removeAllRanges();
+                } catch (_) {}
+            }
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            const target = e.target;
+
+            // 【新增】选择密钥下拉触发按钮 / 下拉面板：右键不弹任何菜单
+            if (selectWrapper.contains(target)) {
+                e.preventDefault();
+                closeCtxMenu();
+                return;
+            }
+
+            const batchItemEl = target.closest && target.closest('.batch-item');
+            if (batchItemEl && resultBody.contains(batchItemEl)) {
+                e.preventDefault();
+                closeCtxMenu();
+                buildBatchItemCtxMenu(e.clientX, e.clientY, batchItemEl);
+                return;
+            }
+
+            if (resultBody.contains(target)) {
+                e.preventDefault();
+                closeCtxMenu();
+                buildResultCtxMenu(e.clientX, e.clientY);
+                return;
+            }
+
+            if (target === inputText || target === keyInput
+                || target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+                e.preventDefault();
+                closeCtxMenu();
+                buildInputCtxMenu(e.clientX, e.clientY, target);
+                return;
+            }
+
+            // 其他区域：屏蔽右键，不弹任何菜单
+            e.preventDefault();
+            closeCtxMenu();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!ctxMenu.contains(e.target)) closeCtxMenu();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCtxMenu();
+        });
+
+        window.addEventListener('blur', closeCtxMenu);
+        window.addEventListener('resize', closeCtxMenu);
+        document.addEventListener('scroll', closeCtxMenu, true);
+
+        ctxMenu.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
         encryptBtn.addEventListener('click', encrypt);
         decryptBtn.addEventListener('click', decrypt);
         copyBtn.addEventListener('click', copyResult);
@@ -3024,9 +2671,7 @@
         clearInputBtn.addEventListener('click', clearInput);
         backfillBtn.addEventListener('click', backfillResult);
 
-        resetKeyBtn.addEventListener('click', () => {
-            aesKey();
-        });
+        resetKeyBtn.addEventListener('click', () => { aesKey(); });
 
         keySelector.addEventListener('change', () => {
             if (suppressKeyChange) return;
@@ -3044,9 +2689,7 @@
             const btn = e.target.closest('.lang-btn');
             if (!btn) return;
             const lang = btn.getAttribute('data-lang');
-            if (lang && translations[lang]) {
-                updateLanguage(lang);
-            }
+            if (lang && translations[lang]) updateLanguage(lang);
         });
 
         inputText.addEventListener('keydown', (e) => {
@@ -3067,11 +2710,8 @@
             e.stopPropagation();
             const willOpen = !selectWrapper.classList.contains('open');
             selectWrapper.classList.toggle('open');
-
             if (willOpen) {
-                setTimeout(() => {
-                    keySelectorSearch.focus();
-                }, 50);
+                setTimeout(() => { keySelectorSearch.focus(); }, 50);
             } else {
                 keySelectorSearch.value = '';
                 currentSearchKeyword = '';
@@ -3084,18 +2724,14 @@
             renderCustomDropdown();
         });
 
-        keySelectorSearch.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+        keySelectorSearch.addEventListener('click', (e) => { e.stopPropagation(); });
 
         selectList.addEventListener('click', (e) => {
             const item = e.target.closest('.select-option');
             if (!item) return;
-
             const value = item.dataset.value;
             keySelector.value = value;
             keySelector.dispatchEvent(new Event('change'));
-
             selectWrapper.classList.remove('open');
             keySelectorSearch.value = '';
             currentSearchKeyword = '';
@@ -3111,35 +2747,17 @@
             }
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                selectWrapper.classList.remove('open');
-                keySelectorSearch.value = '';
-                currentSearchKeyword = '';
-                renderCustomDropdown();
-            }
-        });
-
         window.addEventListener('beforeunload', () => {
-            if (fileInput && fileInput.parentNode) {
-                fileInput.parentNode.removeChild(fileInput);
-            }
-            if (importFlashTimer) {
-                clearTimeout(importFlashTimer);
-                importFlashTimer = null;
-            }
-            if (refreshKeysFlashTimer) {
-                clearTimeout(refreshKeysFlashTimer);
-                refreshKeysFlashTimer = null;
-            }
-            if (dropErrorTimer) {
-                clearTimeout(dropErrorTimer);
-                dropErrorTimer = null;
-            }
+            if (fileInput && fileInput.parentNode) fileInput.parentNode.removeChild(fileInput);
+            if (importFlashTimer) { clearTimeout(importFlashTimer); importFlashTimer = null; }
+            if (refreshKeysFlashTimer) { clearTimeout(refreshKeysFlashTimer); refreshKeysFlashTimer = null; }
+            if (dropErrorTimer) { clearTimeout(dropErrorTimer); dropErrorTimer = null; }
+            if (pasteHintTimer) { clearTimeout(pasteHintTimer); pasteHintTimer = null; }
+            const hint = document.getElementById('__paste_hint__');
+            if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
         });
 
         setResult(t('resultPlaceholder'), true);
-
         renderKeySelector();
 
         const initialLang = getInitialLanguage();
@@ -3148,15 +2766,11 @@
 
         window.dbxPlugin.ready.then(() => {
             const lang = window.dbxPlugin.locale;
-            if (lang && translations[lang]) {
-                updateLanguage(lang);
-            }
-
+            if (lang && translations[lang]) updateLanguage(lang);
             const caps = getFTCaps();
             console.log('[AES] fileTransfer capabilities:', caps);
             console.log('[AES] 宿主 onDrop 可用:', isHostDropAvailable());
             console.log('[AES] beginSave 可用:', canSaveFT());
-
             setupDropListeners();
             aesKey();
             aesKeyLables();
