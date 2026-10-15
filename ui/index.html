@@ -1797,6 +1797,7 @@
             insertTextInto(el, text);
         }
 
+        // 换行粘贴：读取剪贴板后，在前面加一个 \n 再插入
         async function ctxPasteWithNewlineInto(el) {
             if (!el) return;
             const text = await readClipboardText();
@@ -1804,7 +1805,11 @@
                 flashPasteHint(el);
                 return;
             }
-            insertTextInto(el, '\n' + text);
+            // 若光标前已有内容且不以 \n 结尾，自动补一个换行；否则直接粘贴原内容
+            const start = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
+            const before = el.value.slice(0, start);
+            const prefix = (before.length > 0 && !before.endsWith('\n')) ? '\n' : '';
+            insertTextInto(el, prefix + text);
         }
 
         function flashPasteHint(el) {
@@ -2443,7 +2448,7 @@
             cut: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>',
             copy: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
             paste: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
-            pasteNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M12 9v4"/><polyline points="9 11 12 13 15 11"/></svg>',
+            pasteNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 11 12 14 15 11"/></svg>',
             selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
             backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>'
         };
@@ -2516,6 +2521,7 @@
         function buildInputCtxMenu(x, y, el) {
             const hasSel = (typeof el.selectionStart === 'number') && el.selectionStart !== el.selectionEnd;
             const hasText = el.value.length > 0;
+            const isNormalInput = (el !== keyInput);
 
             const items = [
                 { action: 'cut', label: t('ctxCut'), icon: CTX_ICONS.cut, disabled: !hasSel,
@@ -2523,19 +2529,32 @@
                 { action: 'copy', label: t('ctxCopy'), icon: CTX_ICONS.copy, disabled: !hasSel,
                     onClick: () => { el.focus(); document.execCommand('copy'); } },
                 { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
-                    onClick: () => { return ctxPasteInto(el); } },
-                ...(el !== keyInput
-                    ? [{ action: 'pasteNewline', label: t('ctxPasteNewline'), icon: CTX_ICONS.pasteNewline,
-                        onClick: () => { return ctxPasteWithNewlineInto(el); } }]
-                    : []),
-                { type: 'sep' },
-                { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll, disabled: !hasText,
-                    onClick: () => {
-                        el.focus();
-                        if (typeof el.select === 'function') el.select();
-                        else el.setSelectionRange(0, el.value.length);
-                    } }
+                    onClick: () => { return ctxPasteInto(el); } }
             ];
+
+            // 仅普通输入框（输入内容 textarea）支持"换行粘贴"；密钥框不加
+            if (isNormalInput) {
+                items.push({
+                    action: 'pasteNewline',
+                    label: t('ctxPasteNewline'),
+                    icon: CTX_ICONS.pasteNewline,
+                    onClick: () => { return ctxPasteWithNewlineInto(el); }
+                });
+            }
+
+            items.push({ type: 'sep' });
+            items.push({
+                action: 'selectAll',
+                label: t('ctxSelectAll'),
+                icon: CTX_ICONS.selectAll,
+                disabled: !hasText,
+                onClick: () => {
+                    el.focus();
+                    if (typeof el.select === 'function') el.select();
+                    else el.setSelectionRange(0, el.value.length);
+                }
+            });
+
             showCtxMenu(x, y, items);
         }
 
@@ -2594,6 +2613,9 @@
             const items = [
                 { action: 'paste', label: t('ctxPaste'), icon: CTX_ICONS.paste,
                     onClick: () => { return ctxPasteInto(inputText); } },
+                { action: 'pasteNewline', label: t('ctxPasteNewline'), icon: CTX_ICONS.pasteNewline,
+                    onClick: () => { return ctxPasteWithNewlineInto(inputText); } },
+                { type: 'sep' },
                 { action: 'selectAll', label: t('ctxSelectAll'), icon: CTX_ICONS.selectAll,
                     onClick: () => {
                         try {
@@ -2630,7 +2652,7 @@
         document.addEventListener('contextmenu', (e) => {
             const target = e.target;
 
-            // 【新增】选择密钥下拉触发按钮 / 下拉面板：右键不弹任何菜单
+            // 选择密钥下拉触发按钮 / 下拉面板：右键不弹任何菜单
             if (selectWrapper.contains(target)) {
                 e.preventDefault();
                 closeCtxMenu();
