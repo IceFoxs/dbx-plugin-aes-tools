@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "dbx-plugin-aes-rust-plugin"
-version = "0.1.2-beta1"
+version = "0.1.2"
 dependencies = [
  "aes",
  "base64",
