@@ -432,7 +432,7 @@
 
         .batch-item-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
-        .batch-item-copy, .batch-item-backfill {
+        .batch-item-copy, .batch-item-backfill, .batch-item-format {
             display: inline-flex; align-items: center; justify-content: center;
             gap: 0.25rem; padding: 0.15rem 0.45rem;
             font-size: 0.65rem; font-weight: 500; line-height: 1;
@@ -442,9 +442,9 @@
             transition: all 0.15s ease; font-family: inherit; flex-shrink: 0; opacity: 0.75;
         }
 
-        .batch-item-copy:hover, .batch-item-backfill:hover { background-color: var(--color-muted); color: var(--color-foreground); opacity: 1; }
-        .batch-item-copy:active, .batch-item-backfill:active { transform: scale(0.96); }
-        .batch-item-copy svg, .batch-item-backfill svg { width: 0.65rem; height: 0.65rem; flex-shrink: 0; }
+        .batch-item-copy:hover, .batch-item-backfill:hover, .batch-item-format:hover { background-color: var(--color-muted); color: var(--color-foreground); opacity: 1; }
+        .batch-item-copy:active, .batch-item-backfill:active, .batch-item-format:active { transform: scale(0.96); }
+        .batch-item-copy svg, .batch-item-backfill svg, .batch-item-format svg { width: 0.65rem; height: 0.65rem; flex-shrink: 0; }
 
         .divider { height: 1px; background-color: var(--color-border); margin: 0.15rem 0; flex-shrink: 0; }
 
@@ -718,6 +718,13 @@
                                     <span id="resultCount"></span>
                                 </span>
                                 <div class="result-header-actions">
+                                    <button id="formatResultBtn" class="btn btn-ghost btn-sm" title="格式化输出结果（JSON / XML）">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="16 18 22 12 16 6"/>
+                                            <polyline points="8 6 2 12 8 18"/>
+                                        </svg>
+                                        <span data-i18n="formatResultBtn">格式化</span>
+                                    </button>
                                     <button id="backfillBtn" class="btn btn-ghost btn-sm" title="将结果回填到输入框">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="9 14 4 9 9 4"/>
@@ -837,7 +844,11 @@
                 ctxBackfillNewline: '换行回填到输入框',
                 ctxCopyItem: '复制本条',
                 ctxBackfillItem: '回填本条',
-                ctxPasteFailed: '读取剪贴板失败，请用 Ctrl+V 粘贴'
+                ctxPasteFailed: '读取剪贴板失败，请用 Ctrl+V 粘贴',
+                // 新增：结果格式化
+                formatResultBtn: '格式化',
+                ctxFormatResult: '格式化输出结果',
+                ctxFormatItem: '格式化本条'
             },
             'zh-TW': {
                 title: 'AES 加解密',
@@ -908,7 +919,10 @@
                 ctxBackfillNewline: '換行回填至輸入框',
                 ctxCopyItem: '複製本條',
                 ctxBackfillItem: '回填本條',
-                ctxPasteFailed: '讀取剪貼簿失敗，請用 Ctrl+V 貼上'
+                ctxPasteFailed: '讀取剪貼簿失敗，請用 Ctrl+V 貼上',
+                formatResultBtn: '格式化',
+                ctxFormatResult: '格式化輸出結果',
+                ctxFormatItem: '格式化本條'
             },
             en: {
                 title: 'AES Encryption',
@@ -979,7 +993,10 @@
                 ctxBackfillNewline: 'Backfill with Newline',
                 ctxCopyItem: 'Copy Item',
                 ctxBackfillItem: 'Backfill Item',
-                ctxPasteFailed: 'Cannot read clipboard, please use Ctrl+V'
+                ctxPasteFailed: 'Cannot read clipboard, please use Ctrl+V',
+                formatResultBtn: 'Format',
+                ctxFormatResult: 'Format Output',
+                ctxFormatItem: 'Format This Item'
             },
             ja: {
                 title: 'AES 暗号化',
@@ -1050,7 +1067,10 @@
                 ctxBackfillNewline: '改行で入力欄に追記',
                 ctxCopyItem: 'この項目をコピー',
                 ctxBackfillItem: 'この項目を戻す',
-                ctxPasteFailed: 'クリップボードを読み取れません。Ctrl+V で貼り付けてください'
+                ctxPasteFailed: 'クリップボードを読み取れません。Ctrl+V で貼り付けてください',
+                formatResultBtn: '整形',
+                ctxFormatResult: '出力結果を整形',
+                ctxFormatItem: 'この項目を整形'
             },
             ko: {
                 title: 'AES 암호화/복호화',
@@ -1121,7 +1141,10 @@
                 ctxBackfillNewline: '줄바꿈으로 입력창에 추가',
                 ctxCopyItem: '이 항목 복사',
                 ctxBackfillItem: '이 항목 채우기',
-                ctxPasteFailed: '클립보드를 읽을 수 없습니다. Ctrl+V를 사용하세요'
+                ctxPasteFailed: '클립보드를 읽을 수 없습니다. Ctrl+V를 사용하세요',
+                formatResultBtn: '정렬',
+                ctxFormatResult: '출력 결과 정렬',
+                ctxFormatItem: '이 항목 정렬'
             }
         };
 
@@ -1377,6 +1400,7 @@
         const backfillNewlineBtn = document.getElementById('backfillNewlineBtn');
         const clearInputBtn = document.getElementById('clearInputBtn');
         const formatBtn = document.getElementById('formatBtn');
+        const formatResultBtn = document.getElementById('formatResultBtn');
         const langSwitch = document.getElementById('langSwitch');
         const batchMode = document.getElementById('batchMode');
         const batchInputHint = document.getElementById('batchInputHint');
@@ -1452,6 +1476,20 @@
                     const actions = document.createElement('div');
                     actions.className = 'batch-item-actions';
 
+                    // 格式化（新增）
+                    const itemFormatBtn = document.createElement('button');
+                    itemFormatBtn.type = 'button';
+                    itemFormatBtn.className = 'batch-item-format';
+                    itemFormatBtn.dataset.index = String(idx);
+                    itemFormatBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6"/>
+                            <polyline points="8 6 2 12 8 18"/>
+                        </svg>
+                        <span>${t('formatResultBtn')}</span>
+                    `;
+                    actions.appendChild(itemFormatBtn);
+
                     const itemCopyBtn = document.createElement('button');
                     itemCopyBtn.type = 'button';
                     itemCopyBtn.className = 'batch-item-copy';
@@ -1495,6 +1533,144 @@
             });
         }
 
+        // 格式化 JSON / XML 字符串（供输入框和结果复用）
+        function tryFormatJSONOrXML(rawText) {
+            if (!rawText || rawText.trim() === '') return null;
+            const trimmed = rawText.trim();
+
+            // 尝试 JSON
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                try {
+                    const obj = JSON.parse(trimmed);
+                    return JSON.stringify(obj, null, 2);
+                } catch (e) { /* fall through */ }
+            }
+
+            // 尝试 XML
+            if (trimmed.startsWith('<')) {
+                try {
+                    const formatted = formatXmlString(trimmed);
+                    if (formatted) return formatted;
+                } catch (e) { /* fall through */ }
+            }
+
+            return null;
+        }
+
+        // 格式化输入框内容
+        function formatInputText() {
+            const raw = inputText.value;
+            if (!raw || raw.trim() === '') return;
+            const formatted = tryFormatJSONOrXML(raw);
+            if (formatted) {
+                inputText.value = formatted;
+                try {
+                    inputText.dispatchEvent(new Event('input', { bubbles: true }));
+                } catch (e) {}
+            }
+        }
+
+        // 格式化输出结果（单条 / 批量）—— 无任何反馈动画，直接执行
+        function formatResult() {
+            if (resultBody.classList.contains('placeholder') || !resultBody.textContent.trim()) {
+                return;
+            }
+
+            if (isBatchResult && batchResults.length > 0) {
+                // 批量结果：逐条格式化
+                let changed = false;
+                batchResults.forEach(item => {
+                    if (!item.error) {
+                        const formatted = tryFormatJSONOrXML(item.output);
+                        if (formatted) {
+                            item.output = formatted;
+                            changed = true;
+                        }
+                    }
+                });
+                if (changed) renderBatchResults();
+                return;
+            }
+
+            // 非批量：直接格式化 resultBody 的文本
+            const raw = resultBody.textContent;
+            const formatted = tryFormatJSONOrXML(raw);
+            if (formatted) {
+                setResult(formatted);
+            }
+        }
+
+        // 批量单条格式化（按钮触发）
+        function formatSingleItem(index, btnElement) {
+            const item = batchResults[index];
+            if (!item || item.error) return;
+
+            const formatted = tryFormatJSONOrXML(item.output);
+            if (!formatted) return;
+
+            item.output = formatted;
+            renderBatchResults();
+        }
+
+        // 右键菜单批量单条格式化
+        function ctxFormatBatchItem(index) {
+            const item = batchResults[index];
+            if (!item || item.error) return;
+            const formatted = tryFormatJSONOrXML(item.output);
+            if (!formatted) return;
+            item.output = formatted;
+            renderBatchResults();
+        }
+
+        function formatXmlString(xmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlString, 'application/xml');
+            const parserError = doc.querySelector('parsererror');
+            if (parserError) return null;
+            const root = doc.documentElement;
+            if (!root) return null;
+            const lines = [];
+            serializeXmlNode(root, 0, lines);
+            return lines.join('\n');
+        }
+
+        function serializeXmlNode(node, depth, lines) {
+            const indent = '  '.repeat(depth);
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                if (text && text.trim() !== '') lines.push(indent + text.trim());
+                return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const tagName = node.nodeName;
+            const attrs = Array.from(node.attributes || [])
+                .map(a => ` ${a.name}="${escapeXmlAttr(a.value)}"`).join('');
+            const childNodes = Array.from(node.childNodes).filter(n => {
+                if (n.nodeType === Node.TEXT_NODE) return n.nodeValue.trim() !== '';
+                return n.nodeType === Node.ELEMENT_NODE;
+            });
+            if (childNodes.length === 0) {
+                lines.push(`${indent}<${tagName}${attrs}/>`);
+                return;
+            }
+            if (childNodes.length === 1 && childNodes[0].nodeType === Node.TEXT_NODE) {
+                const text = escapeXmlText(childNodes[0].nodeValue.trim());
+                lines.push(`${indent}<${tagName}${attrs}>${text}</${tagName}>`);
+                return;
+            }
+            lines.push(`${indent}<${tagName}${attrs}>`);
+            childNodes.forEach(child => { serializeXmlNode(child, depth + 1, lines); });
+            lines.push(`${indent}</${tagName}>`);
+        }
+
+        function escapeXmlText(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function escapeXmlAttr(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
         function copySingleItem(index, btnElement) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -1507,17 +1683,6 @@
                 ta.select();
                 document.execCommand('copy');
                 document.body.removeChild(ta);
-
-                const span = btnElement.querySelector('span');
-                if (span) {
-                    const originalText = span.textContent;
-                    span.textContent = t('copiedItem');
-                    btnElement.style.color = '#027a48';
-                    setTimeout(() => {
-                        span.textContent = originalText;
-                        btnElement.style.color = '';
-                    }, 1200);
-                }
             } catch (err) {
                 console.error('Copy failed:', err);
             }
@@ -1532,20 +1697,16 @@
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-
-            const span = btnElement.querySelector('span');
-            if (span) {
-                const originalText = span.textContent;
-                span.textContent = t('backfilledItem');
-                btnElement.style.color = '#027a48';
-                setTimeout(() => {
-                    span.textContent = originalText;
-                    btnElement.style.color = '';
-                }, 1200);
-            }
         }
 
         resultBody.addEventListener('click', (e) => {
+            const formatBtnEl = e.target.closest('.batch-item-format');
+            if (formatBtnEl) {
+                const idx = parseInt(formatBtnEl.dataset.index, 10);
+                if (!isNaN(idx)) formatSingleItem(idx, formatBtnEl);
+                return;
+            }
+
             const copyBtn = e.target.closest('.batch-item-copy');
             if (copyBtn) {
                 const idx = parseInt(copyBtn.dataset.index, 10);
@@ -1882,18 +2043,10 @@
             }
 
             if (!text || resultBody.classList.contains('placeholder')) {
-                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('noContent');
-                setTimeout(() => {
-                    copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
-                }, 1200);
                 return;
             }
 
-            const ok = await copyToClipboard(text);
-            copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = ok ? t('copied') : t('copyFailed');
-            setTimeout(() => {
-                copyBtn.querySelector('span[data-i18n="copyBtn"]').textContent = t('copyBtn');
-            }, 1500);
+            await copyToClipboard(text);
         }
 
         function clearInput() {
@@ -1901,8 +2054,6 @@
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-            clearInputBtn.style.opacity = '0.7';
-            setTimeout(() => { clearInputBtn.style.opacity = ''; }, 200);
         }
 
         function backfillResult() {
@@ -1914,8 +2065,6 @@
                 }).join('\n');
             } else {
                 if (resultBody.classList.contains('placeholder')) {
-                    backfillBtn.style.opacity = '0.5';
-                    setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
                     return;
                 }
                 text = resultBody.textContent;
@@ -1924,8 +2073,6 @@
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-            backfillBtn.style.opacity = '0.7';
-            setTimeout(() => { backfillBtn.style.opacity = ''; }, 200);
         }
 
         // 换行回填：不覆盖，而是在当前内容后追加（自动补换行）
@@ -1938,8 +2085,6 @@
                 }).join('\n');
             } else {
                 if (resultBody.classList.contains('placeholder')) {
-                    backfillNewlineBtn.style.opacity = '0.5';
-                    setTimeout(() => { backfillNewlineBtn.style.opacity = ''; }, 200);
                     return;
                 }
                 text = resultBody.textContent;
@@ -1952,9 +2097,6 @@
             try {
                 inputText.dispatchEvent(new Event('input', { bubbles: true }));
             } catch (e) {}
-
-            backfillNewlineBtn.style.opacity = '0.7';
-            setTimeout(() => { backfillNewlineBtn.style.opacity = ''; }, 200);
         }
 
         function readFileAsText(file) {
@@ -2335,80 +2477,6 @@
             else setupBrowserDrop();
         }
 
-        function formatInputText() {
-            const raw = inputText.value;
-            if (!raw || raw.trim() === '') return;
-
-            const trimmed = raw.trim();
-
-            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-                try {
-                    const obj = JSON.parse(trimmed);
-                    inputText.value = JSON.stringify(obj, null, 2);
-                    return;
-                } catch (e) {}
-            }
-
-            if (trimmed.startsWith('<')) {
-                try {
-                    const formatted = formatXmlString(trimmed);
-                    if (formatted) {
-                        inputText.value = formatted;
-                        return;
-                    }
-                } catch (e) {}
-            }
-        }
-
-        function formatXmlString(xmlString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xmlString, 'application/xml');
-            const parserError = doc.querySelector('parsererror');
-            if (parserError) return null;
-            const root = doc.documentElement;
-            if (!root) return null;
-            const lines = [];
-            serializeXmlNode(root, 0, lines);
-            return lines.join('\n');
-        }
-
-        function serializeXmlNode(node, depth, lines) {
-            const indent = '  '.repeat(depth);
-            if (node.nodeType === Node.TEXT_NODE) {
-                const text = node.nodeValue;
-                if (text && text.trim() !== '') lines.push(indent + text.trim());
-                return;
-            }
-            if (node.nodeType !== Node.ELEMENT_NODE) return;
-            const tagName = node.nodeName;
-            const attrs = Array.from(node.attributes || [])
-                .map(a => ` ${a.name}="${escapeXmlAttr(a.value)}"`).join('');
-            const childNodes = Array.from(node.childNodes).filter(n => {
-                if (n.nodeType === Node.TEXT_NODE) return n.nodeValue.trim() !== '';
-                return n.nodeType === Node.ELEMENT_NODE;
-            });
-            if (childNodes.length === 0) {
-                lines.push(`${indent}<${tagName}${attrs}/>`);
-                return;
-            }
-            if (childNodes.length === 1 && childNodes[0].nodeType === Node.TEXT_NODE) {
-                const text = escapeXmlText(childNodes[0].nodeValue.trim());
-                lines.push(`${indent}<${tagName}${attrs}>${text}</${tagName}>`);
-                return;
-            }
-            lines.push(`${indent}<${tagName}${attrs}>`);
-            childNodes.forEach(child => { serializeXmlNode(child, depth + 1, lines); });
-            lines.push(`${indent}</${tagName}>`);
-        }
-
-        function escapeXmlText(s) {
-            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-
-        function escapeXmlAttr(s) {
-            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
         function flashButton(btnSpan, originalText, message, duration = 1500) {
             if (!btnSpan) return;
             btnSpan.textContent = message;
@@ -2497,7 +2565,8 @@
             pasteNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 11 12 14 15 11"/></svg>',
             selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
             backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>',
-            backfillNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><line x1="16" y1="19" x2="16" y2="22"/></svg>'
+            backfillNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><line x1="16" y1="19" x2="16" y2="22"/></svg>',
+            format: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
         };
 
         function closeCtxMenu() {
@@ -2609,6 +2678,8 @@
                 && resultBody.textContent.trim() !== '';
 
             const items = [
+                { action: 'format', label: t('ctxFormatResult'), icon: CTX_ICONS.format, disabled: !hasContent,
+                    onClick: () => { formatResult(); } },
                 { action: 'copyAll', label: t('ctxCopyAll'), icon: CTX_ICONS.copy, disabled: !hasContent,
                     onClick: () => { return copyResult(); } },
                 { action: 'backfill', label: t('ctxBackfill'), icon: CTX_ICONS.backfill, disabled: !hasContent,
@@ -2645,6 +2716,8 @@
             const hasOutput = item && !item.error;
 
             const items = [
+                { action: 'formatItem', label: t('ctxFormatItem'), icon: CTX_ICONS.format, disabled: !hasOutput,
+                    onClick: () => { if (!hasOutput) return; ctxFormatBatchItem(idx); } },
                 { action: 'copyItem', label: t('ctxCopyItem'), icon: CTX_ICONS.copy, disabled: !hasOutput,
                     onClick: () => { if (!hasOutput) return; return ctxCopyText(item.output); } },
                 { action: 'backfillItem', label: t('ctxBackfillItem'), icon: CTX_ICONS.backfill, disabled: !hasOutput,
@@ -2765,6 +2838,7 @@
         copyBtn.addEventListener('click', copyResult);
         saveBtn.addEventListener('click', saveResult);
         formatBtn.addEventListener('click', formatInputText);
+        formatResultBtn.addEventListener('click', formatResult);
 
         clearInputBtn.addEventListener('click', clearInput);
         backfillBtn.addEventListener('click', backfillResult);
