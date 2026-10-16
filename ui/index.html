@@ -432,7 +432,7 @@
 
         .batch-item-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
-        .batch-item-copy, .batch-item-backfill, .batch-item-format {
+        .batch-item-copy, .batch-item-backfill, .batch-item-format, .batch-item-toggle {
             display: inline-flex; align-items: center; justify-content: center;
             gap: 0.25rem; padding: 0.15rem 0.45rem;
             font-size: 0.65rem; font-weight: 500; line-height: 1;
@@ -442,9 +442,114 @@
             transition: all 0.15s ease; font-family: inherit; flex-shrink: 0; opacity: 0.75;
         }
 
-        .batch-item-copy:hover, .batch-item-backfill:hover, .batch-item-format:hover { background-color: var(--color-muted); color: var(--color-foreground); opacity: 1; }
-        .batch-item-copy:active, .batch-item-backfill:active, .batch-item-format:active { transform: scale(0.96); }
-        .batch-item-copy svg, .batch-item-backfill svg, .batch-item-format svg { width: 0.65rem; height: 0.65rem; flex-shrink: 0; }
+        .batch-item-copy:hover, .batch-item-backfill:hover, .batch-item-format:hover, .batch-item-toggle:hover { background-color: var(--color-muted); color: var(--color-foreground); opacity: 1; }
+        .batch-item-copy:active, .batch-item-backfill:active, .batch-item-format:active, .batch-item-toggle:active { transform: scale(0.96); }
+        .batch-item-copy svg, .batch-item-backfill svg, .batch-item-format svg, .batch-item-toggle svg { width: 0.65rem; height: 0.65rem; flex-shrink: 0; }
+
+        /* ========== 折叠相关 ========== */
+        .batch-item-content {
+            position: relative;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .batch-item-content.collapsed {
+            max-height: 6.5em;
+            overflow: hidden;
+        }
+
+        .batch-item-content.collapsed::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 3em;
+            background: linear-gradient(to bottom, transparent, var(--color-muted));
+            pointer-events: none;
+        }
+
+        .result-body-single.collapsed {
+            max-height: 20em;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .result-body-single.collapsed::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 4em;
+            background: linear-gradient(to bottom, transparent, var(--color-muted));
+            pointer-events: none;
+        }
+
+        /* 单条结果（非批量）外层包裹 */
+        .result-body-single-wrap {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-body-single {
+            flex: 1;
+            min-height: 0;
+            padding: 0.75rem 0.85rem;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.8rem; line-height: 1.7;
+            color: var(--color-foreground);
+            word-break: break-all; white-space: pre-wrap;
+        }
+
+        .result-body-single::-webkit-scrollbar { width: 8px; }
+        .result-body-single::-webkit-scrollbar-track { background: transparent; }
+        .result-body-single::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 8px; border: 2px solid var(--color-muted); }
+        .result-body-single::-webkit-scrollbar-thumb:hover { background-color: var(--color-muted-foreground); }
+
+        .result-body-single.placeholder {
+            color: var(--color-placeholder);
+            font-family: 'Inter', sans-serif; font-style: normal; font-weight: 400;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .single-expand-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-top: 1px solid var(--color-border);
+            background: var(--color-card);
+            flex-shrink: 0;
+        }
+
+        .single-expand-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.68rem;
+            font-weight: 500;
+            line-height: 1;
+            color: var(--color-muted-foreground);
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .single-expand-btn:hover {
+            background: var(--color-muted);
+            color: var(--color-foreground);
+        }
+
+        .single-expand-btn:active { transform: scale(0.97); }
+
+        .single-expand-btn svg { width: 0.7rem; height: 0.7rem; flex-shrink: 0; }
 
         .divider { height: 1px; background-color: var(--color-border); margin: 0.15rem 0; flex-shrink: 0; }
 
@@ -725,6 +830,13 @@
                                         </svg>
                                         <span data-i18n="formatResultBtn">格式化</span>
                                     </button>
+                                    <button id="toggleAllCollapseBtn" class="btn btn-ghost btn-sm" title="展开/折叠全部结果">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="7 13 12 18 17 13"/>
+                                            <polyline points="7 6 12 11 17 6"/>
+                                        </svg>
+                                        <span data-i18n="toggleAllCollapseBtn">折叠全部</span>
+                                    </button>
                                     <button id="backfillBtn" class="btn btn-ghost btn-sm" title="将结果回填到输入框">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="9 14 4 9 9 4"/>
@@ -845,10 +957,18 @@
                 ctxCopyItem: '复制本条',
                 ctxBackfillItem: '回填本条',
                 ctxPasteFailed: '读取剪贴板失败，请用 Ctrl+V 粘贴',
-                // 新增：结果格式化
+                // 结果格式化 & 折叠
                 formatResultBtn: '格式化',
                 ctxFormatResult: '格式化输出结果',
-                ctxFormatItem: '格式化本条'
+                ctxFormatItem: '格式化本条',
+                toggleAllCollapseBtn: '折叠全部',
+                expandAllCollapseBtn: '展开全部',
+                expandItem: '展开',
+                collapseItem: '收起',
+                ctxExpandItem: '展开本条',
+                ctxCollapseItem: '收起本条',
+                ctxExpandAll: '展开全部',
+                ctxCollapseAll: '折叠全部'
             },
             'zh-TW': {
                 title: 'AES 加解密',
@@ -922,7 +1042,15 @@
                 ctxPasteFailed: '讀取剪貼簿失敗，請用 Ctrl+V 貼上',
                 formatResultBtn: '格式化',
                 ctxFormatResult: '格式化輸出結果',
-                ctxFormatItem: '格式化本條'
+                ctxFormatItem: '格式化本條',
+                toggleAllCollapseBtn: '折疊全部',
+                expandAllCollapseBtn: '展開全部',
+                expandItem: '展開',
+                collapseItem: '收起',
+                ctxExpandItem: '展開本條',
+                ctxCollapseItem: '收起本條',
+                ctxExpandAll: '展開全部',
+                ctxCollapseAll: '折疊全部'
             },
             en: {
                 title: 'AES Encryption',
@@ -996,7 +1124,15 @@
                 ctxPasteFailed: 'Cannot read clipboard, please use Ctrl+V',
                 formatResultBtn: 'Format',
                 ctxFormatResult: 'Format Output',
-                ctxFormatItem: 'Format This Item'
+                ctxFormatItem: 'Format This Item',
+                toggleAllCollapseBtn: 'Collapse All',
+                expandAllCollapseBtn: 'Expand All',
+                expandItem: 'Expand',
+                collapseItem: 'Collapse',
+                ctxExpandItem: 'Expand Item',
+                ctxCollapseItem: 'Collapse Item',
+                ctxExpandAll: 'Expand All',
+                ctxCollapseAll: 'Collapse All'
             },
             ja: {
                 title: 'AES 暗号化',
@@ -1070,7 +1206,15 @@
                 ctxPasteFailed: 'クリップボードを読み取れません。Ctrl+V で貼り付けてください',
                 formatResultBtn: '整形',
                 ctxFormatResult: '出力結果を整形',
-                ctxFormatItem: 'この項目を整形'
+                ctxFormatItem: 'この項目を整形',
+                toggleAllCollapseBtn: 'すべて折りたたむ',
+                expandAllCollapseBtn: 'すべて展開',
+                expandItem: '展開',
+                collapseItem: '折りたたむ',
+                ctxExpandItem: 'この項目を展開',
+                ctxCollapseItem: 'この項目を折りたたむ',
+                ctxExpandAll: 'すべて展開',
+                ctxCollapseAll: 'すべて折りたたむ'
             },
             ko: {
                 title: 'AES 암호화/복호화',
@@ -1144,13 +1288,23 @@
                 ctxPasteFailed: '클립보드를 읽을 수 없습니다. Ctrl+V를 사용하세요',
                 formatResultBtn: '정렬',
                 ctxFormatResult: '출력 결과 정렬',
-                ctxFormatItem: '이 항목 정렬'
+                ctxFormatItem: '이 항목 정렬',
+                toggleAllCollapseBtn: '모두 접기',
+                expandAllCollapseBtn: '모두 펼치기',
+                expandItem: '펼치기',
+                collapseItem: '접기',
+                ctxExpandItem: '이 항목 펼치기',
+                ctxCollapseItem: '이 항목 접기',
+                ctxExpandAll: '모두 펼치기',
+                ctxCollapseAll: '모두 접기'
             }
         };
 
         const DEFAULT_LANG = 'zh';
         const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
         const MAX_BATCH_LINES = 1000;
+        // 折叠阈值：超过该字符数则默认折叠（仅针对批量结果和单条结果）
+        const COLLAPSE_THRESHOLD = 600;
 
         const TEXT_FILE_EXTENSIONS = [
             '.txt', '.text', '.log',
@@ -1224,6 +1378,12 @@
         let keyOptions = [];
         let currentSearchKeyword = '';
         let suppressKeyChange = false;
+
+        // 折叠状态
+        let allCollapsed = false;
+        let singleCollapsed = false;
+        // 记录每条批量结果的折叠状态（true=折叠）
+        let batchCollapseState = {};
 
         function t(key, params) {
             let text = translations[currentLang]?.[key] ?? translations[DEFAULT_LANG]?.[key] ?? key;
@@ -1371,7 +1531,12 @@
                 setResult(t('resultPlaceholder'), true);
             } else if (isBatchResult) {
                 renderBatchResults();
+            } else {
+                // 非批量：重新渲染单条折叠状态
+                renderSingleResultCollapse();
             }
+
+            updateToggleAllBtnLabel();
         }
 
         function getInitialLanguage() {
@@ -1401,6 +1566,7 @@
         const clearInputBtn = document.getElementById('clearInputBtn');
         const formatBtn = document.getElementById('formatBtn');
         const formatResultBtn = document.getElementById('formatResultBtn');
+        const toggleAllCollapseBtn = document.getElementById('toggleAllCollapseBtn');
         const langSwitch = document.getElementById('langSwitch');
         const batchMode = document.getElementById('batchMode');
         const batchInputHint = document.getElementById('batchInputHint');
@@ -1430,7 +1596,70 @@
         let ctxMenuOpen = false;
         let pasteHintTimer = null;
 
+        // ========== 工具函数：内容是否超过折叠阈值 ==========
+        function shouldCollapse(text) {
+            return text && text.length > COLLAPSE_THRESHOLD;
+        }
+
+        // ========== 渲染单条结果（非批量）折叠 ==========
+        function renderSingleResultCollapse() {
+            if (isBatchResult) return;
+            if (resultBody.classList.contains('placeholder')) return;
+
+            const raw = resultBody.textContent;
+            const needCollapse = shouldCollapse(raw);
+
+            // 把 resultBody 替换成单条结构
+            const container = resultBody.parentNode;
+            const oldSingle = container.querySelector('.result-body-single-wrap');
+            if (oldSingle) oldSingle.remove();
+
+            // 隐藏原来的 resultBody（作为数据源）
+            resultBody.style.display = 'none';
+
+            const wrap = document.createElement('div');
+            wrap.className = 'result-body-single-wrap';
+
+            const content = document.createElement('div');
+            content.className = 'result-body-single';
+            content.textContent = raw;
+            if (needCollapse && singleCollapsed) {
+                content.classList.add('collapsed');
+            }
+            wrap.appendChild(content);
+
+            if (needCollapse) {
+                const bar = document.createElement('div');
+                bar.className = 'single-expand-bar';
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'single-expand-btn';
+                btn.dataset.action = 'toggle-single';
+                const iconExpand = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
+                const iconCollapse = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 18 12 13 17 18"/><polyline points="7 11 12 6 17 11"/></svg>';
+                btn.innerHTML = singleCollapsed ? iconExpand + '<span>' + t('expandItem') + '</span>' : iconCollapse + '<span>' + t('collapseItem') + '</span>';
+                btn.addEventListener('click', () => {
+                    singleCollapsed = !singleCollapsed;
+                    content.classList.toggle('collapsed', singleCollapsed);
+                    btn.innerHTML = singleCollapsed ? iconExpand + '<span>' + t('expandItem') + '</span>' : iconCollapse + '<span>' + t('collapseItem') + '</span>';
+                });
+                bar.appendChild(btn);
+                wrap.appendChild(bar);
+            }
+
+            container.appendChild(wrap);
+        }
+
+        function clearSingleResultWrap() {
+            const container = resultBody.parentNode;
+            const oldSingle = container.querySelector('.result-body-single-wrap');
+            if (oldSingle) oldSingle.remove();
+            resultBody.style.display = '';
+        }
+
         function setResult(text, isPlaceholder = false) {
+            // 先清理单条结构
+            clearSingleResultWrap();
             resultBody.textContent = text;
             resultCount.textContent = '';
             if (isPlaceholder) {
@@ -1440,6 +1669,29 @@
                 resultBody.classList.remove('placeholder');
                 resultBody.classList.add('fade-in');
                 setTimeout(() => resultBody.classList.remove('fade-in'), 200);
+                // 非批量模式下，若内容超长则启用折叠
+                if (!isBatchResult) {
+                    renderSingleResultCollapse();
+                }
+            }
+            updateToggleAllBtnLabel();
+        }
+
+        function updateToggleAllBtnLabel() {
+            const span = toggleAllCollapseBtn.querySelector('span[data-i18n="toggleAllCollapseBtn"]');
+            if (!span) return;
+            // 根据当前状态更新按钮文字
+            if (isBatchResult) {
+                span.textContent = allCollapsed ? t('expandAllCollapseBtn') : t('toggleAllCollapseBtn');
+            } else {
+                // 单条模式下，按钮控制单条折叠（若未折叠）
+                const hasSingle = document.querySelector('.result-body-single-wrap');
+                const content = document.querySelector('.result-body-single');
+                if (hasSingle && content) {
+                    span.textContent = content.classList.contains('collapsed') ? t('expandAllCollapseBtn') : t('toggleAllCollapseBtn');
+                } else {
+                    span.textContent = t('toggleAllCollapseBtn');
+                }
             }
         }
 
@@ -1456,9 +1708,13 @@
         function renderBatchResults() {
             if (!isBatchResult || batchResults.length === 0) return;
 
+            // 清理单条结构
+            clearSingleResultWrap();
+
             resultBody.classList.remove('placeholder');
             resultCount.textContent = t('batchResultCount', { count: batchResults.length });
             resultBody.innerHTML = '';
+            resultBody.style.display = '';
 
             batchResults.forEach((item, idx) => {
                 const div = document.createElement('div');
@@ -1475,6 +1731,21 @@
                 if (!item.error) {
                     const actions = document.createElement('div');
                     actions.className = 'batch-item-actions';
+
+                    // 折叠/展开按钮（仅当内容超长时显示）
+                    const outText = item.output || '';
+                    const needCollapse = shouldCollapse(outText);
+                    if (needCollapse) {
+                        const itemToggleBtn = document.createElement('button');
+                        itemToggleBtn.type = 'button';
+                        itemToggleBtn.className = 'batch-item-toggle';
+                        itemToggleBtn.dataset.index = String(idx);
+                        const isCollapsed = !!batchCollapseState[idx];
+                        const iconExpand = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
+                        const iconCollapse = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 18 12 13 17 18"/><polyline points="7 11 12 6 17 11"/></svg>';
+                        itemToggleBtn.innerHTML = isCollapsed ? iconExpand + '<span>' + t('expandItem') + '</span>' : iconCollapse + '<span>' + t('collapseItem') + '</span>';
+                        actions.appendChild(itemToggleBtn);
+                    }
 
                     // 格式化（新增）
                     const itemFormatBtn = document.createElement('button');
@@ -1522,15 +1793,22 @@
                 div.appendChild(header);
 
                 const content = document.createElement('div');
+                content.className = 'batch-item-content';
                 if (item.error) {
                     content.textContent = '❌ ' + item.error;
                     content.style.color = '#b42318';
                 } else {
                     content.textContent = item.output;
+                    const outText = item.output || '';
+                    if (shouldCollapse(outText) && batchCollapseState[idx]) {
+                        content.classList.add('collapsed');
+                    }
                 }
                 div.appendChild(content);
                 resultBody.appendChild(div);
             });
+
+            updateToggleAllBtnLabel();
         }
 
         // 格式化 JSON / XML 字符串（供输入框和结果复用）
@@ -1538,7 +1816,6 @@
             if (!rawText || rawText.trim() === '') return null;
             const trimmed = rawText.trim();
 
-            // 尝试 JSON
             if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
                 try {
                     const obj = JSON.parse(trimmed);
@@ -1546,7 +1823,6 @@
                 } catch (e) { /* fall through */ }
             }
 
-            // 尝试 XML
             if (trimmed.startsWith('<')) {
                 try {
                     const formatted = formatXmlString(trimmed);
@@ -1557,7 +1833,6 @@
             return null;
         }
 
-        // 格式化输入框内容
         function formatInputText() {
             const raw = inputText.value;
             if (!raw || raw.trim() === '') return;
@@ -1570,14 +1845,12 @@
             }
         }
 
-        // 格式化输出结果（单条 / 批量）—— 无任何反馈动画，直接执行
         function formatResult() {
             if (resultBody.classList.contains('placeholder') || !resultBody.textContent.trim()) {
                 return;
             }
 
             if (isBatchResult && batchResults.length > 0) {
-                // 批量结果：逐条格式化
                 let changed = false;
                 batchResults.forEach(item => {
                     if (!item.error) {
@@ -1592,15 +1865,14 @@
                 return;
             }
 
-            // 非批量：直接格式化 resultBody 的文本
             const raw = resultBody.textContent;
             const formatted = tryFormatJSONOrXML(raw);
             if (formatted) {
+                singleCollapsed = false;
                 setResult(formatted);
             }
         }
 
-        // 批量单条格式化（按钮触发）
         function formatSingleItem(index, btnElement) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -1612,7 +1884,6 @@
             renderBatchResults();
         }
 
-        // 右键菜单批量单条格式化
         function ctxFormatBatchItem(index) {
             const item = batchResults[index];
             if (!item || item.error) return;
@@ -1699,7 +1970,24 @@
             } catch (e) {}
         }
 
+        // 切换单条批量折叠
+        function toggleSingleBatchItem(index) {
+            const item = batchResults[index];
+            if (!item || item.error) return;
+            const outText = item.output || '';
+            if (!shouldCollapse(outText)) return;
+            batchCollapseState[index] = !batchCollapseState[index];
+            renderBatchResults();
+        }
+
         resultBody.addEventListener('click', (e) => {
+            const toggleBtn = e.target.closest('.batch-item-toggle');
+            if (toggleBtn) {
+                const idx = parseInt(toggleBtn.dataset.index, 10);
+                if (!isNaN(idx)) toggleSingleBatchItem(idx);
+                return;
+            }
+
             const formatBtnEl = e.target.closest('.batch-item-format');
             if (formatBtnEl) {
                 const idx = parseInt(formatBtnEl.dataset.index, 10);
@@ -1738,6 +2026,11 @@
                     setResult(t('inputEncryptContent'), true);
                     return;
                 }
+
+                // 重置折叠状态
+                allCollapsed = false;
+                singleCollapsed = false;
+                batchCollapseState = {};
 
                 if (batchMode.checked) {
                     const lines = plaintext.split('\n').filter(l => l.trim() !== '');
@@ -1829,6 +2122,11 @@
                     setResult(t('inputDecryptContent'), true);
                     return;
                 }
+
+                // 重置折叠状态
+                allCollapsed = false;
+                singleCollapsed = false;
+                batchCollapseState = {};
 
                 if (batchMode.checked) {
                     const lines = ciphertext.split('\n').filter(l => l.trim() !== '');
@@ -2566,7 +2864,9 @@
             selectAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="m9 12 2 2 4-4"/></svg>',
             backfill: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>',
             backfillNewline: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><line x1="16" y1="19" x2="16" y2="22"/></svg>',
-            format: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
+            format: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+            expand: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>',
+            collapse: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 18 12 13 17 18"/><polyline points="7 11 12 6 17 11"/></svg>'
         };
 
         function closeCtxMenu() {
@@ -2715,7 +3015,32 @@
             const item = (idx >= 0) ? batchResults[idx] : null;
             const hasOutput = item && !item.error;
 
-            const items = [
+            const outText = hasOutput ? (item.output || '') : '';
+            const canCollapse = hasOutput && shouldCollapse(outText);
+            const isCollapsed = !!batchCollapseState[idx];
+
+            const items = [];
+
+            // 折叠/展开菜单项
+            if (canCollapse) {
+                if (isCollapsed) {
+                    items.push({
+                        action: 'expandItem',
+                        label: t('ctxExpandItem'),
+                        icon: CTX_ICONS.expand,
+                        onClick: () => { toggleSingleBatchItem(idx); }
+                    });
+                } else {
+                    items.push({
+                        action: 'collapseItem',
+                        label: t('ctxCollapseItem'),
+                        icon: CTX_ICONS.collapse,
+                        onClick: () => { toggleSingleBatchItem(idx); }
+                    });
+                }
+            }
+
+            items.push(
                 { action: 'formatItem', label: t('ctxFormatItem'), icon: CTX_ICONS.format, disabled: !hasOutput,
                     onClick: () => { if (!hasOutput) return; ctxFormatBatchItem(idx); } },
                 { action: 'copyItem', label: t('ctxCopyItem'), icon: CTX_ICONS.copy, disabled: !hasOutput,
@@ -2734,7 +3059,7 @@
                         inputText.value = current + prefix + item.output;
                         try { inputText.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
                     } }
-            ];
+            );
             showCtxMenu(x, y, items);
         }
 
@@ -2833,6 +3158,40 @@
             e.stopPropagation();
         });
 
+        // ========== 折叠全部 / 展开全部 ==========
+        function toggleAllCollapse() {
+            if (isBatchResult && batchResults.length > 0) {
+                allCollapsed = !allCollapsed;
+                // 遍历每条结果，超长的才应用折叠状态
+                batchResults.forEach((item, idx) => {
+                    if (!item.error && shouldCollapse(item.output || '')) {
+                        batchCollapseState[idx] = allCollapsed;
+                    } else {
+                        batchCollapseState[idx] = false;
+                    }
+                });
+                renderBatchResults();
+                updateToggleAllBtnLabel();
+            } else {
+                // 单条模式
+                const content = document.querySelector('.result-body-single');
+                if (content) {
+                    singleCollapsed = !singleCollapsed;
+                    content.classList.toggle('collapsed', singleCollapsed);
+                    // 更新单条按钮文字
+                    const btn = document.querySelector('.single-expand-btn');
+                    if (btn) {
+                        const iconExpand = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>';
+                        const iconCollapse = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 18 12 13 17 18"/><polyline points="7 11 12 6 17 11"/></svg>';
+                        btn.innerHTML = singleCollapsed ? iconExpand + '<span>' + t('expandItem') + '</span>' : iconCollapse + '<span>' + t('collapseItem') + '</span>';
+                    }
+                    updateToggleAllBtnLabel();
+                }
+            }
+        }
+
+        toggleAllCollapseBtn.addEventListener('click', toggleAllCollapse);
+
         encryptBtn.addEventListener('click', encrypt);
         decryptBtn.addEventListener('click', decrypt);
         copyBtn.addEventListener('click', copyResult);
@@ -2855,6 +3214,9 @@
             updateBatchHint();
             isBatchResult = false;
             batchResults = [];
+            batchCollapseState = {};
+            allCollapsed = false;
+            singleCollapsed = false;
             setResult(t('resultPlaceholder'), true);
         });
 
