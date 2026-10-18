@@ -1,78 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" font-family="Arial, Helvetica, sans-serif">
   <defs>
-    <!-- 亮色背景渐变 -->
+    <!-- 冷白科技底板渐变 -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#E0F7FA"/>
-      <stop offset="45%" style="stop-color:#F3E5F5"/>
-      <stop offset="100%" style="stop-color:#E8EAF6"/>
+      <stop offset="0%" style="stop-color:#FAFCFF"/>
+      <stop offset="50%" style="stop-color:#F2F7FC"/>
+      <stop offset="100%" style="stop-color:#EDF3FA"/>
     </linearGradient>
 
-    <!-- AES 主渐变（青蓝紫） -->
-    <linearGradient id="aesGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00E5FF"/>
-      <stop offset="35%" style="stop-color:#2979FF"/>
-      <stop offset="65%" style="stop-color:#651FFF"/>
-      <stop offset="100%" style="stop-color:#D500F9"/>
-    </linearGradient>
-
-    <!-- AES 字母高光渐变 -->
+    <!-- AES 主体高光 -->
     <linearGradient id="aesShine" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.55"/>
-      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.05"/>
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.5"/>
+      <stop offset="40%" style="stop-color:#ffffff;stop-opacity:0.05"/>
       <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
     </linearGradient>
 
-    <!-- 描边渐变 -->
-    <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00E5FF"/>
-      <stop offset="50%" style="stop-color:#651FFF"/>
-      <stop offset="100%" style="stop-color:#FF6D00"/>
-    </linearGradient>
-
-    <!-- 霓虹光晕 -->
-    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="10" result="blur1"/>
-      <feGaussianBlur stdDeviation="25" result="blur2"/>
-      <feMerge>
-        <feMergeNode in="blur2"/>
-        <feMergeNode in="blur1"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <!-- 柔和投影 -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F3D5C" flood-opacity="0.15"/>
     </filter>
 
-    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
+    <!-- 轻发光 -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
+    <!-- 底板内发光 -->
+    <radialGradient id="plateGlow" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" style="stop-color:#00B8D4;stop-opacity:0.06"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </radialGradient>
+
     <!-- 圆角方形裁剪 -->
     <clipPath id="roundedSquare">
       <rect x="0" y="0" width="512" height="512" rx="110" ry="110"/>
     </clipPath>
-
-    <!-- 字母内部网格纹理 -->
-    <pattern id="meshPattern" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
-      <rect width="16" height="16" fill="none"/>
-      <circle cx="8" cy="8" r="1" fill="#ffffff" opacity="0.18"/>
-    </pattern>
   </defs>
 
   <!-- ===== 图标底板 ===== -->
   <g clip-path="url(#roundedSquare)">
-    <!-- 亮色渐变底 -->
+    <!-- 冷白科技底 -->
     <rect width="512" height="512" fill="url(#bgGrad)"/>
 
-    <!-- 背景彩色光斑 -->
-    <circle cx="60" cy="80" r="170" fill="#00E5FF" opacity="0.18"/>
-    <circle cx="450" cy="440" r="190" fill="#D500F9" opacity="0.14"/>
-    <circle cx="440" cy="90" r="150" fill="#2979FF" opacity="0.12"/>
-    <circle cx="80" cy="440" r="140" fill="#FF6D00" opacity="0.10"/>
+    <!-- 底板内发光 -->
+    <rect width="512" height="512" fill="url(#plateGlow)"/>
 
-    <!-- 背景网格（浅色科技感） -->
-    <g opacity="0.07" stroke="#2979FF" stroke-width="1">
+    <!-- 极细科技网格（浅青蓝） -->
+    <g opacity="0.10" stroke="#0091EA" stroke-width="0.8">
       <line x1="0" y1="64" x2="512" y2="64"/>
       <line x1="0" y1="128" x2="512" y2="128"/>
       <line x1="0" y1="192" x2="512" y2="192"/>
@@ -89,79 +66,83 @@
       <line x1="448" y1="0" x2="448" y2="512"/>
     </g>
 
-    <!-- 动态斜线光束 -->
-    <g opacity="0.10" stroke="#00E5FF" stroke-width="2">
-      <line x1="-100" y1="220" x2="612" y2="-80"/>
-      <line x1="-100" y1="280" x2="612" y2="-20"/>
-      <line x1="-100" y1="340" x2="612" y2="40"/>
-    </g>
-    <g opacity="0.08" stroke="#FF6D00" stroke-width="2">
-      <line x1="-100" y1="420" x2="612" y2="120"/>
-      <line x1="-100" y1="480" x2="612" y2="180"/>
+    <!-- 斜向浅色光束 -->
+    <g opacity="0.05" stroke="#00B8D4" stroke-width="1.5">
+      <line x1="-100" y1="240" x2="612" y2="-60"/>
+      <line x1="-100" y1="300" x2="612" y2="0"/>
+      <line x1="-100" y1="360" x2="612" y2="60"/>
     </g>
 
-    <!-- ===== AES 巨型字母主体（进一步上移缩小，中心约在 y=255） ===== -->
-    <g filter="url(#neonGlow)">
-      <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
-            fill="url(#aesGrad)" letter-spacing="-7">AES</text>
+    <!-- 四角电路装饰线（浅青蓝） -->
+    <g opacity="0.25" stroke="#0091EA" stroke-width="1.5" fill="none">
+      <path d="M40 80 L80 80 L80 60"/>
+      <path d="M472 80 L432 80 L432 60"/>
+      <path d="M40 432 L80 432 L80 452"/>
+      <path d="M472 432 L432 432 L432 452"/>
+    </g>
+    <g opacity="0.3" fill="#00B8D4">
+      <circle cx="40" cy="80" r="2"/>
+      <circle cx="472" cy="80" r="2"/>
+      <circle cx="40" cy="432" r="2"/>
+      <circle cx="472" cy="432" r="2"/>
     </g>
 
-    <!-- 字母内部网格纹理叠加 -->
-    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
-          fill="url(#meshPattern)" letter-spacing="-7">AES</text>
+    <!-- ===== AES 巨型字母（深青蓝实色，清晰锐利） ===== -->
+    <g filter="url(#softShadow)">
+      <text x="256" y="318" text-anchor="middle" font-size="190" font-weight="900"
+            fill="#0F3D5C" letter-spacing="-6">AES</text>
+    </g>
 
     <!-- 字母顶部高光 -->
-    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
-          fill="url(#aesShine)" letter-spacing="-7">AES</text>
+    <text x="256" y="318" text-anchor="middle" font-size="190" font-weight="900"
+          fill="url(#aesShine)" letter-spacing="-6">AES</text>
 
-    <!-- 字母描边（细霓虹线） -->
-    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
-          fill="none" stroke="url(#strokeGrad)" stroke-width="2.2" letter-spacing="-7"
-          opacity="0.7">AES</text>
+    <!-- 字母细描边（增强科技感） -->
+    <text x="256" y="318" text-anchor="middle" font-size="190" font-weight="900"
+          fill="none" stroke="#0091EA" stroke-width="1.8" letter-spacing="-6"
+          opacity="0.35">AES</text>
 
-    <!-- ===== 字母上的锁形负形点缀（同步上移缩小） ===== -->
-    <path d="M243 158 L243 147 Q243 131 256 131 Q269 131 269 147 L269 158"
-          fill="none" stroke="#ffffff" stroke-width="3.8" stroke-linecap="round" opacity="0.85"/>
-    <rect x="234" y="158" width="44" height="32" rx="7" fill="#ffffff" opacity="0.85"/>
-    <circle cx="256" cy="172" r="5" fill="#651FFF" opacity="0.8"/>
-    <rect x="253.5" y="176" width="5" height="8" rx="2.5" fill="#651FFF" opacity="0.8"/>
-
-    <!-- ===== 加密/解密方向箭头（与字母垂直居中） ===== -->
+    <!-- ===== 字母上方锁形点缀（青蓝科技） ===== -->
     <g filter="url(#softGlow)">
-      <polygon points="38,256 68,233 68,279" fill="#00E5FF"/>
-      <line x1="68" y1="256" x2="96" y2="256" stroke="#00E5FF" stroke-width="4" stroke-linecap="round"/>
-    </g>
-    <g filter="url(#softGlow)">
-      <polygon points="474,256 444,233 444,279" fill="#FF6D00"/>
-      <line x1="444" y1="256" x2="416" y2="256" stroke="#FF6D00" stroke-width="4" stroke-linecap="round"/>
+      <path d="M244 88 L244 78 Q244 64 256 64 Q268 64 268 78 L268 88"
+            fill="none" stroke="#0091EA" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <rect x="236" y="88" width="40" height="30" rx="7" fill="#0091EA" opacity="0.85"/>
+      <circle cx="256" cy="101" r="4.5" fill="#FAFCFF"/>
+      <rect x="253.5" y="105" width="5" height="7" rx="2.5" fill="#FAFCFF"/>
     </g>
 
-    <!-- ===== 底部说明文字（压缩到最下方，与字母留足空隙） ===== -->
+    <!-- ===== 左侧箭头（加密，青蓝） ===== -->
     <g filter="url(#softGlow)">
-      <text x="256" y="468" text-anchor="middle" font-size="15" font-weight="700"
-            fill="url(#strokeGrad)" letter-spacing="6" opacity="0.85">ENCRYPTION</text>
+      <polygon points="42,300 68,280 68,320" fill="#0091EA" opacity="0.8"/>
+      <line x1="68" y1="300" x2="88" y2="300" stroke="#0091EA" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
     </g>
 
-    <!-- 底部装饰线（最下方） -->
-    <line x1="180" y1="484" x2="332" y2="484" stroke="url(#strokeGrad)" stroke-width="2"
-          opacity="0.45" stroke-linecap="round"/>
+    <!-- ===== 右侧箭头（解密，青绿） ===== -->
+    <g filter="url(#softGlow)">
+      <polygon points="470,300 444,280 444,320" fill="#00A896" opacity="0.8"/>
+      <line x1="444" y1="300" x2="424" y2="300" stroke="#00A896" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+    </g>
 
-    <!-- 加密/解密小图标（放在说明文字同一行最外侧，进一步缩小） -->
-    <text x="146" y="472" text-anchor="middle" font-size="13" fill="#00B8D4" font-weight="bold" opacity="0.9">🔐</text>
-    <text x="366" y="472" text-anchor="middle" font-size="13" fill="#FF6D00" font-weight="bold" opacity="0.9">🔓</text>
+    <!-- ===== 底部说明文字（青蓝） ===== -->
+    <g filter="url(#softGlow)">
+      <text x="256" y="462" text-anchor="middle" font-size="16" font-weight="700"
+            fill="#0091EA" letter-spacing="8" opacity="0.75">ENCRYPTION</text>
+    </g>
 
-    <!-- 顶部大高光 -->
-    <rect x="0" y="0" width="512" height="200" rx="110" fill="url(#aesShine)" opacity="0.35"/>
+    <!-- 底部装饰线 -->
+    <line x1="176" y1="480" x2="336" y2="480" stroke="#0091EA" stroke-width="1.5"
+          opacity="0.35" stroke-linecap="round"/>
+
+    <!-- 顶部扫描光效 -->
+    <rect x="0" y="0" width="512" height="180" rx="110" fill="url(#aesShine)" opacity="0.2"/>
 
     <!-- 光点装饰 -->
-    <circle cx="80" cy="60" r="4" fill="#00E5FF" opacity="0.6"/>
-    <circle cx="110" cy="42" r="2.5" fill="#D500F9" opacity="0.5"/>
-    <circle cx="60" cy="100" r="2" fill="#2979FF" opacity="0.5"/>
-    <circle cx="440" cy="460" r="4" fill="#FF6D00" opacity="0.5"/>
-    <circle cx="410" cy="478" r="2.5" fill="#FFD740" opacity="0.5"/>
-    <circle cx="460" cy="420" r="2" fill="#D500F9" opacity="0.4"/>
+    <circle cx="100" cy="120" r="1.8" fill="#00B8D4" opacity="0.5"/>
+    <circle cx="410" cy="390" r="1.8" fill="#0091EA" opacity="0.4"/>
+    <circle cx="420" cy="120" r="1.2" fill="#00A896" opacity="0.4"/>
+    <circle cx="90" cy="390" r="1.2" fill="#00B8D4" opacity="0.35"/>
   </g>
 
-  <!-- 图标外边框 -->
-  <rect x="1" y="1" width="510" height="510" rx="109" fill="none" stroke="#90CAF9" stroke-width="2" opacity="0.6"/>
+  <!-- 图标外边框（浅青蓝细线） -->
+  <rect x="1" y="1" width="510" height="510" rx="109" fill="none" stroke="#90CAF9" stroke-width="1.5" opacity="0.6"/>
 </svg>
