@@ -1,159 +1,167 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" font-family="Arial, Helvetica, sans-serif">
   <defs>
-    <!-- 冰晶渐变 -->
-    <linearGradient id="iceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e8f4ff;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#a8d8ff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#5bb8f5;stop-opacity:1" />
+    <!-- 亮色背景渐变 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E0F7FA"/>
+      <stop offset="45%" style="stop-color:#F3E5F5"/>
+      <stop offset="100%" style="stop-color:#E8EAF6"/>
     </linearGradient>
 
-    <!-- 狐狸身体渐变 -->
-    <linearGradient id="foxBody" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#c9e8ff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6bb5e8;stop-opacity:1" />
+    <!-- AES 主渐变（青蓝紫） -->
+    <linearGradient id="aesGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00E5FF"/>
+      <stop offset="35%" style="stop-color:#2979FF"/>
+      <stop offset="65%" style="stop-color:#651FFF"/>
+      <stop offset="100%" style="stop-color:#D500F9"/>
     </linearGradient>
 
-    <!-- 背景渐变 -->
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" style="stop-color:#0a1628;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#040a14;stop-opacity:1" />
-    </radialGradient>
+    <!-- AES 字母高光渐变 -->
+    <linearGradient id="aesShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.55"/>
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </linearGradient>
 
-    <!-- 发光效果 -->
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+    <!-- 描边渐变 -->
+    <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00E5FF"/>
+      <stop offset="50%" style="stop-color:#651FFF"/>
+      <stop offset="100%" style="stop-color:#FF6D00"/>
+    </linearGradient>
+
+    <!-- 霓虹光晕 -->
+    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur1"/>
+      <feGaussianBlur stdDeviation="25" result="blur2"/>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <filter id="softGlow">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+
+    <!-- 圆角方形裁剪 -->
+    <clipPath id="roundedSquare">
+      <rect x="0" y="0" width="512" height="512" rx="110" ry="110"/>
+    </clipPath>
+
+    <!-- 字母内部网格纹理 -->
+    <pattern id="meshPattern" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="none"/>
+      <circle cx="8" cy="8" r="1" fill="#ffffff" opacity="0.18"/>
+    </pattern>
   </defs>
 
-  <!-- 背景 -->
-  <rect width="400" height="400" rx="24" fill="url(#bgGrad)"/>
+  <!-- ===== 图标底板 ===== -->
+  <g clip-path="url(#roundedSquare)">
+    <!-- 亮色渐变底 -->
+    <rect width="512" height="512" fill="url(#bgGrad)"/>
 
-  <!-- 冰晶装饰 -->
-  <g opacity="0.3" filter="url(#glow)">
-    <!-- 左上冰晶 -->
-    <g transform="translate(60,60)">
-      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
-      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    <!-- 背景彩色光斑 -->
+    <circle cx="60" cy="80" r="170" fill="#00E5FF" opacity="0.18"/>
+    <circle cx="450" cy="440" r="190" fill="#D500F9" opacity="0.14"/>
+    <circle cx="440" cy="90" r="150" fill="#2979FF" opacity="0.12"/>
+    <circle cx="80" cy="440" r="140" fill="#FF6D00" opacity="0.10"/>
+
+    <!-- 背景网格（浅色科技感） -->
+    <g opacity="0.07" stroke="#2979FF" stroke-width="1">
+      <line x1="0" y1="64" x2="512" y2="64"/>
+      <line x1="0" y1="128" x2="512" y2="128"/>
+      <line x1="0" y1="192" x2="512" y2="192"/>
+      <line x1="0" y1="256" x2="512" y2="256"/>
+      <line x1="0" y1="320" x2="512" y2="320"/>
+      <line x1="0" y1="384" x2="512" y2="384"/>
+      <line x1="0" y1="448" x2="512" y2="448"/>
+      <line x1="64" y1="0" x2="64" y2="512"/>
+      <line x1="128" y1="0" x2="128" y2="512"/>
+      <line x1="192" y1="0" x2="192" y2="512"/>
+      <line x1="256" y1="0" x2="256" y2="512"/>
+      <line x1="320" y1="0" x2="320" y2="512"/>
+      <line x1="384" y1="0" x2="384" y2="512"/>
+      <line x1="448" y1="0" x2="448" y2="512"/>
     </g>
-    <!-- 右上冰晶 -->
-    <g transform="translate(340,80) scale(0.8)">
-      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
-      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+
+    <!-- 动态斜线光束 -->
+    <g opacity="0.10" stroke="#00E5FF" stroke-width="2">
+      <line x1="-100" y1="220" x2="612" y2="-80"/>
+      <line x1="-100" y1="280" x2="612" y2="-20"/>
+      <line x1="-100" y1="340" x2="612" y2="40"/>
     </g>
-    <!-- 右下冰晶 -->
-    <g transform="translate(330,330) scale(0.6)">
-      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
-      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+    <g opacity="0.08" stroke="#FF6D00" stroke-width="2">
+      <line x1="-100" y1="420" x2="612" y2="120"/>
+      <line x1="-100" y1="480" x2="612" y2="180"/>
     </g>
-    <!-- 左下冰晶 -->
-    <g transform="translate(70,340) scale(0.7)">
-      <line x1="0" y1="-15" x2="0" y2="15" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-15" y1="0" x2="15" y2="0" stroke="#8ecfff" stroke-width="1.5"/>
-      <line x1="-10" y1="-10" x2="10" y2="10" stroke="#8ecfff" stroke-width="1"/>
-      <line x1="10" y1="-10" x2="-10" y2="10" stroke="#8ecfff" stroke-width="1"/>
+
+    <!-- ===== AES 巨型字母主体（进一步上移缩小，中心约在 y=255） ===== -->
+    <g filter="url(#neonGlow)">
+      <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
+            fill="url(#aesGrad)" letter-spacing="-7">AES</text>
     </g>
+
+    <!-- 字母内部网格纹理叠加 -->
+    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
+          fill="url(#meshPattern)" letter-spacing="-7">AES</text>
+
+    <!-- 字母顶部高光 -->
+    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
+          fill="url(#aesShine)" letter-spacing="-7">AES</text>
+
+    <!-- 字母描边（细霓虹线） -->
+    <text x="256" y="315" text-anchor="middle" font-size="170" font-weight="900"
+          fill="none" stroke="url(#strokeGrad)" stroke-width="2.2" letter-spacing="-7"
+          opacity="0.7">AES</text>
+
+    <!-- ===== 字母上的锁形负形点缀（同步上移缩小） ===== -->
+    <path d="M243 158 L243 147 Q243 131 256 131 Q269 131 269 147 L269 158"
+          fill="none" stroke="#ffffff" stroke-width="3.8" stroke-linecap="round" opacity="0.85"/>
+    <rect x="234" y="158" width="44" height="32" rx="7" fill="#ffffff" opacity="0.85"/>
+    <circle cx="256" cy="172" r="5" fill="#651FFF" opacity="0.8"/>
+    <rect x="253.5" y="176" width="5" height="8" rx="2.5" fill="#651FFF" opacity="0.8"/>
+
+    <!-- ===== 加密/解密方向箭头（与字母垂直居中） ===== -->
+    <g filter="url(#softGlow)">
+      <polygon points="38,256 68,233 68,279" fill="#00E5FF"/>
+      <line x1="68" y1="256" x2="96" y2="256" stroke="#00E5FF" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g filter="url(#softGlow)">
+      <polygon points="474,256 444,233 444,279" fill="#FF6D00"/>
+      <line x1="444" y1="256" x2="416" y2="256" stroke="#FF6D00" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- ===== 底部说明文字（压缩到最下方，与字母留足空隙） ===== -->
+    <g filter="url(#softGlow)">
+      <text x="256" y="468" text-anchor="middle" font-size="15" font-weight="700"
+            fill="url(#strokeGrad)" letter-spacing="6" opacity="0.85">ENCRYPTION</text>
+    </g>
+
+    <!-- 底部装饰线（最下方） -->
+    <line x1="180" y1="484" x2="332" y2="484" stroke="url(#strokeGrad)" stroke-width="2"
+          opacity="0.45" stroke-linecap="round"/>
+
+    <!-- 加密/解密小图标（放在说明文字同一行最外侧，进一步缩小） -->
+    <text x="146" y="472" text-anchor="middle" font-size="13" fill="#00B8D4" font-weight="bold" opacity="0.9">🔐</text>
+    <text x="366" y="472" text-anchor="middle" font-size="13" fill="#FF6D00" font-weight="bold" opacity="0.9">🔓</text>
+
+    <!-- 顶部大高光 -->
+    <rect x="0" y="0" width="512" height="200" rx="110" fill="url(#aesShine)" opacity="0.35"/>
+
+    <!-- 光点装饰 -->
+    <circle cx="80" cy="60" r="4" fill="#00E5FF" opacity="0.6"/>
+    <circle cx="110" cy="42" r="2.5" fill="#D500F9" opacity="0.5"/>
+    <circle cx="60" cy="100" r="2" fill="#2979FF" opacity="0.5"/>
+    <circle cx="440" cy="460" r="4" fill="#FF6D00" opacity="0.5"/>
+    <circle cx="410" cy="478" r="2.5" fill="#FFD740" opacity="0.5"/>
+    <circle cx="460" cy="420" r="2" fill="#D500F9" opacity="0.4"/>
   </g>
 
-  <!-- 小雪花点缀 -->
-  <g fill="#a8d8ff" opacity="0.5">
-    <circle cx="120" cy="50" r="2"/>
-    <circle cx="290" cy="45" r="1.5"/>
-    <circle cx="355" cy="200" r="1.8"/>
-    <circle cx="45" cy="220" r="1.5"/>
-    <circle cx="100" cy="370" r="2"/>
-    <circle cx="300" cy="360" r="1.5"/>
-    <circle cx="200" cy="30" r="1.2"/>
-  </g>
-
-  <!-- 狐狸主体 -->
-  <g filter="url(#softGlow)">
-
-    <!-- 尾巴 -->
-    <path d="M 260 280 Q 330 240 340 180 Q 350 130 320 120 Q 290 110 300 160 Q 310 210 250 270 Z"
-          fill="url(#foxBody)" stroke="#a8d8ff" stroke-width="1.5"/>
-    <!-- 尾巴尖 -->
-    <path d="M 320 120 Q 340 130 340 160 Q 335 140 315 135 Z"
-          fill="#e8f4ff" opacity="0.8"/>
-
-    <!-- 身体 -->
-    <ellipse cx="200" cy="270" rx="80" ry="60" fill="url(#foxBody)"/>
-    <!-- 胸口白色 -->
-    <ellipse cx="195" cy="280" rx="45" ry="40" fill="#e8f4ff" opacity="0.7"/>
-
-    <!-- 头部 -->
-    <ellipse cx="190" cy="190" rx="70" ry="60" fill="url(#foxBody)"/>
-
-    <!-- 左耳 -->
-    <path d="M 135 160 L 110 80 L 165 140 Z" fill="#6bb5e8" stroke="#a8d8ff" stroke-width="1.5"/>
-    <path d="M 138 155 L 118 95 L 158 140 Z" fill="#c9e8ff" opacity="0.8"/>
-
-    <!-- 右耳 -->
-    <path d="M 245 160 L 270 80 L 215 140 Z" fill="#6bb5e8" stroke="#a8d8ff" stroke-width="1.5"/>
-    <path d="M 242 155 L 262 95 L 222 140 Z" fill="#c9e8ff" opacity="0.8"/>
-
-    <!-- 脸部白色区域 -->
-    <ellipse cx="190" cy="205" rx="45" ry="35" fill="#e8f4ff" opacity="0.8"/>
-
-    <!-- 左眼 -->
-    <ellipse cx="165" cy="185" rx="12" ry="14" fill="#0a1628"/>
-    <ellipse cx="165" cy="185" rx="10" ry="12" fill="#1a3a5c"/>
-    <ellipse cx="168" cy="182" rx="4" ry="5" fill="#ffffff" opacity="0.9"/>
-    <ellipse cx="162" cy="188" rx="2" ry="2" fill="#8ecfff" opacity="0.6"/>
-
-    <!-- 右眼 -->
-    <ellipse cx="215" cy="185" rx="12" ry="14" fill="#0a1628"/>
-    <ellipse cx="215" cy="185" rx="10" ry="12" fill="#1a3a5c"/>
-    <ellipse cx="218" cy="182" rx="4" ry="5" fill="#ffffff" opacity="0.9"/>
-    <ellipse cx="212" cy="188" rx="2" ry="2" fill="#8ecfff" opacity="0.6"/>
-
-    <!-- 鼻子 -->
-    <path d="M 185 200 L 190 208 L 195 200 Z" fill="#1a3a5c"/>
-    <ellipse cx="190" cy="199" rx="5" ry="3" fill="#2a4a6c"/>
-
-    <!-- 嘴巴 -->
-    <path d="M 190 208 Q 180 218 172 214" fill="none" stroke="#2a4a6c" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M 190 208 Q 200 218 208 214" fill="none" stroke="#2a4a6c" stroke-width="1.5" stroke-linecap="round"/>
-
-    <!-- 胡须 -->
-    <line x1="150" y1="205" x2="125" y2="200" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
-    <line x1="150" y1="210" x2="125" y2="212" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
-    <line x1="230" y1="205" x2="255" y2="200" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
-    <line x1="230" y1="210" x2="255" y2="212" stroke="#a8d8ff" stroke-width="1" opacity="0.5"/>
-
-    <!-- 前爪 -->
-    <ellipse cx="155" cy="320" rx="22" ry="14" fill="#6bb5e8"/>
-    <ellipse cx="235" cy="320" rx="22" ry="14" fill="#6bb5e8"/>
-    <ellipse cx="155" cy="322" rx="16" ry="10" fill="#c9e8ff" opacity="0.6"/>
-    <ellipse cx="235" cy="322" rx="16" ry="10" fill="#c9e8ff" opacity="0.6"/>
-  </g>
-
-  <!-- 冰霜气息 -->
-  <g opacity="0.25" filter="url(#glow)">
-    <path d="M 100 230 Q 80 250 90 270" fill="none" stroke="#8ecfff" stroke-width="2" stroke-linecap="round"/>
-    <path d="M 280 230 Q 300 250 290 270" fill="none" stroke="#8ecfff" stroke-width="2" stroke-linecap="round"/>
-  </g>
-
-  <!-- 底部文字 -->
-  <text x="200" y="385" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold"
-        fill="#a8d8ff" text-anchor="middle" letter-spacing="4" opacity="0.8" filter="url(#glow)">
-    ICEFOX
-  </text>
+  <!-- 图标外边框 -->
+  <rect x="1" y="1" width="510" height="510" rx="109" fill="none" stroke="#90CAF9" stroke-width="2" opacity="0.6"/>
 </svg>
