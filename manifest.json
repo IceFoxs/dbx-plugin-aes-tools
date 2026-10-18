@@ -3,7 +3,7 @@
   "manifest_version": 1,
   "id": "io.github.icefoxs.aes-tools",
   "name": "aes-tools",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "icefoxs",
   "description": "基于 DBX 平台的 AES-128-ECB 加解密插件，兼容 Hutool 默认 AES 配置。（AES-128-ECB 为确定性加密、非语义安全）",
   "source": "https://github.com/IceFoxs/dbx-plugin-aes-tools",
